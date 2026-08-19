@@ -28,5 +28,7 @@ test("uses the requested neutral glass presentation", () => {
   assert.doesNotMatch(page, />OHAUS service reference</i);
   assert.match(page, /src="\.\/og\.png"/);
   assert.match(styles, /backdrop-filter:\s*blur/);
-  assert.match(styles, /\.hero-visual/);
+  assert.match(styles, /\.side-visual/);
+  assert.match(styles, /aspect-ratio:\s*1730\s*\/\s*909/);
+  assert.match(styles, /object-fit:\s*contain/);
 });

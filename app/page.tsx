@@ -263,6 +263,15 @@ export default function Home() {
 
       <section className="workspace">
         <aside className="side-panel">
+          <div className="side-visual">
+            <img
+              src="./og.png"
+              width={1730}
+              height={909}
+              alt="Precision scale and tolerance reference illustration"
+            />
+          </div>
+
           <div className="data-card">
             <p className="panel-label">Knowledge base</p>
             <strong>{totalRecords.toLocaleString()}</strong>
@@ -312,9 +321,6 @@ export default function Home() {
               <p>Deterministic answers from structured, source-linked records.</p>
             </div>
             <div className="heading-side">
-              <div className="hero-visual">
-                <img src="./og.png" alt="Precision scale and tolerance reference illustration" />
-              </div>
               <span className={`data-ready ${loadError ? "error" : ""}`}>
                 {loading ? "Loading data…" : loadError ? "Data unavailable" : "Data ready"}
               </span>
