@@ -28,6 +28,14 @@ Use the hosted browser URL when software installation is restricted. No Electron
 
 Before production use, add company authentication, access logging requirements, an owner/version policy for the master workbook, and a formal review workflow for records marked `Source review`.
 
+## GitHub Pages build
+
+```bash
+npm run build:pages
+```
+
+The static output is written to `pages-dist/` for publication from a GitHub Pages branch. The repository can remain private when the GitHub account plan supports private-repository Pages; the published website itself remains public.
+
 ## Validation
 
 ```bash

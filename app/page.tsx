@@ -97,7 +97,8 @@ export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetch("/data/ohaus-knowledge.json")
+    const knowledgeUrl = new URL("data/ohaus-knowledge.json", document.baseURI);
+    fetch(knowledgeUrl)
       .then((response) => {
         if (!response.ok) throw new Error("Knowledge base unavailable");
         return response.json();
