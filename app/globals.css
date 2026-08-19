@@ -94,7 +94,7 @@ button { cursor: pointer; }
 .privacy-note strong { font-size: 12px; }
 .privacy-note p { margin: 3px 0 0; color: var(--muted); font-size: 11px; line-height: 1.4; }
 
-.chat-panel { min-width: 0; display: grid; grid-template-rows: auto 1fr auto; background: rgba(255,255,255,.38); }
+.chat-panel { min-width: 0; display: grid; grid-template-rows: auto auto 1fr; background: rgba(255,255,255,.38); }
 .chat-heading { padding: 30px 34px 24px; display: flex; align-items: flex-start; justify-content: space-between; border-bottom: 1px solid var(--line); }
 .chat-heading h2 { margin: 6px 0 4px; font-size: clamp(23px, 2vw, 31px); letter-spacing: -.035em; }
 .chat-heading > div > p:last-child { margin: 0; color: var(--muted); font-size: 14px; }
@@ -160,7 +160,7 @@ button { cursor: pointer; }
 .compact-card .spec-grid { margin-top: 0; grid-template-columns: repeat(3, 1fr); }
 .guidance-source { width: fit-content; margin-top: 8px; padding: 5px 8px; color: var(--muted); background: #f7f9fb; border-radius: 6px; font-size: 10px; }
 
-.ask-form { padding: 18px 34px 22px; border-top: 1px solid rgba(205, 219, 231, .72); background: rgba(255,255,255,.7); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+.ask-form { position: sticky; top: 0; z-index: 5; padding: 18px 34px 22px; border-bottom: 1px solid rgba(205, 219, 231, .72); background: rgba(255,255,255,.82); box-shadow: 0 10px 24px rgba(28,58,86,.06); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
 .ask-form label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
 .input-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
 .input-row input { min-width: 0; height: 48px; padding: 0 16px; color: var(--ink); background: rgba(255,255,255,.7); border: 1px solid rgba(190,208,222,.82); border-radius: 12px; outline: none; box-shadow: inset 0 1px 0 rgba(255,255,255,.9); }

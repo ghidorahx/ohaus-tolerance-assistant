@@ -321,6 +321,26 @@ export default function Home() {
             </div>
           </div>
 
+          <form className="ask-form" onSubmit={onSubmit}>
+            <label htmlFor="question">Service question</label>
+            <div className="input-row">
+              <input
+                ref={inputRef}
+                id="question"
+                value={input}
+                onChange={(event) => setInput(event.target.value)}
+                placeholder="Example: What is the tolerance for STX622?"
+                autoComplete="off"
+                disabled={!data}
+              />
+              <button type="submit" disabled={!data || !input.trim()} aria-label="Ask question">Ask <span>→</span></button>
+            </div>
+            <div className="form-footnote">
+              <p>Use an exact model number for specifications. Every answer stays tied to its source record.</p>
+              <span>Pilot owner · T. Delacruz</span>
+            </div>
+          </form>
+
           <div className="message-list" aria-live="polite">
             {exchanges.length === 0 ? (
               <div className="welcome-state">
@@ -361,25 +381,6 @@ export default function Home() {
             )}
           </div>
 
-          <form className="ask-form" onSubmit={onSubmit}>
-            <label htmlFor="question">Service question</label>
-            <div className="input-row">
-              <input
-                ref={inputRef}
-                id="question"
-                value={input}
-                onChange={(event) => setInput(event.target.value)}
-                placeholder="Example: What is the tolerance for STX622?"
-                autoComplete="off"
-                disabled={!data}
-              />
-              <button type="submit" disabled={!data || !input.trim()} aria-label="Ask question">Ask <span>→</span></button>
-            </div>
-            <div className="form-footnote">
-              <p>Use an exact model number for specifications. Every answer stays tied to its source record.</p>
-              <span>Pilot owner · T. Delacruz</span>
-            </div>
-          </form>
         </section>
       </section>
     </main>

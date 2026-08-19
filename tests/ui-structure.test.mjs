@@ -14,6 +14,15 @@ test("keeps the newest answer expanded above collapsible history", () => {
   assert.match(page, /Previous answers/);
 });
 
+test("places a sticky question bar above the responses", () => {
+  const formIndex = page.indexOf('<form className="ask-form"');
+  const responsesIndex = page.indexOf('<div className="message-list"');
+
+  assert.ok(formIndex >= 0);
+  assert.ok(responsesIndex > formIndex);
+  assert.match(styles, /\.ask-form\s*\{[^}]*position:\s*sticky/s);
+});
+
 test("uses the requested neutral glass presentation", () => {
   assert.match(page, />Service reference</);
   assert.doesNotMatch(page, />OHAUS service reference</i);
