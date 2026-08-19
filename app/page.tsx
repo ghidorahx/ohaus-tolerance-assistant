@@ -71,6 +71,12 @@ type Message = {
   result?: AnswerResult;
 };
 
+type Exchange = {
+  id: string;
+  user: Message;
+  assistant: Message;
+};
+
 const starterMessage: Message = {
   id: "welcome",
   role: "assistant",
@@ -86,6 +92,91 @@ const suggestedQuestions = [
 
 function measureText(measure: Measure | undefined, signed = false) {
   return answerFormatting.measureText(measure, signed);
+}
+
+function MessageBubble({
+  message,
+  onFollowUp,
+}: {
+  message: Message;
+  onFollowUp: (question: string) => void;
+}) {
+  return (
+    <article className={`message ${message.role}`}>
+      <div className="avatar" aria-hidden="true">{message.role === "assistant" ? "O" : "Y"}</div>
+      <div className="message-content">
+        <p>{message.text}</p>
+
+        {message.result?.options && (
+          <div className="choice-list">
+            {message.result.options.map((option) => (
+              <button key={option.id} onClick={() => onFollowUp(option.question)}>
+                <span>{option.label}</span>
+                <small>Page {option.source.page} · {option.source.manual}</small>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {message.result?.record && (
+          <div className="answer-card">
+            <div className="answer-card-head">
+              <div>
+                <span>{message.result.record.series}</span>
+                <h3>{message.result.record.modelGroup}</h3>
+              </div>
+              <div className="chip-row">
+                <span className="lifecycle-chip">{message.result.record.lifecycle}</span>
+                <span className={`qa-chip ${message.result.record.qa?.status ?? "ok"}`}>
+                  {message.result.record.qa?.status === "review" ? "Source review" : "Verified"}
+                </span>
+              </div>
+            </div>
+
+            {message.result.factValue && (
+              <div className="primary-fact">
+                <span>{message.result.factLabel}</span>
+                <strong>{message.result.factValue}</strong>
+              </div>
+            )}
+
+            <div className="spec-grid">
+              <div><span>Readability</span><strong>{answerFormatting.readabilityText(message.result.record)}</strong></div>
+              <div><span>Repeatability</span><strong>{measureText(message.result.record.repeatability, true)}</strong></div>
+              <div><span>Linearity</span><strong>{measureText(message.result.record.linearity, true)}</strong></div>
+              <div><span>Off-center load</span><strong>{measureText(message.result.record.ocl, true)}</strong></div>
+            </div>
+
+            {message.result.record.qa?.messages?.length ? (
+              <div className="qa-note">
+                <strong>Source QA note</strong>
+                {message.result.record.qa.messages.map((note) => <p key={note}>{note}</p>)}
+              </div>
+            ) : null}
+
+            <div className="source-line">
+              Source: {message.result.record.source.manual} · Master reference page {message.result.record.source.page}
+            </div>
+          </div>
+        )}
+
+        {message.result?.temperature && (
+          <div className="answer-card compact-card">
+            <div className="spec-grid">
+              <div><span>Heater</span><strong>{message.result.temperature.heater_technology}</strong></div>
+              <div><span>Temperature readability</span><strong>{message.result.temperature.temperature_readability_c} °C</strong></div>
+              <div><span>Adjustment mass</span><strong>{message.result.temperature.adjustment_mass_value} {message.result.temperature.adjustment_mass_unit}</strong></div>
+            </div>
+            <div className="source-line">Source: Master Reference · Page {message.result.source?.page}</div>
+          </div>
+        )}
+
+        {message.result?.kind === "guidance" && message.result.source && (
+          <div className="guidance-source">Source: Master Reference guidance · Page {message.result.source.page}</div>
+        )}
+      </div>
+    </article>
+  );
 }
 
 export default function Home() {
@@ -112,6 +203,19 @@ export default function Home() {
     () => (data ? data.meta.currentRecords + data.meta.legacyRecords : 746),
     [data],
   );
+
+  const exchanges = useMemo(() => {
+    const conversation = messages.filter((message) => message.id !== "welcome");
+    const grouped: Exchange[] = [];
+    for (let index = 0; index < conversation.length; index += 2) {
+      const user = conversation[index];
+      const assistant = conversation[index + 1];
+      if (user?.role === "user" && assistant?.role === "assistant") {
+        grouped.push({ id: assistant.id, user, assistant });
+      }
+    }
+    return grouped.reverse();
+  }, [messages]);
 
   function submitQuestion(question: string) {
     const trimmed = question.trim();
@@ -144,7 +248,7 @@ export default function Home() {
         <div className="brand">
           <div className="brand-mark" aria-hidden="true">O</div>
           <div>
-            <p className="eyebrow">OHAUS service reference</p>
+            <p className="eyebrow">Service reference</p>
             <h1>Tolerance Assistant</h1>
           </div>
         </div>
@@ -207,88 +311,54 @@ export default function Home() {
               <h2>Ask a tolerance question</h2>
               <p>Deterministic answers from structured, source-linked records.</p>
             </div>
-            <span className={`data-ready ${loadError ? "error" : ""}`}>
-              {loading ? "Loading data…" : loadError ? "Data unavailable" : "Data ready"}
-            </span>
+            <div className="heading-side">
+              <div className="hero-visual">
+                <img src="./og.png" alt="Precision scale and tolerance reference illustration" />
+              </div>
+              <span className={`data-ready ${loadError ? "error" : ""}`}>
+                {loading ? "Loading data…" : loadError ? "Data unavailable" : "Data ready"}
+              </span>
+            </div>
           </div>
 
           <div className="message-list" aria-live="polite">
-            {messages.map((message) => (
-              <article key={message.id} className={`message ${message.role}`}>
-                <div className="avatar" aria-hidden="true">{message.role === "assistant" ? "O" : "Y"}</div>
-                <div className="message-content">
-                  <p>{message.text}</p>
+            {exchanges.length === 0 ? (
+              <div className="welcome-state">
+                <MessageBubble message={starterMessage} onFollowUp={submitQuestion} />
+              </div>
+            ) : (
+              <>
+                <section className="latest-exchange" aria-label="Latest answer">
+                  <div className="exchange-label"><span>Latest response</span></div>
+                  <MessageBubble message={exchanges[0].user} onFollowUp={submitQuestion} />
+                  <MessageBubble message={exchanges[0].assistant} onFollowUp={submitQuestion} />
+                </section>
 
-                  {message.result?.options && (
-                    <div className="choice-list">
-                      {message.result.options.map((option) => (
-                        <button key={option.id} onClick={() => submitQuestion(option.question)}>
-                          <span>{option.label}</span>
-                          <small>Page {option.source.page} · {option.source.manual}</small>
-                        </button>
-                      ))}
+                {exchanges.length > 1 && (
+                  <section className="history-list" aria-label="Previous answers">
+                    <div className="history-heading">
+                      <span>Previous answers</span>
+                      <strong>{exchanges.length - 1}</strong>
                     </div>
-                  )}
-
-                  {message.result?.record && (
-                    <div className="answer-card">
-                      <div className="answer-card-head">
-                        <div>
-                          <span>{message.result.record.series}</span>
-                          <h3>{message.result.record.modelGroup}</h3>
-                        </div>
-                        <div className="chip-row">
-                          <span className="lifecycle-chip">{message.result.record.lifecycle}</span>
-                          <span className={`qa-chip ${message.result.record.qa?.status ?? "ok"}`}>
-                            {message.result.record.qa?.status === "review" ? "Source review" : "Verified"}
+                    {exchanges.slice(1).map((exchange) => (
+                      <details className="history-item" key={exchange.id}>
+                        <summary>
+                          <span className="history-copy">
+                            <strong>{exchange.user.text}</strong>
+                            <small>{exchange.assistant.result?.factValue ?? exchange.assistant.text}</small>
                           </span>
+                          <span className="history-toggle" aria-hidden="true">+</span>
+                        </summary>
+                        <div className="history-content">
+                          <MessageBubble message={exchange.user} onFollowUp={submitQuestion} />
+                          <MessageBubble message={exchange.assistant} onFollowUp={submitQuestion} />
                         </div>
-                      </div>
-
-                      {message.result.factValue && (
-                        <div className="primary-fact">
-                          <span>{message.result.factLabel}</span>
-                          <strong>{message.result.factValue}</strong>
-                        </div>
-                      )}
-
-                      <div className="spec-grid">
-                        <div><span>Readability</span><strong>{answerFormatting.readabilityText(message.result.record)}</strong></div>
-                        <div><span>Repeatability</span><strong>{measureText(message.result.record.repeatability, true)}</strong></div>
-                        <div><span>Linearity</span><strong>{measureText(message.result.record.linearity, true)}</strong></div>
-                        <div><span>Off-center load</span><strong>{measureText(message.result.record.ocl, true)}</strong></div>
-                      </div>
-
-                      {message.result.record.qa?.messages?.length ? (
-                        <div className="qa-note">
-                          <strong>Source QA note</strong>
-                          {message.result.record.qa.messages.map((note) => <p key={note}>{note}</p>)}
-                        </div>
-                      ) : null}
-
-                      <div className="source-line">
-                        Source: {message.result.record.source.manual} · Master reference page {message.result.record.source.page}
-                      </div>
-                    </div>
-                  )}
-
-                  {message.result?.temperature && (
-                    <div className="answer-card compact-card">
-                      <div className="spec-grid">
-                        <div><span>Heater</span><strong>{message.result.temperature.heater_technology}</strong></div>
-                        <div><span>Temperature readability</span><strong>{message.result.temperature.temperature_readability_c} °C</strong></div>
-                        <div><span>Adjustment mass</span><strong>{message.result.temperature.adjustment_mass_value} {message.result.temperature.adjustment_mass_unit}</strong></div>
-                      </div>
-                      <div className="source-line">Source: Master Reference · Page {message.result.source?.page}</div>
-                    </div>
-                  )}
-
-                  {message.result?.kind === "guidance" && message.result.source && (
-                    <div className="guidance-source">Source: Master Reference guidance · Page {message.result.source.page}</div>
-                  )}
-                </div>
-              </article>
-            ))}
+                      </details>
+                    ))}
+                  </section>
+                )}
+              </>
+            )}
           </div>
 
           <form className="ask-form" onSubmit={onSubmit}>
