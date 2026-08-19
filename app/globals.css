@@ -130,7 +130,9 @@ button { cursor: pointer; }
 .input-row button:hover { background: var(--navy-deep); }
 .input-row button:disabled { opacity: .45; cursor: default; }
 .input-row button span { margin-left: 8px; }
-.ask-form > p { margin: 8px 2px 0; color: var(--muted); font-size: 11px; }
+.form-footnote { margin: 8px 2px 0; display: flex; justify-content: space-between; gap: 18px; color: var(--muted); font-size: 11px; }
+.form-footnote p { margin: 0; }
+.form-footnote span { flex: 0 0 auto; color: #8a97a6; font-size: 10px; letter-spacing: .03em; }
 
 @media (max-width: 900px) {
   .topbar { padding: 0 18px; }
@@ -161,4 +163,5 @@ button { cursor: pointer; }
   .choice-list button { display: grid; gap: 5px; }
   .input-row { grid-template-columns: 1fr; }
   .input-row button { height: 44px; }
+  .form-footnote { display: grid; gap: 5px; }
 }

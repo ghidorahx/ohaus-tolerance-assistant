@@ -304,7 +304,10 @@ export default function Home() {
               />
               <button type="submit" disabled={!data || !input.trim()} aria-label="Ask question">Ask <span>→</span></button>
             </div>
-            <p>Use an exact model number for specifications. Every answer stays tied to its source record.</p>
+            <div className="form-footnote">
+              <p>Use an exact model number for specifications. Every answer stays tied to its source record.</p>
+              <span>Pilot owner · T. Delacruz</span>
+            </div>
           </form>
         </section>
       </section>

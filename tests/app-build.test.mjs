@@ -22,6 +22,7 @@ test("server renders the OHAUS assistant shell", async () => {
   assert.match(html, /<title>OHAUS Tolerance Assistant<\/title>/i);
   assert.match(html, /Tolerance Assistant/);
   assert.match(html, /Ask a tolerance question/);
+  assert.match(html, /Pilot owner · T\. Delacruz/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/);
 });
 
