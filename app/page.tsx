@@ -275,7 +275,7 @@ function CompatibilityWeb() {
     const childSpread = children.length > 1 ? Math.min(54, 15 * (children.length - 1)) : 0;
 
     children.forEach((child, index) => {
-      if (path.includes(child.id)) return;
+      if (path.includes(child.id) || positioned.some((node) => node.id === child.id)) return;
       const offset = children.length > 1 ? -childSpread / 2 + (childSpread / (children.length - 1)) * index : 0;
       const point = polarPosition(childCenterAngle + offset, childRadius);
       positioned.push({ ...child, ...point });
@@ -339,18 +339,21 @@ function CompatibilityWeb() {
         const endY = target.y / 100 * rect.height;
         const relation = edge.state !== "hierarchy";
         const colors = {
-          hierarchy: "rgba(136, 38, 57, .28)",
-          compatible: "rgba(34, 133, 91, .84)",
-          incompatible: "rgba(190, 69, 42, .84)",
-          discontinued: "rgba(108, 119, 130, .75)",
+          hierarchy: "rgba(226, 59, 91, .46)",
+          compatible: "rgba(53, 217, 145, .92)",
+          incompatible: "rgba(255, 121, 88, .92)",
+          discontinued: "rgba(142, 157, 171, .82)",
         };
         context.beginPath();
         context.moveTo(startX, startY);
         context.quadraticCurveTo((startX + endX) / 2, (startY + endY) / 2 - (relation ? 14 : 4), endX, endY);
         context.strokeStyle = colors[edge.state];
         context.lineWidth = relation ? 2.4 : 1.25;
+        context.shadowBlur = relation ? 10 : 4;
+        context.shadowColor = colors[edge.state];
         context.setLineDash(edge.state === "incompatible" ? [7, 5] : edge.state === "discontinued" ? [2, 6] : []);
         context.stroke();
+        context.shadowBlur = 0;
       });
       context.setLineDash([]);
     }
@@ -371,9 +374,13 @@ function CompatibilityWeb() {
     return nextPath;
   }
 
-  function selectNode(node: PositionedNode) {
+  function focusNode(node: NetworkNode) {
     setSelectedId(node.id);
     if (node.kind !== "part") setPath(pathToNode(node.id));
+  }
+
+  function selectNode(node: PositionedNode) {
+    focusNode(node);
   }
 
   function goBack() {
@@ -466,7 +473,7 @@ function CompatibilityWeb() {
               );
             })}
           </div>
-          <p className="network-hint">Move to tilt · Select a node to follow its branch</p>
+          <p className="network-hint">Move to tilt · Product and part relationships work in both directions</p>
         </div>
 
         <aside className="web-detail" aria-live="polite">
@@ -478,6 +485,11 @@ function CompatibilityWeb() {
             {selectedNode.verified ? "Verified relationship data" : "Structure ready · links pending verification"}
           </div>
 
+          <div className="interchange-note">
+            <span aria-hidden="true">⇄</span>
+            <p><strong>Interchangeable lookup</strong>Move from a product to its parts—or select a part to trace every connected product.</p>
+          </div>
+
           {selectedRelationships.length > 0 && (
             <div className="relationship-list">
               <p className="panel-label">Direct relationships</p>
@@ -485,7 +497,7 @@ function CompatibilityWeb() {
                 const otherId = link.source === selectedId ? link.target : link.source;
                 const otherNode = nodeMap.get(otherId);
                 return (
-                  <button key={`${link.source}-${link.target}`} onClick={() => otherNode && setSelectedId(otherNode.id)}>
+                  <button key={`${link.source}-${link.target}`} onClick={() => otherNode && focusNode(otherNode)}>
                     <span className={`relation-dot ${link.state}`} aria-hidden="true" />
                     <span><strong>{otherNode?.label}</strong><small>{link.label}</small></span>
                   </button>
@@ -776,9 +788,10 @@ export default function Home() {
         </div>
       </header>
 
-      {isCompatibilityMode ? (
+      <div className="compatibility-mode-surface" hidden={!isCompatibilityMode}>
         <CompatibilityWeb />
-      ) : (
+      </div>
+      {!isCompatibilityMode && (
       <section className="workspace">
         <aside className="side-panel">
           <div className="side-visual">

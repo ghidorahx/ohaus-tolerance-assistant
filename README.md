@@ -10,7 +10,7 @@ The interface must clearly distinguish between the assistant's portfolio-wide pu
 
 ## Compatibility Web rule
 
-The Compatibility Web is centered on OHAUS and branches through product families, categories, series, models, and parts. Hierarchy nodes may be added from the current product catalog, but compatibility, incompatibility, replacement, and lifecycle links must only be shown as verified facts. Unverified branches remain visibly marked as awaiting relationship data.
+The Compatibility Web is centered on OHAUS and branches through product families, categories, series, models, and parts. Hierarchy nodes may be added from the current product catalog, but compatibility, incompatibility, replacement, and lifecycle links must only be shown as verified facts. Unverified branches remain visibly marked as awaiting relationship data. Every verified relationship must be navigable in both directions, and switching between Tolerance, Sales, and the Compatibility Web must preserve each mode's working state.
 
 ## Local browser test
 
