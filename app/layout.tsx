@@ -13,17 +13,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OHAUS Tolerance Assistant",
-  description: "A source-linked service reference for OHAUS balance and scale tolerances.",
+  title: "OHAUS Support Assistants",
+  description: "Internal OHAUS tolerance and sales support assistants for service specifications and Scout compatibility.",
   openGraph: {
-    title: "OHAUS Tolerance Assistant",
-    description: "Source-linked tolerance answers from the organized master reference.",
+    title: "OHAUS Support Assistants",
+    description: "Tolerance lookup and Scout sales compatibility support in one internal workspace.",
     images: [{ url: "/og.png", width: 1730, height: 909 }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "OHAUS Tolerance Assistant",
-    description: "Source-linked tolerance answers from the organized master reference.",
+    title: "OHAUS Support Assistants",
+    description: "Tolerance lookup and Scout sales compatibility support in one internal workspace.",
     images: ["/og.png"],
   },
   icons: {

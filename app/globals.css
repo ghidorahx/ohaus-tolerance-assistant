@@ -33,6 +33,18 @@ body {
 button, input { font: inherit; }
 button { cursor: pointer; }
 .app-shell { min-height: 100vh; }
+.app-shell.sales-mode {
+  --navy: #c41230;
+  --navy-deep: #8e0e25;
+  --blue-soft: #fdecef;
+  --line: #eadde0;
+  --green: #a10f29;
+  --green-soft: #fce8ec;
+  background:
+    radial-gradient(circle at 8% 8%, rgba(196, 18, 48, .17), transparent 31%),
+    radial-gradient(circle at 91% 18%, rgba(117, 18, 37, .1), transparent 29%),
+    linear-gradient(145deg, rgba(250, 240, 242, .58), rgba(248, 250, 252, .25));
+}
 
 .topbar {
   height: 82px;
@@ -46,6 +58,12 @@ button { cursor: pointer; }
   -webkit-backdrop-filter: blur(20px) saturate(145%);
   box-shadow: 0 8px 30px rgba(28, 59, 86, .06);
 }
+.mode-switcher { padding: 4px; display: flex; align-items: center; gap: 3px; background: rgba(236, 242, 247, .72); border: 1px solid rgba(205, 218, 229, .78); border-radius: 13px; box-shadow: inset 0 1px 0 rgba(255,255,255,.9); }
+.mode-switcher button { min-width: 124px; height: 38px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; color: #617286; background: transparent; border: 0; border-radius: 9px; font-size: 12px; font-weight: 800; transition: color .16s ease, background .16s ease, box-shadow .16s ease; }
+.mode-switcher button:hover { color: var(--navy); background: rgba(255,255,255,.58); }
+.mode-switcher button.active { color: white; background: linear-gradient(145deg, var(--navy), var(--navy-deep)); box-shadow: 0 5px 13px rgba(25, 58, 91, .2); }
+.mode-switcher small { padding: 2px 5px; color: inherit; background: rgba(255,255,255,.17); border-radius: 99px; font-size: 8px; letter-spacing: .05em; text-transform: uppercase; }
+.mode-icon { width: 19px; height: 19px; display: grid; place-items: center; background: rgba(255,255,255,.18); border-radius: 6px; font-size: 11px; }
 .brand { display: flex; align-items: center; gap: 14px; }
 .brand-mark, .avatar { display: grid; place-items: center; flex: 0 0 auto; color: white; background: var(--navy); font-weight: 800; }
 .brand-mark { width: 42px; height: 42px; border-radius: 12px; font-size: 21px; box-shadow: 0 8px 20px rgba(21, 63, 114, .18); }
@@ -75,7 +93,19 @@ button { cursor: pointer; }
 .side-panel { padding: 24px; background: rgba(244, 249, 252, .64); border-right: 1px solid rgba(205, 219, 231, .72); display: flex; flex-direction: column; gap: 28px; }
 .side-visual { width: 100%; aspect-ratio: 1730 / 909; overflow: hidden; background: var(--navy-deep); border: 1px solid rgba(255,255,255,.78); border-radius: 16px; box-shadow: 0 14px 30px rgba(11, 40, 68, .18); }
 .side-visual img { width: 100%; height: 100%; display: block; object-fit: contain; }
+.sales-visual { position: relative; width: 100%; height: 100%; padding: 18px; color: white; background: radial-gradient(circle at 80% 16%, rgba(255,255,255,.18), transparent 27%), linear-gradient(150deg, #d01936 0%, #8e0e25 100%); overflow: hidden; }
+.sales-visual > span { display: block; font-size: 10px; font-weight: 900; letter-spacing: .16em; }
+.sales-visual > strong { display: block; margin-top: 7px; font-size: 28px; letter-spacing: -.04em; }
+.sales-visual > small { display: block; margin-top: 2px; color: #ffdce2; font-size: 8px; font-weight: 800; letter-spacing: .13em; }
+.scale-silhouette { position: absolute; right: 14px; bottom: 12px; width: 90px; height: 60px; background: linear-gradient(145deg, rgba(255,255,255,.95), rgba(235,224,226,.9)); border: 1px solid rgba(255,255,255,.7); border-radius: 9px 9px 12px 12px; box-shadow: 0 12px 22px rgba(63,0,12,.27); transform: perspective(160px) rotateY(-7deg); }
+.scale-silhouette i { position: absolute; left: 12px; top: -12px; width: 66px; height: 18px; background: linear-gradient(#f8fafb, #bdc6ca); border-radius: 50%; box-shadow: 0 3px 6px rgba(38,42,46,.22); }
+.scale-silhouette b { position: absolute; left: 25px; bottom: 12px; padding: 4px 7px; color: #fff; background: #1d262d; border-radius: 3px; font-family: var(--font-geist-mono), monospace; font-size: 9px; letter-spacing: .08em; }
 .data-card { padding: 20px; border: 1px solid rgba(255,255,255,.18); border-radius: 16px; color: white; background: linear-gradient(145deg, rgba(9,37,68,.95), rgba(21,63,114,.88)); box-shadow: 0 16px 34px rgba(13,43,75,.16), inset 0 1px 0 rgba(255,255,255,.16); }
+.sales-mode .data-card { background: linear-gradient(145deg, rgba(113,8,30,.96), rgba(196,18,48,.9)); box-shadow: 0 16px 34px rgba(104, 9, 28, .15), inset 0 1px 0 rgba(255,255,255,.16); }
+.sales-mode .data-card .panel-label { color: #f4bbc6; }
+.sales-mode .data-card > span { color: #f7d5dc; }
+.sales-mode .data-meter span { width: 35%; background: #ffffff; }
+.sales-mode .data-note { color: #f1c4cd; }
 .data-card .panel-label { color: #b9cee3; }
 .data-card strong { display: block; margin-top: 14px; font-size: 34px; line-height: 1; }
 .data-card > span { color: #d3e3f1; font-size: 13px; }
@@ -175,6 +205,7 @@ button { cursor: pointer; }
 
 @media (max-width: 900px) {
   .topbar { padding: 0 18px; }
+  .mode-switcher button { min-width: 106px; }
   .workspace { width: calc(100% - 20px); grid-template-columns: 1fr; }
   .side-panel { display: none; }
   .spec-grid { grid-template-columns: repeat(2, 1fr); }
@@ -183,7 +214,9 @@ button { cursor: pointer; }
 }
 
 @media (max-width: 560px) {
-  .topbar { height: 72px; }
+  .topbar { height: auto; min-height: 112px; padding-top: 12px; padding-bottom: 12px; display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+  .mode-switcher { grid-column: 1 / -1; grid-row: 2; width: 100%; }
+  .mode-switcher button { min-width: 0; flex: 1; }
   .header-status { display: none; }
   .header-actions { gap: 8px; }
   .clear-button { font-size: 11px; }
