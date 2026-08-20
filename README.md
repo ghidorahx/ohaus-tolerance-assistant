@@ -8,6 +8,10 @@ The Sales Assistant is portfolio-wide. It must support all OHAUS product series 
 
 The interface must clearly distinguish between the assistant's portfolio-wide purpose and the product lines currently loaded with verified data. Every new series should extend the same sales workflow and compatibility model rather than create a separate series-specific assistant.
 
+## Compatibility Web rule
+
+The Compatibility Web is centered on OHAUS and branches through product families, categories, series, models, and parts. Hierarchy nodes may be added from the current product catalog, but compatibility, incompatibility, replacement, and lifecycle links must only be shown as verified facts. Unverified branches remain visibly marked as awaiting relationship data.
+
 ## Local browser test
 
 Requirements: Node.js 22 or newer.
