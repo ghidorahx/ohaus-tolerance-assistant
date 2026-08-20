@@ -88,7 +88,7 @@ const starterMessage: Message = {
 const salesStarterMessage: Message = {
   id: "sales-welcome",
   role: "assistant",
-  text: "Ask me which Scout accessories fit, which replacements remain active, or whether an option is still supported. This first Scout pilot uses confirmed internal sales rules while broader AI-backed coverage is prepared.",
+  text: "Ask me about product compatibility, replacements, accessories, or lifecycle status across the OHAUS portfolio. The assistant is designed for every product series; Scout is simply the first verified dataset being loaded.",
 };
 
 const suggestedQuestions = [
@@ -148,7 +148,7 @@ function answerSalesQuestion(question: string): AnswerResult {
 
   return {
     kind: "sales-guidance",
-    text: "The Scout pilot currently covers confirmed accessory compatibility and replacement-status questions. Try asking about the replacement power adapter, Bluetooth availability, or stacking-cover compatibility for SPX123 and SPX223. Broader model coverage will come with the AI connection.",
+    text: "The Sales Assistant is designed to support every OHAUS product series. Its current verified dataset begins with Scout, so today you can try asking about the replacement power adapter, Bluetooth availability, or stacking-cover compatibility for SPX123 and SPX223. Additional series will be added without changing this workflow.",
   };
 }
 
@@ -354,7 +354,6 @@ export default function Home() {
           >
             <span className="mode-icon" aria-hidden="true">S</span>
             Sales
-            <small>Scout</small>
           </button>
         </nav>
 
@@ -362,7 +361,7 @@ export default function Home() {
           <button className="clear-button" onClick={clearConversation}>Clear chat</button>
           <div className="header-status">
             <span className="status-dot" aria-hidden="true" />
-            {isSalesMode ? "Scout pilot" : "Verified local data"}
+            {isSalesMode ? "Sales pilot" : "Verified local data"}
           </div>
         </div>
       </header>
@@ -371,10 +370,10 @@ export default function Home() {
         <aside className="side-panel">
           <div className="side-visual">
             {isSalesMode ? (
-              <div className="sales-visual" aria-label="OHAUS Scout SPX sales assistant">
+              <div className="sales-visual" aria-label="OHAUS portfolio sales assistant">
                 <span>OHAUS</span>
-                <strong>SCOUT</strong>
-                <small>SPX · SALES SUPPORT</small>
+                <strong>SALES</strong>
+                <small>PRODUCT PORTFOLIO SUPPORT</small>
                 <div className="scale-silhouette" aria-hidden="true">
                   <i />
                   <b>0.00</b>
@@ -391,15 +390,15 @@ export default function Home() {
           </div>
 
           <div className="data-card">
-            <p className="panel-label">{isSalesMode ? "Pilot product line" : "Knowledge base"}</p>
+            <p className="panel-label">{isSalesMode ? "Current verified dataset" : "Knowledge base"}</p>
             <strong>{isSalesMode ? "Scout" : totalRecords.toLocaleString()}</strong>
-            <span>{isSalesMode ? "SPX compatibility" : "model records"}</span>
+            <span>{isSalesMode ? "First product line" : "model records"}</span>
             <div className="data-meter"><span /></div>
-            <p className="data-note">{isSalesMode ? "Confirmed internal sales rules" : "August 2026 master reference"}</p>
+            <p className="data-note">{isSalesMode ? "Portfolio-wide assistant · More series to follow" : "August 2026 master reference"}</p>
           </div>
 
           <div className="side-section">
-            <p className="panel-label">Try a question</p>
+            <p className="panel-label">{isSalesMode ? "Try a current question" : "Try a question"}</p>
             {activeSuggestions.map((question) => (
               <button
                 key={question}
@@ -416,7 +415,7 @@ export default function Home() {
             <p className="panel-label">Answer coverage</p>
             <div className="coverage-tags">
               {(isSalesMode
-                ? ["Compatibility", "Accessories", "Replacements", "Lifecycle", "Scout SPX"]
+                ? ["All product series", "Compatibility", "Accessories", "Replacements", "Lifecycle"]
                 : [
                     "Tolerance", "OCL", "Repeatability", "Linearity", "Readability",
                     "Capacity", "Weight class", "Temperature",
@@ -429,7 +428,7 @@ export default function Home() {
             <span aria-hidden="true">●</span>
             <div>
               <strong>Runs in your browser</strong>
-              <p>{isSalesMode ? "This pilot uses confirmed local Scout rules." : "No question or model data leaves this app."}</p>
+              <p>{isSalesMode ? "This pilot uses confirmed local product rules." : "No question or model data leaves this app."}</p>
             </div>
           </div>
         </aside>
@@ -437,13 +436,13 @@ export default function Home() {
         <section className="chat-panel">
           <div className="chat-heading">
             <div>
-              <p className="eyebrow">{isSalesMode ? "Scout sales lookup" : "Service lookup"}</p>
-              <h2>{isSalesMode ? "Ask a Scout sales question" : "Ask a tolerance question"}</h2>
-              <p>{isSalesMode ? "Compatibility and replacement guidance for internal sales conversations." : "Deterministic answers from structured, source-linked records."}</p>
+              <p className="eyebrow">{isSalesMode ? "Product sales lookup" : "Service lookup"}</p>
+              <h2>{isSalesMode ? "Ask an OHAUS sales question" : "Ask a tolerance question"}</h2>
+              <p>{isSalesMode ? "Compatibility and replacement guidance designed for every OHAUS product family." : "Deterministic answers from structured, source-linked records."}</p>
             </div>
             <div className="heading-side">
               <span className={`data-ready ${loadError ? "error" : ""}`}>
-                {isSalesMode ? "Scout rules ready" : loading ? "Loading data…" : loadError ? "Data unavailable" : "Data ready"}
+                {isSalesMode ? "Scout data loaded" : loading ? "Loading data…" : loadError ? "Data unavailable" : "Data ready"}
               </span>
             </div>
           </div>
@@ -463,7 +462,7 @@ export default function Home() {
               <button type="submit" disabled={!isReady || !input.trim()} aria-label="Ask question">Ask <span>→</span></button>
             </div>
             <div className="form-footnote">
-              <p>{isSalesMode ? "Scout SPX pilot · Confirmed compatibility rules today, broader AI coverage next." : "Use an exact model number for specifications. Every answer stays tied to its source record."}</p>
+              <p>{isSalesMode ? "Portfolio-wide assistant · Scout data loaded first · broader AI coverage next." : "Use an exact model number for specifications. Every answer stays tied to its source record."}</p>
               <span>{isSalesMode ? "Internal sales pilot" : "Pilot owner · T. Delacruz"}</span>
             </div>
           </form>

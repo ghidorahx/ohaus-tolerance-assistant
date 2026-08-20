@@ -1,6 +1,12 @@
-# OHAUS Tolerance Assistant
+# OHAUS Support Assistants
 
-A browser-first service reference with an optional Electron desktop shell. The same structured OHAUS knowledge base powers both versions.
+A browser-first workspace with Tolerance and Sales Assistant modes, plus an optional Electron desktop shell. The same structured OHAUS knowledge base powers both versions.
+
+## Sales Assistant scope rule
+
+The Sales Assistant is portfolio-wide. It must support all OHAUS product series and equipment categories as verified data becomes available; it must never be designed, named, routed, or prompted as a Scout-only assistant. Scout is the first verified sales dataset, not the boundary of the product.
+
+The interface must clearly distinguish between the assistant's portfolio-wide purpose and the product lines currently loaded with verified data. Every new series should extend the same sales workflow and compatibility model rather than create a separate series-specific assistant.
 
 ## Local browser test
 
