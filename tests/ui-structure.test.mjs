@@ -6,6 +6,7 @@ const [page, styles] = await Promise.all([
   readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
   readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
 ]);
+const salesAssistant = await readFile(new URL("../app/SalesAssistant.tsx", import.meta.url), "utf8");
 
 test("keeps the newest answer expanded above collapsible history", () => {
   assert.match(page, /grouped\.reverse\(\)/);
@@ -24,11 +25,53 @@ test("places a sticky question bar above the responses", () => {
 });
 
 test("uses the requested neutral glass presentation", () => {
-  assert.match(page, />Service reference</);
-  assert.doesNotMatch(page, />OHAUS service reference</i);
+  assert.match(page, /"Service reference"/);
+  assert.doesNotMatch(page, /"OHAUS service reference"/i);
   assert.match(page, /src="\.\/og\.png"/);
   assert.match(styles, /backdrop-filter:\s*blur/);
   assert.match(styles, /\.side-visual/);
   assert.match(styles, /aspect-ratio:\s*1730\s*\/\s*909/);
   assert.match(styles, /object-fit:\s*contain/);
+});
+
+test("provides a workbook-grounded Sales assistant with extended verified context", () => {
+  assert.match(page, /<SalesAssistant/);
+  assert.match(salesAssistant, /new URL\("api\/sales"/);
+  assert.match(salesAssistant, /buildContext/);
+  assert.match(salesAssistant, /verified turns/);
+  assert.match(salesAssistant, /Verified catalog evidence/);
+  assert.match(salesAssistant, /retry_after_seconds/);
+  assert.match(salesAssistant, /Ready in \$\{rateLimitSeconds\}s/);
+  assert.match(salesAssistant, /Sales pilot owner · T\. Delacruz/);
+  assert.match(salesAssistant, /generated knowledge documents/);
+  assert.match(styles, /\.sales-evidence-grid/);
+  assert.match(styles, /\.sales-conversation/);
+});
+
+test("keeps the Sales surface concise and supports answer-specific follow-ups", () => {
+  assert.doesNotMatch(salesAssistant, /Professional product assistant/);
+  assert.doesNotMatch(salesAssistant, /Ask about any product detail in the catalog/);
+  assert.match(salesAssistant, /Ask a follow-up about this answer/);
+  assert.match(salesAssistant, /showFollowUpField/);
+  assert.match(styles, /\.sales-inline-follow-up/);
+});
+
+test("makes the Sales product-knowledge rail collapsible and accessible", () => {
+  assert.match(salesAssistant, /productKnowledgeCollapsed/);
+  assert.match(salesAssistant, /aria-expanded=\{!productKnowledgeCollapsed\}/);
+  assert.match(salesAssistant, /aria-controls="sales-product-knowledge-details"/);
+  assert.match(salesAssistant, /sales-product-knowledge-collapsed/);
+  assert.match(styles, /\.sales-workspace\.sales-rail-collapsed/);
+  assert.match(styles, /\.sales-rail-body\[hidden\]/);
+});
+
+test("keeps every workspace mounted while switching tabs", () => {
+  assert.match(page, /className="mode-surface tolerance-mode-surface" hidden=\{mode !== "tolerance"\}/);
+  assert.match(page, /className="mode-surface sales-mode-surface" hidden=\{!isSalesMode\}/);
+  assert.match(page, /className="mode-surface compatibility-mode-surface" hidden=\{!isCompatibilityMode\}/);
+  assert.doesNotMatch(page, /\{isSalesMode && <SalesAssistant/);
+  assert.match(styles, /\.mode-surface\[hidden\]\s*\{\s*display:\s*none\s*!important;/);
+
+  const switchMode = page.match(/function switchMode[\s\S]*?\n {2}\}/)?.[0] ?? "";
+  assert.doesNotMatch(switchMode, /setInput\(""\)/);
 });

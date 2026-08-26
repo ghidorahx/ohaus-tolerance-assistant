@@ -1,0 +1,22 @@
+{
+  "catalog_schema_version": "2.0.0",
+  "retrieval_schema_version": "1.0.0",
+  "generated_at": "2026-08-26T16:06:02.265Z",
+  "source": {
+    "file": "Alpha-PortableBalances.xlsx",
+    "sha256": "ca651e6a597d2b74635d871ff2bb766a8e00d2c77a68a76c29daafffc205e12c",
+    "bytes": 2457131,
+    "rows": 6407,
+    "columns": 428,
+    "selection_rule": "Parent Family Name = Portable Balances"
+  },
+  "catalog": {
+    "sha256": "f4505deecce6601722946ff6a3e68bbf83cee40172f44fa9e16b34ddf2b1e381",
+    "portable_products": 80,
+    "portable_families": 7,
+    "related_items": 91,
+    "records": 171,
+    "retrieval_documents": 87
+  },
+  "quality_status": "review_required"
+}
