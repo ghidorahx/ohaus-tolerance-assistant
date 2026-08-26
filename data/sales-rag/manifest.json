@@ -1,0 +1,530 @@
+{
+  "manifest_version": "1.0.0",
+  "generated_at": "2026-08-26T16:06:02.265Z",
+  "source_file": "Alpha-PortableBalances.xlsx",
+  "source_sha256": "ca651e6a597d2b74635d871ff2bb766a8e00d2c77a68a76c29daafffc205e12c",
+  "documents": [
+    {
+      "document_id": "product:30428204",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30428204-cr221.md",
+      "sha256": "7060eaaccab5aaadbf4248f31d15ab4220580c3e5f343a1d5ffdbe39364a1114"
+    },
+    {
+      "document_id": "product:30428205",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30428205-cr621.md",
+      "sha256": "a89cdd5c898fb97bc69fe439410679c052eae58ed8439a87eb587a1a7d3e21ca"
+    },
+    {
+      "document_id": "product:30428206",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30428206-cr2200.md",
+      "sha256": "97a476ea8ee4b4dbacd41b52aa0bcdeb007e1a3a167b75a894ea37e09f6cdd33"
+    },
+    {
+      "document_id": "product:30428207",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30428207-cr5200.md",
+      "sha256": "6ae66ffcdf294cc1242a6e5617651e7d95c5e417aa3d3c8b7f8916b2fdba0dc4"
+    },
+    {
+      "document_id": "product:30428199",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30428199-cx221.md",
+      "sha256": "bb3176f511db89664950f52d1278cd700f4f61299a1c45485ef2f8832b2b124c"
+    },
+    {
+      "document_id": "product:30467746",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30467746-cx221p.md",
+      "sha256": "1d94e929063664c9b7f0810fb6fdba8e4383705cfb32af87371390e7b475ba86"
+    },
+    {
+      "document_id": "product:30428200",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30428200-cx621.md",
+      "sha256": "20f4238aeff759d7a3b3c3854d48ee8eccd165d42faeb1f1e4dd63406055a062"
+    },
+    {
+      "document_id": "product:30428201",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30428201-cx1201.md",
+      "sha256": "07519396c2ced51dfa02737ebe26d6379588230ead5a1e23d423c0b3d32eb541"
+    },
+    {
+      "document_id": "product:30428202",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30428202-cx2200.md",
+      "sha256": "8ce69ecd160d0fad313810c81aea55bc483a7cf016f0cc97e93d33d4b47239cb"
+    },
+    {
+      "document_id": "product:30467747",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30467747-cx2200p.md",
+      "sha256": "8bc2cfea71590a3081a351a3c130673db898ed1170c6c88c39dcbfffdf3f8da8"
+    },
+    {
+      "document_id": "product:30428203",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30428203-cx5200.md",
+      "sha256": "dd5c5ba7086986237264f94b511fc3ff1f9199ac118bf357acd11f95bf183c4b"
+    },
+    {
+      "document_id": "product:30467762",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30467762-cx5200f.md",
+      "sha256": "a09a39d094f861185cc88478ebd44d162e0ce12c30db1956d28da789c2212e5f"
+    },
+    {
+      "document_id": "product:30467761",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30467761-cx5200p.md",
+      "sha256": "709bcd3bed032bcfb2e997c428617ea282bda4b7d0a508dcfdc71b2e3cdf3149"
+    },
+    {
+      "document_id": "product:30642238",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30642238-nv123.md",
+      "sha256": "0fd569de5499700c7cd4592b5f4187dc92b13798edfc6f382889060fb6bbc8a7"
+    },
+    {
+      "document_id": "product:30642239",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30642239-nv223.md",
+      "sha256": "62e32eda94204c5916ca81598a4214fbcfd1b7902cb7c17d7bb89d0178d481a7"
+    },
+    {
+      "document_id": "product:30456410",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30456410-nv222.md",
+      "sha256": "d32efb065d644eb4f585d091ede7e2426fc0be7d0e9950c294d6ef839acc30ae"
+    },
+    {
+      "document_id": "product:30456412",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30456412-nv221.md",
+      "sha256": "9fc4feae677949cbba751a152ff89d6cef43f75752d951613349a65ff34e9199"
+    },
+    {
+      "document_id": "product:30642240",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30642240-nv323.md",
+      "sha256": "c425c5f37238478bb3c6920d4c1437d5c78b1a2d0e1c20d5fc7f5473af9b5e33"
+    },
+    {
+      "document_id": "product:30456411",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30456411-nv422.md",
+      "sha256": "d9248cfd5547f889ecdcbbdda163e62f11940f89ec55072b034a32d62dbcae5f"
+    },
+    {
+      "document_id": "product:30467960",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30467960-nv622.md",
+      "sha256": "47fee8c040962303fc9414e4df81086c15727534f8f36be5ef260e60dd314a7d"
+    },
+    {
+      "document_id": "product:30456413",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30456413-nv621.md",
+      "sha256": "1f9e578b515946e9f3ed369c61050e9b5f597b228964721f9f5668f82e31dcb3"
+    },
+    {
+      "document_id": "product:30642241",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30642241-nv1202.md",
+      "sha256": "57188626cfda04b02631892154ef2966c7db6edde6f41e104c7481deda12ff6d"
+    },
+    {
+      "document_id": "product:30456414",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30456414-nv1201.md",
+      "sha256": "4ea360abd9aa75d683a6a285e07c0ba46e09e89b34e413d6a0a8c9d0fb6a861e"
+    },
+    {
+      "document_id": "product:30642242",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30642242-nv2202.md",
+      "sha256": "f288908536cab76c1f0b744d5b5fd18afbf9d56500b8a5bbc777d6ac7ed7bc5a"
+    },
+    {
+      "document_id": "product:30456415",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30456415-nv2201.md",
+      "sha256": "bc0a21838e98f50c7649d452295b5b30b0eccb62fee9301807cbf6a54de74e1a"
+    },
+    {
+      "document_id": "product:30456416",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30456416-nvt2201.md",
+      "sha256": "abce0e759387ff9049301f6fa382cb8bb063cfb7f4a2343a045c0b4f0cd3c975"
+    },
+    {
+      "document_id": "product:30456418",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30456418-nvt2200.md",
+      "sha256": "7eaa0f54d9ad445b656b6ce795241b5547054f7e652d8c6d649e12412e9ea161"
+    },
+    {
+      "document_id": "product:30642243",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30642243-nv3202.md",
+      "sha256": "9407d4f7bcfb5cbf9fe4e6e8ec671a5bb90dd6c2ac6f550eac94780e78beec17"
+    },
+    {
+      "document_id": "product:30456417",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30456417-nvt4201.md",
+      "sha256": "099da2e32caa24298774085b43aafa1736f71b377c862e880fa2be525ab3e658"
+    },
+    {
+      "document_id": "product:30467961",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30467961-nvt6201.md",
+      "sha256": "de107f954f447f35704d0289eb6f9224eca2ce07699af99abe0f9f79038eaf98"
+    },
+    {
+      "document_id": "product:30456419",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30456419-nvt6200.md",
+      "sha256": "a68c7c36327ff12c5f3d45d8c08014c7dca46a818f15d3e59757480ba3f29baa"
+    },
+    {
+      "document_id": "product:30642244",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30642244-nvt10201.md",
+      "sha256": "2bbe42f9c944a9d28f770c612bdb46ede278ed8aeb261cf7a11d5c460dca425a"
+    },
+    {
+      "document_id": "product:30456420",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30456420-nvt12000.md",
+      "sha256": "b89eff1d260452d14d1e71da6ca71b7fe54911a159ab54faa029ccd1a8d1156f"
+    },
+    {
+      "document_id": "product:30456421",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30456421-nvt22000.md",
+      "sha256": "f1343266cc3598eeaa1a9384bd8f461ead8009862647e0594a440a5107275686"
+    },
+    {
+      "document_id": "product:80104060",
+      "document_type": "product",
+      "path": "data/sales-rag/products/80104060-ps121.md",
+      "sha256": "91a8d7ba8d8bd5e5df55c68b3f22d13ac5c8a5f1439847b1790873dd3b6919ad"
+    },
+    {
+      "document_id": "product:80104061",
+      "document_type": "product",
+      "path": "data/sales-rag/products/80104061-ps251.md",
+      "sha256": "d4393b4f3e151c27de42174cb80bed3aad968dcc4e9accaab5dc9291bd8a2394"
+    },
+    {
+      "document_id": "product:30253029",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253029-skx123.md",
+      "sha256": "a998883f10662dd1981a6ae44681477d4717289b755b80f5ade636e0b7ec29ba"
+    },
+    {
+      "document_id": "product:30253030",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253030-skx222.md",
+      "sha256": "bf1a01de6004c6c13b8927bd5c3241b9abe73eb05a9ec8afc0b4d6d73810ee17"
+    },
+    {
+      "document_id": "product:30268917",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30268917-skx222.md",
+      "sha256": "ad75a0e7d9fa254cca7173195e23636c6c593bfd08866cd5c7568b8482163e99"
+    },
+    {
+      "document_id": "product:30253031",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253031-skx422.md",
+      "sha256": "1640d32cae45cb1f7c3130ec43aa5376584fd3a8536b6c3cf8d9742fcf75f5a6"
+    },
+    {
+      "document_id": "product:30268918",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30268918-skx422.md",
+      "sha256": "58579a3369dd0b5781b46a0678c1f12179965f2f851dd70a5d897195d0d26f6c"
+    },
+    {
+      "document_id": "product:30253035",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253035-skx421.md",
+      "sha256": "a76cd1d10fa50e2f9c26c9e3d40a4358e56f6778f66305ac0b63080d9c615c5e"
+    },
+    {
+      "document_id": "product:30253032",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253032-skx622.md",
+      "sha256": "2ac469c597b7514d8fa24ba6fdeb019b5740b110a17824ae5ce0897b6a287893"
+    },
+    {
+      "document_id": "product:30253036",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253036-skx621.md",
+      "sha256": "829fbe8fc4ca71e50d1fb0338b321bf8347870c3878a2857ab7a0dfbdbb1a323"
+    },
+    {
+      "document_id": "product:30253033",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253033-skx1202.md",
+      "sha256": "77392229270adb7a8353d15dc4bab4472810c953f27bbc3d0d6e48f0391ffd4b"
+    },
+    {
+      "document_id": "product:30253034",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253034-skx2202.md",
+      "sha256": "14f006edc62bc2b0ef32ebe5975541d157f5749b9d82c42abd58743a7acac221"
+    },
+    {
+      "document_id": "product:30253037",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253037-skx2201.md",
+      "sha256": "d881a78525df0f2f6ca94d2eff330ecb3df1920ca8c254968af069d89de4f905"
+    },
+    {
+      "document_id": "product:30268924",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30268924-skx2201.md",
+      "sha256": "f8245f1181f23c395a0f8aabc335e9cd96fcc0504b683e42a38de42266e8abdd"
+    },
+    {
+      "document_id": "product:30253038",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253038-skx6201.md",
+      "sha256": "97671c9a435a6c1284f4975abcea4e7fb46bf7e7c91596edf662e390eb753f03"
+    },
+    {
+      "document_id": "product:30253039",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253039-skx8200.md",
+      "sha256": "29aaae289fadf50c83896db28a461968cb214ce93a2cf909ece12dc90227657a"
+    },
+    {
+      "document_id": "product:30268926",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30268926-skx8200.md",
+      "sha256": "edf750a0740c67259b252bea762f3a625d32d8b9da8a46a22b1f487132f6c27a"
+    },
+    {
+      "document_id": "product:30253017",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253017-spx123.md",
+      "sha256": "aadafdc6b91ba85a01bb665df65aa35b73dd072ff7a8f4ca052a7fe78da3fc53"
+    },
+    {
+      "document_id": "product:30253018",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253018-spx223.md",
+      "sha256": "e63a504c849d045e3fe75e1b074e243a7411c30b2c41017980d8b2976a85ec23"
+    },
+    {
+      "document_id": "product:30253019",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253019-spx222.md",
+      "sha256": "c1ca2f8fc6fe4c30b1b04fae77c29261e02042214fb2faf28310c2d3039388d6"
+    },
+    {
+      "document_id": "product:30268906",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30268906-spx222.md",
+      "sha256": "1ee307d171f250d58d809f971f6a4ec462b9172d447d1431604d6ce4dab193e8"
+    },
+    {
+      "document_id": "product:30253020",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253020-spx422.md",
+      "sha256": "e97f068030ec1e178033f9ba028cd7b2afc1a21c15d57e0f15561668e8daff9f"
+    },
+    {
+      "document_id": "product:30268907",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30268907-spx422.md",
+      "sha256": "d17539e5bc4c3bde665e9c0ad9ae304944be57028751d2a77e2a8221805ea326"
+    },
+    {
+      "document_id": "product:30253024",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253024-spx421.md",
+      "sha256": "47691df7fc404dfbf391d18119b79fee199c739f1cb1d76dcb9282016a6b2a13"
+    },
+    {
+      "document_id": "product:30253021",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253021-spx622.md",
+      "sha256": "8bc49acb377bbab0c410baeaa180ca88e0187f330760f4a33c10de5742d0ad06"
+    },
+    {
+      "document_id": "product:30253025",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253025-spx621.md",
+      "sha256": "8426094a6e063561cf33a25f8adb2aa8a0cc1fa5ecce09ae5336d8e0fd818252"
+    },
+    {
+      "document_id": "product:30268912",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30268912-spx621.md",
+      "sha256": "6b5ed8538224e58fd44833aa87f72b99fec40d301825a5ed23c5312aa7275668"
+    },
+    {
+      "document_id": "product:30253022",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253022-spx1202.md",
+      "sha256": "fdead68a39955d713a12766f595119def08e6682824a87f85b701ec4f2f4a475"
+    },
+    {
+      "document_id": "product:30253023",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253023-spx2202.md",
+      "sha256": "feb36faa0ce97fd477540b4b54ba5dd18c9795632c81f7eede242b0e82fa9ee9"
+    },
+    {
+      "document_id": "product:30253026",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253026-spx2201.md",
+      "sha256": "9c89b9bb34762480bfe0c23dc94606752f33a73dd31f24fa1294e68ce934462a"
+    },
+    {
+      "document_id": "product:30268913",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30268913-spx2201.md",
+      "sha256": "06fd6305f5ecbc6f292cf6e7edcbb33c864deaf70bd7397dacb6ab9361a0c7a5"
+    },
+    {
+      "document_id": "product:30253027",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253027-spx6201.md",
+      "sha256": "d547b75b010dc7d2d44fa62cdfe7579be976442773b204138f87ae46633ca45e"
+    },
+    {
+      "document_id": "product:30268914",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30268914-spx6201.md",
+      "sha256": "f5641ecc731c0027b41001f0984ffe21e7211c656c71319eb8b1613ec60b368d"
+    },
+    {
+      "document_id": "product:30253028",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253028-spx8200.md",
+      "sha256": "6814d6240f8026f6af07cc9e2bb5f500044c0c22c3496adceee303a38c945d06"
+    },
+    {
+      "document_id": "product:30253005",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253005-stx123.md",
+      "sha256": "9269daf559d64bc30b30de55a4d0c523ab7458f4034962fb8129ca85d1387c02"
+    },
+    {
+      "document_id": "product:30253006",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253006-stx223.md",
+      "sha256": "bbd299e6de41d351c448a923016528e5c862fae9d0ef18eb9e81ef8f8afd4fd8"
+    },
+    {
+      "document_id": "product:30253007",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253007-stx222.md",
+      "sha256": "b95cdfa0cb632c77db63c6e770fca06a9a6d7cac2d31601c743a0d021234abca"
+    },
+    {
+      "document_id": "product:30253008",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253008-stx422.md",
+      "sha256": "014f40f84e3d4e65feb6e6458fcffa1f10a546b2dd8ad52a0150ac9451ffdf4f"
+    },
+    {
+      "document_id": "product:30253012",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253012-stx421.md",
+      "sha256": "cf89e2e9e0a73ba860c3ac622ed7ed412007fdbebf56dfbdd6e910a06ef78e79"
+    },
+    {
+      "document_id": "product:30253009",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253009-stx622.md",
+      "sha256": "ce85d78c76763d33c77920053536f1102f7b348cd4b5451914faaca8046cc238"
+    },
+    {
+      "document_id": "product:30253013",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253013-stx621.md",
+      "sha256": "61c9424e81287782447f3eee28a5570faeda9c3b61625316d743948ec395d9bb"
+    },
+    {
+      "document_id": "product:30253010",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253010-stx1202.md",
+      "sha256": "bd68633f5d6c647c911f0c7074ba8fb0cf188dee0bd57d11b48a165255e5b479"
+    },
+    {
+      "document_id": "product:30253011",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253011-stx2202.md",
+      "sha256": "e6481f4d54929214161408558308d1eddb62daf3105d003362614cb3f5796ac1"
+    },
+    {
+      "document_id": "product:30253014",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253014-stx2201.md",
+      "sha256": "06204246c042aef45ca8729061faf237879e00f62e15de60b2e520fbe33c30a7"
+    },
+    {
+      "document_id": "product:30253015",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253015-stx6201.md",
+      "sha256": "bdc0a248c5e2e476005f072f3bd9756c1ee9a9d078f78ab22b1d496b02f2e04b"
+    },
+    {
+      "document_id": "product:30253016",
+      "document_type": "product",
+      "path": "data/sales-rag/products/30253016-stx8200.md",
+      "sha256": "c67cf939564579be7e11c84a9857f11e1101c95de0683504c4cc0fa0824a8d6c"
+    },
+    {
+      "document_id": "family:compass-cr",
+      "document_type": "family",
+      "path": "data/sales-rag/families/compass-cr.md",
+      "sha256": "4ff39c57b499d9f1cc717744ec9e1e4cfda767f1917a3d078ba34dc99a1f2231"
+    },
+    {
+      "document_id": "family:compass-cx",
+      "document_type": "family",
+      "path": "data/sales-rag/families/compass-cx.md",
+      "sha256": "722671eef205daed916f85105eca69d50dabde8db6c63c5426c790e82bbc5a32"
+    },
+    {
+      "document_id": "family:navigator",
+      "document_type": "family",
+      "path": "data/sales-rag/families/navigator.md",
+      "sha256": "f3f3654f7389e9e8e989c8865cf689f940578db3c98f5cb64b97ba1a33db9604"
+    },
+    {
+      "document_id": "family:ps-series",
+      "document_type": "family",
+      "path": "data/sales-rag/families/ps-series.md",
+      "sha256": "12d800bfd6e63a62d0820cdf1a83dd92203a58ae1e39403619ff0add2c22668e"
+    },
+    {
+      "document_id": "family:scout-skx",
+      "document_type": "family",
+      "path": "data/sales-rag/families/scout-skx.md",
+      "sha256": "f684defd116b4667fd02be0b437a640adaf979435183d3608c70663a1b2d196b"
+    },
+    {
+      "document_id": "family:scout-spx",
+      "document_type": "family",
+      "path": "data/sales-rag/families/scout-spx.md",
+      "sha256": "7002e44ecf9fd3aa55e505c8d100f0e8527607e00a330113ebfe1b79e06eaa13"
+    },
+    {
+      "document_id": "family:scout-stx",
+      "document_type": "family",
+      "path": "data/sales-rag/families/scout-stx.md",
+      "sha256": "ecd4943d42d45507905d4a8dc6d1624b2bcc5e6b313b5ff60de891342723ee0d"
+    }
+  ]
+}

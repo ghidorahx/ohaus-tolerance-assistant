@@ -1,0 +1,780 @@
+{
+  "report_version": "1.0.0",
+  "generated_at": "2026-08-26T16:06:02.265Z",
+  "status": "review_required",
+  "source_file": "Alpha-PortableBalances.xlsx",
+  "source_sha256": "ca651e6a597d2b74635d871ff2bb766a8e00d2c77a68a76c29daafffc205e12c",
+  "selection_rule": "Parent Family Name = Portable Balances",
+  "summary": {
+    "errors": 0,
+    "warnings": 28,
+    "affected_unresolved_relationship_edges": 86,
+    "portable_products": 80,
+    "related_items": 91,
+    "retrieval_documents": 87
+  },
+  "field_completeness": {
+    "material_number": {
+      "populated": 80,
+      "missing": 0,
+      "completeness_percent": 100
+    },
+    "model": {
+      "populated": 80,
+      "missing": 0,
+      "completeness_percent": 100
+    },
+    "product_name": {
+      "populated": 80,
+      "missing": 0,
+      "completeness_percent": 100
+    },
+    "family": {
+      "populated": 80,
+      "missing": 0,
+      "completeness_percent": 100
+    },
+    "specifications.maximum_capacity": {
+      "populated": 80,
+      "missing": 0,
+      "completeness_percent": 100
+    },
+    "specifications.readability": {
+      "populated": 80,
+      "missing": 0,
+      "completeness_percent": 100
+    },
+    "source.file": {
+      "populated": 80,
+      "missing": 0,
+      "completeness_percent": 100
+    }
+  },
+  "errors": {
+    "missing_required_fields": [],
+    "duplicate_material_numbers": []
+  },
+  "review_items": {
+    "ambiguous_model_labels": [
+      {
+        "model": "SKX222",
+        "material_numbers": [
+          "30253030",
+          "30268917"
+        ]
+      },
+      {
+        "model": "SKX422",
+        "material_numbers": [
+          "30253031",
+          "30268918"
+        ]
+      },
+      {
+        "model": "SKX2201",
+        "material_numbers": [
+          "30253037",
+          "30268924"
+        ]
+      },
+      {
+        "model": "SKX8200",
+        "material_numbers": [
+          "30253039",
+          "30268926"
+        ]
+      },
+      {
+        "model": "SPX222",
+        "material_numbers": [
+          "30253019",
+          "30268906"
+        ]
+      },
+      {
+        "model": "SPX422",
+        "material_numbers": [
+          "30253020",
+          "30268907"
+        ]
+      },
+      {
+        "model": "SPX621",
+        "material_numbers": [
+          "30253025",
+          "30268912"
+        ]
+      },
+      {
+        "model": "SPX2201",
+        "material_numbers": [
+          "30253026",
+          "30268913"
+        ]
+      },
+      {
+        "model": "SPX6201",
+        "material_numbers": [
+          "30253027",
+          "30268914"
+        ]
+      }
+    ],
+    "unresolved_relationships": [
+      {
+        "source_material_number": "30428206",
+        "source_model": "CR2200",
+        "relationship_type": "Accessories",
+        "related_material_number": "80850075",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30428204",
+        "source_model": "CR221",
+        "relationship_type": "Accessories",
+        "related_material_number": "80850075",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30428207",
+        "source_model": "CR5200",
+        "relationship_type": "Accessories",
+        "related_material_number": "80850075",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30428205",
+        "source_model": "CR621",
+        "relationship_type": "Accessories",
+        "related_material_number": "80850075",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30428201",
+        "source_model": "CX1201",
+        "relationship_type": "Accessories",
+        "related_material_number": "80850075",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30428202",
+        "source_model": "CX2200",
+        "relationship_type": "Accessories",
+        "related_material_number": "80850075",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30467747",
+        "source_model": "CX2200P",
+        "relationship_type": "Accessories",
+        "related_material_number": "80850075",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30428199",
+        "source_model": "CX221",
+        "relationship_type": "Accessories",
+        "related_material_number": "80850075",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30467746",
+        "source_model": "CX221P",
+        "relationship_type": "Accessories",
+        "related_material_number": "80850075",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30428203",
+        "source_model": "CX5200",
+        "relationship_type": "Accessories",
+        "related_material_number": "80850075",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30467762",
+        "source_model": "CX5200F",
+        "relationship_type": "Accessories",
+        "related_material_number": "80850075",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30467761",
+        "source_model": "CX5200P",
+        "relationship_type": "Accessories",
+        "related_material_number": "80850075",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30428200",
+        "source_model": "CX621",
+        "relationship_type": "Accessories",
+        "related_material_number": "80850075",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30456414",
+        "source_model": "NV1201",
+        "relationship_type": "Accessories",
+        "related_material_number": "30809921",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30642241",
+        "source_model": "NV1202",
+        "relationship_type": "Accessories",
+        "related_material_number": "30809921",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30642238",
+        "source_model": "NV123",
+        "relationship_type": "Accessories",
+        "related_material_number": "30809921",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30456415",
+        "source_model": "NV2201",
+        "relationship_type": "Accessories",
+        "related_material_number": "30809921",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30642242",
+        "source_model": "NV2202",
+        "relationship_type": "Accessories",
+        "related_material_number": "30809921",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30456412",
+        "source_model": "NV221",
+        "relationship_type": "Accessories",
+        "related_material_number": "30809921",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30456410",
+        "source_model": "NV222",
+        "relationship_type": "Accessories",
+        "related_material_number": "30809921",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30642239",
+        "source_model": "NV223",
+        "relationship_type": "Accessories",
+        "related_material_number": "30809921",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30642243",
+        "source_model": "NV3202",
+        "relationship_type": "Accessories",
+        "related_material_number": "30809921",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30642240",
+        "source_model": "NV323",
+        "relationship_type": "Accessories",
+        "related_material_number": "30809921",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30456411",
+        "source_model": "NV422",
+        "relationship_type": "Accessories",
+        "related_material_number": "30809921",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30456413",
+        "source_model": "NV621",
+        "relationship_type": "Accessories",
+        "related_material_number": "30809921",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30467960",
+        "source_model": "NV622",
+        "relationship_type": "Accessories",
+        "related_material_number": "30809921",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30642244",
+        "source_model": "NVT10201",
+        "relationship_type": "Accessories",
+        "related_material_number": "30809922",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30456420",
+        "source_model": "NVT12000",
+        "relationship_type": "Accessories",
+        "related_material_number": "30809922",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30456418",
+        "source_model": "NVT2200",
+        "relationship_type": "Accessories",
+        "related_material_number": "30809922",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30456421",
+        "source_model": "NVT22000",
+        "relationship_type": "Accessories",
+        "related_material_number": "30809922",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30456416",
+        "source_model": "NVT2201",
+        "relationship_type": "Accessories",
+        "related_material_number": "30809922",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30456417",
+        "source_model": "NVT4201",
+        "relationship_type": "Accessories",
+        "related_material_number": "30809922",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30456419",
+        "source_model": "NVT6200",
+        "relationship_type": "Accessories",
+        "related_material_number": "30809922",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30467961",
+        "source_model": "NVT6201",
+        "relationship_type": "Accessories",
+        "related_material_number": "30809922",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253033",
+        "source_model": "SKX1202",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253029",
+        "source_model": "SKX123",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30268924",
+        "source_model": "SKX2201",
+        "relationship_type": "Accessories",
+        "related_material_number": "30045641",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253037",
+        "source_model": "SKX2201",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30268924",
+        "source_model": "SKX2201",
+        "relationship_type": "Spare Parts",
+        "related_material_number": "30333868",
+        "source_field": "Relationship / Spare Parts"
+      },
+      {
+        "source_material_number": "30268924",
+        "source_model": "SKX2201",
+        "relationship_type": "Spare Parts",
+        "related_material_number": "30333869",
+        "source_field": "Relationship / Spare Parts"
+      },
+      {
+        "source_material_number": "30253034",
+        "source_model": "SKX2202",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30268917",
+        "source_model": "SKX222",
+        "relationship_type": "Accessories",
+        "related_material_number": "30045641",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253030",
+        "source_model": "SKX222",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30268917",
+        "source_model": "SKX222",
+        "relationship_type": "Spare Parts",
+        "related_material_number": "30333868",
+        "source_field": "Relationship / Spare Parts"
+      },
+      {
+        "source_material_number": "30268917",
+        "source_model": "SKX222",
+        "relationship_type": "Spare Parts",
+        "related_material_number": "30333869",
+        "source_field": "Relationship / Spare Parts"
+      },
+      {
+        "source_material_number": "30253035",
+        "source_model": "SKX421",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30268918",
+        "source_model": "SKX422",
+        "relationship_type": "Accessories",
+        "related_material_number": "30045641",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253031",
+        "source_model": "SKX422",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30268918",
+        "source_model": "SKX422",
+        "relationship_type": "Spare Parts",
+        "related_material_number": "30333868",
+        "source_field": "Relationship / Spare Parts"
+      },
+      {
+        "source_material_number": "30268918",
+        "source_model": "SKX422",
+        "relationship_type": "Spare Parts",
+        "related_material_number": "30333869",
+        "source_field": "Relationship / Spare Parts"
+      },
+      {
+        "source_material_number": "30253038",
+        "source_model": "SKX6201",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253036",
+        "source_model": "SKX621",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253032",
+        "source_model": "SKX622",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30268926",
+        "source_model": "SKX8200",
+        "relationship_type": "Accessories",
+        "related_material_number": "30045641",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253039",
+        "source_model": "SKX8200",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30268926",
+        "source_model": "SKX8200",
+        "relationship_type": "Spare Parts",
+        "related_material_number": "30333868",
+        "source_field": "Relationship / Spare Parts"
+      },
+      {
+        "source_material_number": "30268926",
+        "source_model": "SKX8200",
+        "relationship_type": "Spare Parts",
+        "related_material_number": "30333869",
+        "source_field": "Relationship / Spare Parts"
+      },
+      {
+        "source_material_number": "30253022",
+        "source_model": "SPX1202",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253017",
+        "source_model": "SPX123",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30268913",
+        "source_model": "SPX2201",
+        "relationship_type": "Accessories",
+        "related_material_number": "30045641",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253026",
+        "source_model": "SPX2201",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253023",
+        "source_model": "SPX2202",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30268906",
+        "source_model": "SPX222",
+        "relationship_type": "Accessories",
+        "related_material_number": "30045641",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253019",
+        "source_model": "SPX222",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253018",
+        "source_model": "SPX223",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253024",
+        "source_model": "SPX421",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30268907",
+        "source_model": "SPX422",
+        "relationship_type": "Accessories",
+        "related_material_number": "30045641",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253020",
+        "source_model": "SPX422",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30268914",
+        "source_model": "SPX6201",
+        "relationship_type": "Accessories",
+        "related_material_number": "30045641",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253027",
+        "source_model": "SPX6201",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30268912",
+        "source_model": "SPX621",
+        "relationship_type": "Accessories",
+        "related_material_number": "30045641",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253025",
+        "source_model": "SPX621",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253021",
+        "source_model": "SPX622",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253028",
+        "source_model": "SPX8200",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253010",
+        "source_model": "STX1202",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253005",
+        "source_model": "STX123",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253014",
+        "source_model": "STX2201",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253011",
+        "source_model": "STX2202",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253007",
+        "source_model": "STX222",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253006",
+        "source_model": "STX223",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253012",
+        "source_model": "STX421",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253008",
+        "source_model": "STX422",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253015",
+        "source_model": "STX6201",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253013",
+        "source_model": "STX621",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253009",
+        "source_model": "STX622",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      },
+      {
+        "source_material_number": "30253016",
+        "source_model": "STX8200",
+        "relationship_type": "Accessories",
+        "related_material_number": "30268985",
+        "source_field": "Relationship / Accessories"
+      }
+    ],
+    "missing_documents": [
+      {
+        "material_number": "30428204",
+        "model": "CR221",
+        "document_type": "manual"
+      },
+      {
+        "material_number": "30428205",
+        "model": "CR621",
+        "document_type": "manual"
+      },
+      {
+        "material_number": "30428206",
+        "model": "CR2200",
+        "document_type": "manual"
+      },
+      {
+        "material_number": "30428207",
+        "model": "CR5200",
+        "document_type": "manual"
+      },
+      {
+        "material_number": "80104060",
+        "model": "PS121",
+        "document_type": "manual"
+      },
+      {
+        "material_number": "30268917",
+        "model": "SKX222",
+        "document_type": "data_sheet"
+      },
+      {
+        "material_number": "30268918",
+        "model": "SKX422",
+        "document_type": "data_sheet"
+      },
+      {
+        "material_number": "30268924",
+        "model": "SKX2201",
+        "document_type": "data_sheet"
+      },
+      {
+        "material_number": "30268926",
+        "model": "SKX8200",
+        "document_type": "data_sheet"
+      }
+    ],
+    "known_source_gaps": [
+      "No lifecycle status, effective date, or replacement material field is present.",
+      "Live price, inventory, lead time, discounts, and regional availability are not present.",
+      "Replacement and upsell relationship coverage is not established for the portable-balance catalog."
+    ]
+  }
+}

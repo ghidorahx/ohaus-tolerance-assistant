@@ -1,12 +1,38 @@
 # OHAUS Support Assistants
 
-A browser-first workspace with Tolerance and Sales Assistant modes, plus an optional Electron desktop shell. The same structured OHAUS knowledge base powers both versions.
+A browser-first workspace with a source-linked Tolerance Assistant, a workbook-grounded Sales Assistant, and an interactive Compatibility Web.
 
-## Sales Assistant scope rule
+## Workbook-grounded Sales Assistant
 
-The Sales Assistant is portfolio-wide. It must support all OHAUS product series and equipment categories as verified data becomes available; it must never be designed, named, routed, or prompted as a Scout-only assistant. Scout is the first verified sales dataset, not the boundary of the product.
+The Sales Assistant uses the OpenAI Responses API with GPT-5.6 Sol, medium reasoning, Standard mode, hybrid workbook retrieval, and strict structured answers. GPT-5.6 Terra is used only as a same-generation fallback when Sol is temporarily rate limited. Each request receives exact JSON records, deterministic requirement filtering, exact and nearest capacity alternatives, relevant field matches, relationship data, and a small set of generated Markdown product or family documents before the model answers. Model memory and prior chat answers are never treated as product-source evidence.
 
-The interface must clearly distinguish between the assistant's portfolio-wide purpose and the product lines currently loaded with verified data. Every new series should extend the same sales workflow and compatibility model rather than create a separate series-specific assistant.
+The current catalog contains 80 portable balances across 7 families and 91 resolved related items from `Alpha-PortableBalances.xlsx`. Exact material numbers are authoritative, duplicate model labels require clarification, unresolved relationships remain review items, and missing live business fields such as pricing, inventory, and lead time are reported instead of invented.
+
+### Catalog source pipeline
+
+The workbook remains the only human-edited master. Do not manually edit the generated JSON or Markdown files. A workbook import now produces all of the following in one repeatable operation:
+
+- `data/portable-balances-api.json` — structured authority for identifiers, exact specifications, numeric filtering, relationships, and field-level evidence.
+- `data/sales-rag/products/*.md` — one readable retrieval document per product.
+- `data/sales-rag/families/*.md` — one readable retrieval document per family.
+- `data/sales-retrieval-index.json` — compact local retrieval index used before each AI request.
+- `data/sales-data-quality-report.json` — required-field checks plus visible source-review items.
+- `data/sales-catalog-version.json` and `data/sales-rag/manifest.json` — source hashes, record counts, generated-file hashes, and version traceability.
+
+The current generated layer contains 80 product documents and 7 family documents. Exact or numeric claims still come from the structured JSON; Markdown helps find and explain descriptive details. This keeps one OpenAI model call per user question and avoids an additional embedding or vector-store request during the pilot.
+
+To import a refreshed workbook, install the maintenance-only Python dependencies and run:
+
+```bash
+python3 -m pip install -r requirements-sales-import.txt
+npm run import:sales-workbook -- /absolute/path/to/Alpha-PortableBalances.xlsx
+```
+
+Set `SALES_IMPORT_PYTHON` when the required Python executable is not named `python3`.
+
+For the expanded-context test, the Tier 1 profile uses a 450K total request budget: up to 322K tokens are reserved for instructions, current catalog evidence, and verified conversation context, while GPT-5.6's maximum 128K output allowance is available for the answer. This leaves 50K of headroom under the model's 500K Tier 1 TPM limit. Conversation memory retains up to 120 verified turns, and each question may retrieve up to 20 generated knowledge documents with expanded excerpts. Requests for all information about an identified model receive its complete populated structured record. These are safety ceilings, not targets: only compact conversation summaries and relevant catalog evidence are sent. Every new question revalidates product facts against the catalog. The OpenAI response is not stored by the app, and the API key and catalog remain server-side.
+
+To reduce avoidable API throttling, generated answers are capped to the size expected by this interface, Sol enters a short circuit-breaker period after a rate limit, and the browser honors the API retry interval with a visible countdown. Repeatedly submitting during a limit window should be avoided because rejected requests also count toward OpenAI rate limits.
 
 ## Compatibility Web rule
 
@@ -19,10 +45,11 @@ Requirements: Node.js 22 or newer.
 ```bash
 npm install
 npm run prepare:data
+npm run prepare:sales-data
 npm run dev
 ```
 
-Open `http://localhost:3000` in a browser. The questions and reference data stay inside the browser; the test version does not call an external AI service.
+Open `http://localhost:3000` in a browser. The Tolerance Assistant remains local-only. Sales questions are processed through the server-side OpenAI connection and are grounded in the server-side catalog.
 
 ## Electron test on this laptop
 
@@ -52,4 +79,4 @@ The static output is written to `pages-dist/` for publication from a GitHub Page
 npm test
 ```
 
-The test suite builds the deployable site, checks the packaged record count, exercises representative service questions, verifies exact model matching, and tests current-versus-legacy disambiguation.
+The test suite builds the deployable site, checks the workbook hash and generated retrieval layer, verifies catalog quality totals, exercises representative service questions, verifies exact model matching, and tests current-versus-legacy disambiguation.

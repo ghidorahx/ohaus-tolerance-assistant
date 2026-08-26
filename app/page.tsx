@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import { answerFormatting, answerQuestion } from "@/lib/answer-engine.mjs";
+import SalesAssistant from "./SalesAssistant";
 
 type Measure = {
   value: number | null;
@@ -118,24 +119,11 @@ const starterMessage: Message = {
   text: "Ask me about a model's tolerance, readability, repeatability, linearity, off-center load, capacity, calibration-weight class, or moisture-analyzer temperature specification.",
 };
 
-const salesStarterMessage: Message = {
-  id: "sales-welcome",
-  role: "assistant",
-  text: "Ask me about product compatibility, replacements, accessories, or lifecycle status across the OHAUS portfolio. The assistant is designed for every product series; Scout is simply the first verified dataset being loaded.",
-};
-
 const suggestedQuestions = [
   "What is the tolerance for STX622?",
   "What is the OCL for RC31P3?",
   "Which weight class does R71MHD3 use?",
   "What is tolerance vs. uncertainty?",
-];
-
-const salesSuggestedQuestions = [
-  "Which replacement power adapter works with Scout?",
-  "Is the Bluetooth accessory still available?",
-  "Will the stacking cover fit SPX123?",
-  "Will the stacking cover fit SPX223?",
 ];
 
 const networkNodes: NetworkNode[] = [
@@ -518,53 +506,6 @@ function CompatibilityWeb() {
   );
 }
 
-function answerSalesQuestion(question: string): AnswerResult {
-  const normalized = question.toLowerCase();
-
-  if (normalized.includes("bluetooth")) {
-    return {
-      kind: "sales-guidance",
-      text: "No. The Scout Bluetooth accessory is no longer available and is no longer supported.",
-    };
-  }
-
-  if (normalized.includes("adapter") || normalized.includes("power supply") || normalized.includes("power cord")) {
-    return {
-      kind: "sales-guidance",
-      text: "Use item 30330714. It is the only replacement power adapter currently offered for the Scout series.",
-    };
-  }
-
-  if (
-    (normalized.includes("cover") || normalized.includes("stacking")) &&
-    (normalized.includes("spx123") || normalized.includes("spx223"))
-  ) {
-    return {
-      kind: "sales-guidance",
-      text: "No. SPX123 and SPX223 have draft shields, so the Scout stacking covers do not fit those models.",
-    };
-  }
-
-  if (normalized.includes("tolerance") || normalized.includes("accuracy")) {
-    return {
-      kind: "sales-guidance",
-      text: "Tolerance and accuracy guidance is handled through OHAUS's internal tolerance method; it is not listed in the Scout data sheet. Use the Tolerance Assistant tab for that calculation workflow.",
-    };
-  }
-
-  if (normalized.includes("30253017")) {
-    return {
-      kind: "sales-guidance",
-      text: "30253017 is the active item number in the current Scout sales reference.",
-    };
-  }
-
-  return {
-    kind: "sales-guidance",
-    text: "The Sales Assistant is designed to support every OHAUS product series. Its current verified dataset begins with Scout, so today you can try asking about the replacement power adapter, Bluetooth availability, or stacking-cover compatibility for SPX123 and SPX223. Additional series will be added without changing this workflow.",
-  };
-}
-
 function measureText(measure: Measure | undefined, signed = false) {
   return answerFormatting.measureText(measure, signed);
 }
@@ -659,7 +600,6 @@ export default function Home() {
   const [data, setData] = useState<KnowledgeBase | null>(null);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([starterMessage]);
-  const [salesMessages, setSalesMessages] = useState<Message[]>([salesStarterMessage]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -683,15 +623,9 @@ export default function Home() {
 
   const isSalesMode = mode === "sales";
   const isCompatibilityMode = mode === "compatibility";
-  const activeMessages = isSalesMode ? salesMessages : messages;
-  const activeStarterMessage = isSalesMode ? salesStarterMessage : starterMessage;
-  const activeSuggestions = isSalesMode ? salesSuggestedQuestions : suggestedQuestions;
-  const isReady = isSalesMode || Boolean(data);
 
   const exchanges = useMemo(() => {
-    const conversation = activeMessages.filter(
-      (message) => message.id !== "welcome" && message.id !== "sales-welcome",
-    );
+    const conversation = messages.filter((message) => message.id !== "welcome");
     const grouped: Exchange[] = [];
     for (let index = 0; index < conversation.length; index += 2) {
       const user = conversation[index];
@@ -701,20 +635,18 @@ export default function Home() {
       }
     }
     return grouped.reverse();
-  }, [activeMessages]);
+  }, [messages]);
 
   function submitQuestion(question: string) {
     const trimmed = question.trim();
-    if (!trimmed || (!isSalesMode && !data)) return;
-    const timestamp = Date.now();
-    const result = isSalesMode
-      ? answerSalesQuestion(trimmed)
-      : answerQuestion(trimmed, data as KnowledgeBase) as AnswerResult;
-    const updateMessages = isSalesMode ? setSalesMessages : setMessages;
-    updateMessages((current) => [
+    if (!trimmed || !data) return;
+    const exchangeId = crypto.randomUUID();
+    const result = answerQuestion(trimmed, data) as AnswerResult;
+
+    setMessages((current) => [
       ...current,
-      { id: `user-${timestamp}`, role: "user", text: trimmed },
-      { id: `assistant-${timestamp}`, role: "assistant", text: result.text, result },
+      { id: `user-${exchangeId}`, role: "user", text: trimmed },
+      { id: `assistant-${exchangeId}`, role: "assistant", text: result.text, result },
     ]);
     setInput("");
     requestAnimationFrame(() => inputRef.current?.focus());
@@ -726,19 +658,13 @@ export default function Home() {
   }
 
   function clearConversation() {
-    if (isSalesMode) {
-      setSalesMessages([salesStarterMessage]);
-    } else {
-      setMessages([starterMessage]);
-    }
+    setMessages([starterMessage]);
     setInput("");
     inputRef.current?.focus();
   }
 
   function switchMode(nextMode: AssistantMode) {
     setMode(nextMode);
-    setInput("");
-    requestAnimationFrame(() => inputRef.current?.focus());
   }
 
   return (
@@ -747,16 +673,16 @@ export default function Home() {
         <div className="brand">
           <div className="brand-mark" aria-hidden="true">O</div>
           <div>
-            <p className="eyebrow">{isCompatibilityMode ? "Product relationships" : isSalesMode ? "Internal sales support" : "Service reference"}</p>
+            <p className="eyebrow">{isCompatibilityMode ? "Product relationships" : isSalesMode ? "Product intelligence" : "Service reference"}</p>
             <h1>{isCompatibilityMode ? "Compatibility Web" : isSalesMode ? "Sales Assistant" : "Tolerance Assistant"}</h1>
           </div>
         </div>
 
         <nav className="mode-switcher" aria-label="Assistant mode">
           <button
-            className={!isSalesMode ? "active" : ""}
+            className={mode === "tolerance" ? "active" : ""}
             onClick={() => switchMode("tolerance")}
-            aria-pressed={!isSalesMode}
+            aria-pressed={mode === "tolerance"}
           >
             <span className="mode-icon" aria-hidden="true">±</span>
             Tolerance
@@ -780,57 +706,52 @@ export default function Home() {
         </nav>
 
         <div className="header-actions">
-          {!isCompatibilityMode && <button className="clear-button" onClick={clearConversation}>Clear chat</button>}
+          {mode === "tolerance" && <button className="clear-button" onClick={clearConversation}>Clear chat</button>}
           <div className="header-status">
             <span className="status-dot" aria-hidden="true" />
-            {isCompatibilityMode ? "Verified links only" : isSalesMode ? "Sales pilot" : "Verified local data"}
+            {isCompatibilityMode
+              ? "Verified links only"
+              : isSalesMode
+                ? "Workbook grounded"
+                : "Verified local data"}
           </div>
         </div>
       </header>
 
-      <div className="compatibility-mode-surface" hidden={!isCompatibilityMode}>
+      <div className="mode-surface compatibility-mode-surface" hidden={!isCompatibilityMode}>
         <CompatibilityWeb />
       </div>
-      {!isCompatibilityMode && (
-      <section className="workspace">
+      <div className="mode-surface sales-mode-surface" hidden={!isSalesMode}>
+        <SalesAssistant />
+      </div>
+      <div className="mode-surface tolerance-mode-surface" hidden={mode !== "tolerance"}>
+        <section className="workspace">
         <aside className="side-panel">
           <div className="side-visual">
-            {isSalesMode ? (
-              <div className="sales-visual" aria-label="OHAUS portfolio sales assistant">
-                <span>OHAUS</span>
-                <strong>SALES</strong>
-                <small>PRODUCT PORTFOLIO SUPPORT</small>
-                <div className="scale-silhouette" aria-hidden="true">
-                  <i />
-                  <b>0.00</b>
-                </div>
-              </div>
-            ) : (
-              <img
-                src="./og.png"
-                width={1730}
-                height={909}
-                alt="Precision scale and tolerance reference illustration"
-              />
-            )}
+            <img
+              src="./og.png"
+              width={1730}
+              height={909}
+              alt="Precision scale and tolerance reference illustration"
+            />
           </div>
 
           <div className="data-card">
-            <p className="panel-label">{isSalesMode ? "Current verified dataset" : "Knowledge base"}</p>
-            <strong>{isSalesMode ? "Scout" : totalRecords.toLocaleString()}</strong>
-            <span>{isSalesMode ? "First product line" : "model records"}</span>
+            <p className="panel-label">Knowledge base</p>
+            <strong>{totalRecords.toLocaleString()}</strong>
+            <span>model records</span>
             <div className="data-meter"><span /></div>
-            <p className="data-note">{isSalesMode ? "Portfolio-wide assistant · More series to follow" : "August 2026 master reference"}</p>
+            <p className="data-note">August 2026 master reference</p>
           </div>
 
           <div className="side-section">
-            <p className="panel-label">{isSalesMode ? "Try a current question" : "Try a question"}</p>
-            {activeSuggestions.map((question) => (
+            <p className="panel-label">Try a question</p>
+            {suggestedQuestions.map((question) => (
               <button
                 key={question}
                 className="prompt-link"
                 onClick={() => submitQuestion(question)}
-                disabled={!isReady}
+                disabled={!data}
               >
                 <span>↗</span>{question}
               </button>
@@ -840,13 +761,10 @@ export default function Home() {
           <div className="coverage-card">
             <p className="panel-label">Answer coverage</p>
             <div className="coverage-tags">
-              {(isSalesMode
-                ? ["All product series", "Compatibility", "Accessories", "Replacements", "Lifecycle"]
-                : [
-                    "Tolerance", "OCL", "Repeatability", "Linearity", "Readability",
-                    "Capacity", "Weight class", "Temperature",
-                  ]
-              ).map((item) => <span key={item}>{item}</span>)}
+              {[
+                "Tolerance", "OCL", "Repeatability", "Linearity", "Readability",
+                "Capacity", "Weight class", "Temperature",
+              ].map((item) => <span key={item}>{item}</span>)}
             </div>
           </div>
 
@@ -854,7 +772,7 @@ export default function Home() {
             <span aria-hidden="true">●</span>
             <div>
               <strong>Runs in your browser</strong>
-              <p>{isSalesMode ? "This pilot uses confirmed local product rules." : "No question or model data leaves this app."}</p>
+              <p>No question or model data leaves this app.</p>
             </div>
           </div>
         </aside>
@@ -862,48 +780,53 @@ export default function Home() {
         <section className="chat-panel">
           <div className="chat-heading">
             <div>
-              <p className="eyebrow">{isSalesMode ? "Product sales lookup" : "Service lookup"}</p>
-              <h2>{isSalesMode ? "Ask an OHAUS sales question" : "Ask a tolerance question"}</h2>
-              <p>{isSalesMode ? "Compatibility and replacement guidance designed for every OHAUS product family." : "Deterministic answers from structured, source-linked records."}</p>
+              <p className="eyebrow">Service lookup</p>
+              <h2>Ask a tolerance question</h2>
+              <p>Deterministic answers from structured, source-linked records.</p>
             </div>
             <div className="heading-side">
               <span className={`data-ready ${loadError ? "error" : ""}`}>
-                {isSalesMode ? "Scout data loaded" : loading ? "Loading data…" : loadError ? "Data unavailable" : "Data ready"}
+                {loading ? "Loading data…" : loadError ? "Data unavailable" : "Data ready"}
               </span>
             </div>
           </div>
 
           <form className="ask-form" onSubmit={onSubmit}>
-            <label htmlFor="question">{isSalesMode ? "Sales question" : "Service question"}</label>
+            <label htmlFor="question">Service question</label>
             <div className="input-row">
               <input
                 ref={inputRef}
                 id="question"
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
-                placeholder={isSalesMode ? "Example: Which power adapter works with Scout?" : "Example: What is the tolerance for STX622?"}
+                placeholder="Example: What is the tolerance for STX622?"
                 autoComplete="off"
-                disabled={!isReady}
+                disabled={!data}
               />
-              <button type="submit" disabled={!isReady || !input.trim()} aria-label="Ask question">Ask <span>→</span></button>
+              <button type="submit" disabled={!data || !input.trim()} aria-label="Ask question">
+                Ask <span>→</span>
+              </button>
             </div>
             <div className="form-footnote">
-              <p>{isSalesMode ? "Portfolio-wide assistant · Scout data loaded first · broader AI coverage next." : "Use an exact model number for specifications. Every answer stays tied to its source record."}</p>
-              <span>{isSalesMode ? "Internal sales pilot" : "Pilot owner · T. Delacruz"}</span>
+              <p>Use an exact model number for specifications. Every answer stays tied to its source record.</p>
+              <span>Pilot owner · T. Delacruz</span>
             </div>
           </form>
 
           <div className="message-list" aria-live="polite">
             {exchanges.length === 0 ? (
               <div className="welcome-state">
-                <MessageBubble message={activeStarterMessage} onFollowUp={submitQuestion} />
+                <MessageBubble message={starterMessage} onFollowUp={submitQuestion} />
               </div>
             ) : (
               <>
                 <section className="latest-exchange" aria-label="Latest answer">
                   <div className="exchange-label"><span>Latest response</span></div>
                   <MessageBubble message={exchanges[0].user} onFollowUp={submitQuestion} />
-                  <MessageBubble message={exchanges[0].assistant} onFollowUp={submitQuestion} />
+                  <MessageBubble
+                    message={exchanges[0].assistant}
+                    onFollowUp={submitQuestion}
+                  />
                 </section>
 
                 {exchanges.length > 1 && (
@@ -923,7 +846,10 @@ export default function Home() {
                         </summary>
                         <div className="history-content">
                           <MessageBubble message={exchange.user} onFollowUp={submitQuestion} />
-                          <MessageBubble message={exchange.assistant} onFollowUp={submitQuestion} />
+                          <MessageBubble
+                            message={exchange.assistant}
+                            onFollowUp={submitQuestion}
+                          />
                         </div>
                       </details>
                     ))}
@@ -934,8 +860,8 @@ export default function Home() {
           </div>
 
         </section>
-      </section>
-      )}
+        </section>
+      </div>
     </main>
   );
 }
