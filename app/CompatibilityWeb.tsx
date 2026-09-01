@@ -66,13 +66,57 @@ type WebData = {
   links: WebLink[];
 };
 
-type PositionedNode = WebNode & { x: number; y: number; relationType?: RelationType };
+type Point = { x: number; y: number };
+type SceneEdge = {
+  key: string;
+  source: string;
+  target: string;
+  relationType?: RelationType;
+};
+type ConnectionItem = {
+  node: WebNode;
+  relationType?: RelationType;
+};
 
 const initialPath = ["ohaus"];
 const pageSize = 12;
+const worldCenter = { x: 2100, y: 1600 };
+const worldSize = { width: 4200, height: 3200 };
 
 function relationLabel(type: RelationType) {
   return type === "accessory" ? "Accessory" : "Spare part";
+}
+
+function edgeKey(source: string, target: string, relationType?: RelationType) {
+  return `${source}|${target}|${relationType ?? "hierarchy"}`;
+}
+
+function distanceBetween(first: Point, second: Point) {
+  return Math.hypot(first.x - second.x, first.y - second.y);
+}
+
+function findOpenPosition(
+  anchor: Point,
+  baseAngle: number,
+  index: number,
+  total: number,
+  occupied: Map<string, Point>,
+) {
+  const spread = total <= 1 ? 0 : Math.min(250, Math.max(70, (total - 1) * 18));
+  const offset = total <= 1 ? 0 : -spread / 2 + spread * (index / (total - 1));
+  for (let attempt = 0; attempt < 30; attempt += 1) {
+    const angle = (baseAngle + offset + attempt * 19) * Math.PI / 180;
+    const radius = 285 + Math.floor(attempt / 6) * 95 + Math.floor(index / pageSize) * 90;
+    const point = {
+      x: Math.max(120, Math.min(worldSize.width - 120, anchor.x + Math.cos(angle) * radius)),
+      y: Math.max(120, Math.min(worldSize.height - 120, anchor.y + Math.sin(angle) * radius)),
+    };
+    if ([...occupied.values()].every((existing) => distanceBetween(existing, point) >= 128)) return point;
+  }
+  return {
+    x: Math.max(120, Math.min(worldSize.width - 120, anchor.x + (index + 1) * 145)),
+    y: Math.max(120, Math.min(worldSize.height - 120, anchor.y + 300)),
+  };
 }
 
 function CompatibilityWebLoading({ error }: { error?: string }) {
@@ -93,8 +137,16 @@ export default function CompatibilityWeb() {
   const [relationFilter, setRelationFilter] = useState<RelationFilter>("accessory");
   const [page, setPage] = useState(0);
   const [query, setQuery] = useState("");
+  const [sceneNodeIds, setSceneNodeIds] = useState<Set<string>>(() => new Set());
+  const [sceneEdges, setSceneEdges] = useState<SceneEdge[]>([]);
+  const [positions, setPositions] = useState<Map<string, Point>>(() => new Map());
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const positionsRef = useRef<Map<string, Point>>(new Map());
+  const pointerRef = useRef({ pointerId: -1, x: 0, y: 0 });
+  const initializedRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -136,33 +188,6 @@ export default function CompatibilityWeb() {
   const graphItems = allRelationships.length > 0 ? filteredRelationships : children;
   const pageCount = Math.max(1, Math.ceil(graphItems.length / pageSize));
   const safePage = Math.min(page, pageCount - 1);
-  const visibleItems = graphItems.slice(safePage * pageSize, (safePage + 1) * pageSize);
-
-  const positionedNodes = useMemo(() => {
-    if (!selectedNode) return [];
-    const result: PositionedNode[] = [{ ...selectedNode, x: 50, y: 49 }];
-    visibleItems.forEach((item, index) => {
-      const node = "source" in item
-        ? nodeMap.get(item.source === selectedId ? item.target : item.source)
-        : item;
-      if (!node) return;
-      const angle = -90 + index * (360 / Math.max(visibleItems.length, 1));
-      const radians = angle * Math.PI / 180;
-      result.push({
-        ...node,
-        x: 50 + Math.cos(radians) * 38,
-        y: 49 + Math.sin(radians) * 39,
-        relationType: "source" in item ? item.relationType : undefined,
-      });
-    });
-    return result;
-  }, [nodeMap, selectedId, selectedNode, visibleItems]);
-
-  const visibleEdges = useMemo(() => positionedNodes.slice(1).map((node) => ({
-    source: selectedId,
-    target: node.id,
-    relationType: node.relationType,
-  })), [positionedNodes, selectedId]);
 
   const searchResults = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -173,6 +198,34 @@ export default function CompatibilityWeb() {
         .some((value) => value?.toLowerCase().includes(normalized)))
       .slice(0, 8);
   }, [data, query]);
+
+  const sceneNodes = useMemo(
+    () => (data?.nodes ?? []).filter((node) => sceneNodeIds.has(node.id) && positions.has(node.id)),
+    [data, positions, sceneNodeIds],
+  );
+
+  useEffect(() => {
+    if (!data || initializedRef.current) return;
+    initializedRef.current = true;
+    const nextPositions = new Map<string, Point>([["ohaus", worldCenter]]);
+    const familyNodes = data.nodes.filter((node) => node.parentId === "ohaus");
+    familyNodes.forEach((node, index) => {
+      const angle = (-90 + index * (360 / Math.max(familyNodes.length, 1))) * Math.PI / 180;
+      nextPositions.set(node.id, {
+        x: worldCenter.x + Math.cos(angle) * 330,
+        y: worldCenter.y + Math.sin(angle) * 330,
+      });
+    });
+    positionsRef.current = nextPositions;
+    setPositions(nextPositions);
+    setSceneNodeIds(new Set(["ohaus", ...familyNodes.map((node) => node.id)]));
+    setSceneEdges(familyNodes.map((node) => ({
+      key: edgeKey("ohaus", node.id),
+      source: "ohaus",
+      target: node.id,
+    })));
+    window.requestAnimationFrame(() => centerOnNode("ohaus"));
+  }, [data]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -190,15 +243,14 @@ export default function CompatibilityWeb() {
       if (!context) return;
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
       context.clearRect(0, 0, rect.width, rect.height);
-      const positions = new Map(positionedNodes.map((node) => [node.id, node]));
-      visibleEdges.forEach((edge) => {
+      sceneEdges.forEach((edge) => {
         const source = positions.get(edge.source);
         const target = positions.get(edge.target);
         if (!source || !target) return;
-        const startX = source.x / 100 * rect.width;
-        const startY = source.y / 100 * rect.height;
-        const endX = target.x / 100 * rect.width;
-        const endY = target.y / 100 * rect.height;
+        const startX = source.x + pan.x;
+        const startY = source.y + pan.y;
+        const endX = target.x + pan.x;
+        const endY = target.y + pan.y;
         const color = edge.relationType === "accessory"
           ? "rgba(53, 217, 145, .88)"
           : edge.relationType === "spare_part"
@@ -219,7 +271,7 @@ export default function CompatibilityWeb() {
     observer.observe(stage);
     drawNetwork();
     return () => observer.disconnect();
-  }, [positionedNodes, visibleEdges]);
+  }, [pan, positions, sceneEdges]);
 
   if (!data || !selectedNode) return <CompatibilityWebLoading error={loadError || undefined} />;
 
@@ -233,44 +285,195 @@ export default function CompatibilityWeb() {
     return nextPath;
   }
 
-  function focusNode(node: WebNode) {
+  function getConnections(nodeId: string, filter: RelationFilter): ConnectionItem[] {
+    const relationships = data.links.filter((link) => link.source === nodeId || link.target === nodeId);
+    if (relationships.length > 0) {
+      return relationships
+        .filter((link) => filter === "all" || link.relationType === filter)
+        .map((link) => ({
+          node: nodeMap.get(link.source === nodeId ? link.target : link.source),
+          relationType: link.relationType,
+        }))
+        .filter((item): item is ConnectionItem => Boolean(item.node));
+    }
+    return data.nodes
+      .filter((node) => node.parentId === nodeId)
+      .map((node) => ({ node }));
+  }
+
+  function addPathToScene(node: WebNode, nextPositions: Map<string, Point>, nextIds: Set<string>, nextEdges: Map<string, SceneEdge>) {
+    if (node.kind === "part" && !nextPositions.has(node.id)) {
+      const relation = data.links.find((link) => link.target === node.id);
+      const sourceNode = relation ? nodeMap.get(relation.source) : undefined;
+      if (relation && sourceNode) {
+        addPathToScene(sourceNode, nextPositions, nextIds, nextEdges);
+        const sourcePoint = nextPositions.get(sourceNode.id) ?? worldCenter;
+        const baseAngle = Math.atan2(sourcePoint.y - worldCenter.y, sourcePoint.x - worldCenter.x) * 180 / Math.PI;
+        nextPositions.set(node.id, findOpenPosition(sourcePoint, baseAngle, 0, 1, nextPositions));
+        nextIds.add(node.id);
+        const key = edgeKey(sourceNode.id, node.id, relation.relationType);
+        nextEdges.set(key, { key, source: sourceNode.id, target: node.id, relationType: relation.relationType });
+        return;
+      }
+    }
+    const ancestry = pathToNode(node.id);
+    ancestry.forEach((nodeId, index) => {
+      const pathNode = nodeMap.get(nodeId);
+      if (!pathNode) return;
+      nextIds.add(nodeId);
+      if (index === 0) {
+        if (!nextPositions.has(nodeId)) nextPositions.set(nodeId, worldCenter);
+        return;
+      }
+      const parentId = ancestry[index - 1];
+      const parentPoint = nextPositions.get(parentId) ?? worldCenter;
+      if (!nextPositions.has(nodeId)) {
+        const parentDirection = Math.atan2(parentPoint.y - worldCenter.y, parentPoint.x - worldCenter.x) * 180 / Math.PI;
+        nextPositions.set(nodeId, findOpenPosition(parentPoint, parentDirection || -90, index, ancestry.length, nextPositions));
+      }
+      nextEdges.set(edgeKey(parentId, nodeId), {
+        key: edgeKey(parentId, nodeId),
+        source: parentId,
+        target: nodeId,
+      });
+    });
+  }
+
+  function revealConnections(node: WebNode, filter: RelationFilter, pageIndex: number) {
+    const connections = getConnections(node.id, filter);
+    const pageItems = connections.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
+    const nextPositions = new Map(positionsRef.current);
+    const nextIds = new Set(sceneNodeIds);
+    const nextEdges = new Map(sceneEdges.map((edge) => [edge.key, edge]));
+    addPathToScene(node, nextPositions, nextIds, nextEdges);
+    const parentPoint = nextPositions.get(node.id) ?? worldCenter;
+    const baseAngle = node.id === "ohaus"
+      ? -90
+      : Math.atan2(parentPoint.y - worldCenter.y, parentPoint.x - worldCenter.x) * 180 / Math.PI;
+    pageItems.forEach((item, pageItemIndex) => {
+      const globalIndex = pageIndex * pageSize + pageItemIndex;
+      nextIds.add(item.node.id);
+      if (!nextPositions.has(item.node.id)) {
+        nextPositions.set(
+          item.node.id,
+          findOpenPosition(parentPoint, baseAngle, globalIndex, connections.length, nextPositions),
+        );
+      }
+      const source = node.id;
+      const target = item.node.id;
+      const key = edgeKey(source, target, item.relationType);
+      nextEdges.set(key, { key, source, target, relationType: item.relationType });
+    });
+    positionsRef.current = nextPositions;
+    setPositions(nextPositions);
+    setSceneNodeIds(nextIds);
+    setSceneEdges([...nextEdges.values()]);
+  }
+
+  function focusNode(node: WebNode, center = false) {
     const nodeRelationships = data.links.filter((link) => link.source === node.id || link.target === node.id);
+    let nextFilter = relationFilter;
     if (nodeRelationships.length > 0 && !nodeRelationships.some((link) => relationFilter === "all" || link.relationType === relationFilter)) {
-      setRelationFilter(nodeRelationships[0].relationType);
+      nextFilter = nodeRelationships[0].relationType;
+      setRelationFilter(nextFilter);
     }
     setSelectedId(node.id);
     setPage(0);
     setQuery("");
     if (node.kind !== "part") setPath(pathToNode(node.id));
+    revealConnections(node, nextFilter, 0);
+    if (center) window.requestAnimationFrame(() => centerOnNode(node.id));
+  }
+
+  function centerOnNode(nodeId: string) {
+    const stage = stageRef.current;
+    const point = positionsRef.current.get(nodeId);
+    if (!stage || !point) return;
+    const rect = stage.getBoundingClientRect();
+    setPan({ x: rect.width / 2 - point.x, y: rect.height / 2 - point.y });
   }
 
   function goBack() {
     if (selectedNode.kind === "part") {
       const category = nodeMap.get("portable-balances");
-      if (category) focusNode(category);
+      if (category) focusNode(category, true);
       return;
     }
     if (path.length <= 1) return;
     const nextPath = path.slice(0, -1);
+    const parent = nodeMap.get(nextPath[nextPath.length - 1]);
     setPath(nextPath);
     setSelectedId(nextPath[nextPath.length - 1]);
     setPage(0);
+    if (parent) window.requestAnimationFrame(() => centerOnNode(parent.id));
   }
 
   function resetWeb() {
+    initializedRef.current = true;
+    const familyNodes = data.nodes.filter((node) => node.parentId === "ohaus");
+    const nextPositions = new Map<string, Point>([["ohaus", worldCenter]]);
+    familyNodes.forEach((node, index) => {
+      const angle = (-90 + index * (360 / Math.max(familyNodes.length, 1))) * Math.PI / 180;
+      nextPositions.set(node.id, {
+        x: worldCenter.x + Math.cos(angle) * 330,
+        y: worldCenter.y + Math.sin(angle) * 330,
+      });
+    });
+    positionsRef.current = nextPositions;
+    setPositions(nextPositions);
+    setSceneNodeIds(new Set(["ohaus", ...familyNodes.map((node) => node.id)]));
+    setSceneEdges(familyNodes.map((node) => ({
+      key: edgeKey("ohaus", node.id),
+      source: "ohaus",
+      target: node.id,
+    })));
     setPath(initialPath);
     setSelectedId("ohaus");
     setRelationFilter("accessory");
     setPage(0);
     setQuery("");
+    window.requestAnimationFrame(() => centerOnNode("ohaus"));
+  }
+
+  function changePage(nextPage: number) {
+    setPage(nextPage);
+    revealConnections(selectedNode, relationFilter, nextPage);
+  }
+
+  function changeRelationFilter(nextFilter: RelationFilter) {
+    setRelationFilter(nextFilter);
+    setPage(0);
+    revealConnections(selectedNode, nextFilter, 0);
+  }
+
+  function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    if (event.button !== 0) return;
+    pointerRef.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setIsDragging(true);
   }
 
   function handlePointerMove(event: ReactPointerEvent<HTMLDivElement>) {
     const stage = stageRef.current;
     if (!stage) return;
+    if (pointerRef.current.pointerId === event.pointerId) {
+      const dx = event.clientX - pointerRef.current.x;
+      const dy = event.clientY - pointerRef.current.y;
+      pointerRef.current.x = event.clientX;
+      pointerRef.current.y = event.clientY;
+      setPan((current) => ({ x: current.x + dx, y: current.y + dy }));
+      return;
+    }
     const rect = stage.getBoundingClientRect();
     stage.style.setProperty("--tilt-y", `${((event.clientX - rect.left) / rect.width - .5) * 5}deg`);
     stage.style.setProperty("--tilt-x", `${((event.clientY - rect.top) / rect.height - .5) * -4}deg`);
+  }
+
+  function stopDragging(event: ReactPointerEvent<HTMLDivElement>) {
+    if (pointerRef.current.pointerId !== event.pointerId) return;
+    pointerRef.current.pointerId = -1;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    setIsDragging(false);
   }
 
   const relationshipCounts = {
@@ -314,7 +517,7 @@ export default function CompatibilityWeb() {
           {query && (
             <div className="web-search-results">
               {searchResults.length > 0 ? searchResults.map((node) => (
-                <button key={node.id} onClick={() => focusNode(node)}>
+                <button key={node.id} onClick={() => focusNode(node, true)}>
                   <span><strong>{node.label}</strong><small>{node.kind} · {node.family}</small></span>
                   {node.materialNumber && <b>{node.materialNumber}</b>}
                 </button>
@@ -335,7 +538,7 @@ export default function CompatibilityWeb() {
           return (
             <span key={nodeId}>
               {index > 0 && <i aria-hidden="true">›</i>}
-              <button onClick={() => focusNode(node)}>{node.label}</button>
+              <button onClick={() => focusNode(node, true)}>{node.label}</button>
             </span>
           );
         })}
@@ -343,42 +546,66 @@ export default function CompatibilityWeb() {
       </nav>
 
       <div className="compatibility-layout">
-        <div className="network-viewport" onPointerMove={handlePointerMove} onPointerLeave={() => {
-          stageRef.current?.style.setProperty("--tilt-y", "0deg");
-          stageRef.current?.style.setProperty("--tilt-x", "0deg");
-        }}>
-          <div ref={stageRef} className="network-stage" role="group" aria-label="Portable balance compatibility network">
+        <div className="network-viewport">
+          <div
+            ref={stageRef}
+            className={`network-stage branching-stage ${isDragging ? "dragging" : ""}`}
+            role="group"
+            aria-label="Portable balance compatibility network"
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={stopDragging}
+            onPointerCancel={stopDragging}
+            onPointerLeave={(event) => {
+              if (pointerRef.current.pointerId === event.pointerId) stopDragging(event);
+              stageRef.current?.style.setProperty("--tilt-y", "0deg");
+              stageRef.current?.style.setProperty("--tilt-x", "0deg");
+            }}
+          >
             <canvas ref={canvasRef} aria-hidden="true" />
-            {positionedNodes.map((node, index) => {
-              const nodeStyle = {
-                left: `${node.x}%`,
-                top: `${node.y}%`,
-                "--node-z": index === 0 ? "82px" : node.kind === "part" ? "68px" : "54px",
-              } as CSSProperties;
-              return (
-                <button
-                  key={node.id}
-                  className={`web-node ${node.kind} ${node.relationType ?? ""} ${index === 0 ? "selected on-path" : ""}`}
-                  style={nodeStyle}
-                  onClick={() => focusNode(node)}
-                  aria-pressed={index === 0}
-                >
-                  <small>{index === 0 ? `selected ${node.kind}` : node.relationType ? relationLabel(node.relationType) : node.kind}</small>
-                  <strong>{node.label}</strong>
-                  {node.materialNumber && <em>{node.materialNumber}</em>}
-                </button>
-              );
-            })}
+            <div
+              className="network-scene"
+              style={{
+                width: worldSize.width,
+                height: worldSize.height,
+                transform: `translate3d(${pan.x}px, ${pan.y}px, 0)`,
+              }}
+            >
+              {sceneNodes.map((node) => {
+                const point = positions.get(node.id) as Point;
+                const relationship = sceneEdges.find((edge) => edge.target === node.id && edge.relationType);
+                const isSelected = selectedId === node.id;
+                const nodeStyle = {
+                  left: point.x,
+                  top: point.y,
+                  "--node-z": isSelected ? "82px" : node.kind === "part" ? "68px" : "54px",
+                } as CSSProperties;
+                return (
+                  <button
+                    key={node.id}
+                    className={`web-node ${node.kind} ${relationship?.relationType ?? ""} ${isSelected ? "selected" : ""} ${path.includes(node.id) ? "on-path" : ""}`}
+                    style={nodeStyle}
+                    onPointerDown={(event) => event.stopPropagation()}
+                    onClick={() => focusNode(node)}
+                    aria-pressed={isSelected}
+                  >
+                    <small>{isSelected ? `selected ${node.kind}` : relationship?.relationType ? relationLabel(relationship.relationType) : node.kind}</small>
+                    <strong>{node.label}</strong>
+                    {node.materialNumber && <em>{node.materialNumber}</em>}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {graphItems.length > pageSize && (
             <div className="web-pagination">
-              <button disabled={safePage === 0} onClick={() => setPage((value) => Math.max(0, value - 1))}>←</button>
+              <button disabled={safePage === 0} onClick={() => changePage(Math.max(0, safePage - 1))}>←</button>
               <span>{safePage + 1} / {pageCount}</span>
-              <button disabled={safePage + 1 >= pageCount} onClick={() => setPage((value) => Math.min(pageCount - 1, value + 1))}>→</button>
+              <button disabled={safePage + 1 >= pageCount} onClick={() => changePage(Math.min(pageCount - 1, safePage + 1))}>→</button>
             </div>
           )}
-          <p className="network-hint">Move to tilt · Select any node to recenter · {graphItems.length} connected item{graphItems.length === 1 ? "" : "s"}</p>
+          <p className="network-hint">Move to tilt · Drag empty space to move · Select any node to branch · {graphItems.length} connected item{graphItems.length === 1 ? "" : "s"}</p>
         </div>
 
         <aside className="web-detail" aria-live="polite">
@@ -410,7 +637,7 @@ export default function CompatibilityWeb() {
                   ["spare_part", `Spare parts ${relationshipCounts.spare_part}`],
                   ["all", `All ${allRelationships.length}`],
                 ] as Array<[RelationFilter, string]>).map(([value, label]) => (
-                  <button key={value} className={relationFilter === value ? "active" : ""} onClick={() => { setRelationFilter(value); setPage(0); }}>{label}</button>
+                  <button key={value} className={relationFilter === value ? "active" : ""} onClick={() => changeRelationFilter(value)}>{label}</button>
                 ))}
               </div>
 
@@ -422,7 +649,7 @@ export default function CompatibilityWeb() {
                     const otherNode = nodeMap.get(otherId);
                     if (!otherNode) return null;
                     return (
-                      <button key={`${link.source}-${link.target}-${link.relationType}`} onClick={() => focusNode(otherNode)}>
+                      <button key={`${link.source}-${link.target}-${link.relationType}`} onClick={() => focusNode(otherNode, true)}>
                         <span className={`relation-dot ${link.relationType}`} aria-hidden="true" />
                         <span><strong>{otherNode.label}</strong><small>{relationLabel(link.relationType)}</small></span>
                         {otherNode.materialNumber && <b>{otherNode.materialNumber}</b>}

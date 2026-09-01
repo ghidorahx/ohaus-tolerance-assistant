@@ -370,6 +370,10 @@ button { cursor: pointer; }
 .network-viewport { position: relative; min-width: 0; min-height: 650px; overflow: hidden; perspective: 1050px; background: radial-gradient(circle at 50% 48%, rgba(196,18,48,.1), transparent 18%), radial-gradient(circle at 50% 50%, transparent 0 29%, rgba(153,48,66,.08) 29.2%, transparent 29.6%), radial-gradient(circle at 50% 50%, transparent 0 46%, rgba(153,48,66,.06) 46.2%, transparent 46.6%), linear-gradient(rgba(255,255,255,.4), rgba(250,245,247,.68)); }
 .network-stage { --tilt-x: 0deg; --tilt-y: 0deg; position: absolute; inset: 18px; transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y)); transform-style: preserve-3d; transition: transform .16s ease-out; }
 .network-stage canvas { position: absolute; inset: 0; pointer-events: none; transform: translateZ(8px); }
+.branching-stage { cursor: grab; touch-action: none; user-select: none; }
+.branching-stage.dragging { cursor: grabbing; }
+.branching-stage canvas { z-index: 1; }
+.network-scene { position: absolute; left: 0; top: 0; z-index: 2; transform-origin: 0 0; transform-style: preserve-3d; will-change: transform; }
 .web-node { position: absolute; z-index: 2; width: 116px; min-height: 53px; padding: 8px 9px; display: grid; align-content: center; gap: 3px; color: #66303b; background: rgba(255,255,255,.88); border: 1px solid rgba(174,104,117,.36); border-radius: 12px; box-shadow: 0 9px 22px rgba(66,20,31,.11), inset 0 1px 0 white; transform: translate(-50%, -50%) translateZ(var(--node-z, 0)); transform-style: preserve-3d; transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease, border-color .16s ease; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 .web-node:hover { z-index: 4; border-color: rgba(196,18,48,.58); box-shadow: 0 14px 28px rgba(66,20,31,.17), inset 0 1px 0 white; transform: translate(-50%, -50%) translateZ(calc(var(--node-z, 0px) + 10px)) scale(1.03); }
 .web-node small { color: #9b7180; font-size: 7px; font-weight: 900; letter-spacing: .11em; text-transform: uppercase; }
