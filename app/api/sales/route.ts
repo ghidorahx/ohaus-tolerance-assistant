@@ -2,12 +2,15 @@ import {
   answerSalesQuestionWithAI,
   DEFAULT_FALLBACK_MODEL,
   DEFAULT_MODEL,
+  DEFAULT_REASONING_PROFILE,
   DEFAULT_REASONING_EFFORT,
   DEFAULT_REASONING_MODE,
   MAX_INPUT_TOKENS,
   MAX_OUTPUT_TOKENS,
   MAX_TOTAL_REQUEST_TOKENS,
   MAX_VERIFIED_CONTEXT_TURNS,
+  REASONING_PROFILES,
+  resolveReasoningProfile,
 } from "@/lib/sales-agent.mjs";
 import { getSalesCatalogStatus, MAX_RETRIEVAL_DOCUMENTS } from "@/lib/sales-catalog.mjs";
 
@@ -119,6 +122,8 @@ export async function GET() {
     model: process.env.OPENAI_MODEL ?? DEFAULT_MODEL,
     fallback_model: process.env.OPENAI_FALLBACK_MODEL ?? DEFAULT_FALLBACK_MODEL,
     reasoning_effort: process.env.OPENAI_REASONING_EFFORT ?? DEFAULT_REASONING_EFFORT,
+    default_reasoning_profile: DEFAULT_REASONING_PROFILE,
+    reasoning_profiles: REASONING_PROFILES,
     reasoning_mode: process.env.OPENAI_REASONING_MODE ?? DEFAULT_REASONING_MODE,
     api_configured: Boolean(process.env.OPENAI_API_KEY),
     access_code_required: Boolean(process.env.SALES_PILOT_ACCESS_CODE),
@@ -153,7 +158,7 @@ export async function POST(request: Request) {
     }
   }
 
-  let body: { question?: unknown; context?: unknown };
+  let body: { question?: unknown; context?: unknown; reasoning_profile?: unknown };
   try {
     body = await request.json();
   } catch {
@@ -170,17 +175,22 @@ export async function POST(request: Request) {
 
   try {
     const context = boundedContext(body.context);
+    const requestedProfile = typeof body.reasoning_profile === "string"
+      ? body.reasoning_profile
+      : DEFAULT_REASONING_PROFILE;
+    const reasoning = resolveReasoningProfile(question, requestedProfile);
     const answer = await answerSalesQuestionWithAI({
       question,
       sessionContext: context,
       apiKey: process.env.OPENAI_API_KEY,
       model: process.env.OPENAI_MODEL ?? DEFAULT_MODEL,
       fallbackModel: process.env.OPENAI_FALLBACK_MODEL ?? DEFAULT_FALLBACK_MODEL,
-      reasoningEffort: process.env.OPENAI_REASONING_EFFORT ?? DEFAULT_REASONING_EFFORT,
+      reasoningEffort: reasoning.effort,
       reasoningMode: process.env.OPENAI_REASONING_MODE ?? DEFAULT_REASONING_MODE,
     });
     return json({
       answer,
+      reasoning_profile: reasoning.profile,
       context_used: context.length,
       catalog: getSalesCatalogStatus(),
     });

@@ -4,9 +4,28 @@ import {
   answerSalesQuestionWithAI,
   DEFAULT_FALLBACK_MODEL,
   DEFAULT_MODEL,
+  DEFAULT_REASONING_PROFILE,
   DEFAULT_REASONING_EFFORT,
   DEFAULT_REASONING_MODE,
+  resolveReasoningProfile,
 } from "../lib/sales-agent.mjs";
+
+test("routes adaptive answer modes without changing the GPT-5.6 Sol model", () => {
+  assert.equal(DEFAULT_REASONING_PROFILE, "auto");
+  assert.deepEqual(resolveReasoningProfile("What is the capacity of CR221?", "auto"), { profile: "auto", effort: "low" });
+  assert.deepEqual(
+    resolveReasoningProfile("Which balances support at least 5 kg capacity and battery operation?", "auto"),
+    { profile: "auto", effort: "medium" },
+  );
+  assert.deepEqual(
+    resolveReasoningProfile("Give me a thorough comparison of CR221 and CR5200 with all specifications and tradeoffs.", "auto"),
+    { profile: "auto", effort: "high" },
+  );
+  assert.equal(resolveReasoningProfile("Any question", "fast").effort, "low");
+  assert.equal(resolveReasoningProfile("Any question", "balanced").effort, "medium");
+  assert.equal(resolveReasoningProfile("Any question", "thorough").effort, "high");
+  assert.equal(resolveReasoningProfile("Any question", "not-valid").profile, "auto");
+});
 
 test("uses one quality-first GPT-5.6 Responses call with comprehensive workbook grounding", async () => {
   const requests = [];
