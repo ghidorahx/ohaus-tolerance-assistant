@@ -17,6 +17,29 @@ const relationshipColumns = [
   ["Relationship / Spare Parts", "spare_part", "Spare part"],
 ];
 
+const placeholderFamilies = [
+  {
+    id: "instruments",
+    label: "Instruments",
+    detail: "Water analysis, color measurement, and turbidity instruments.",
+  },
+  {
+    id: "lab-equipment",
+    label: "Laboratory Equipment",
+    detail: "Sample preparation, mixing, heating, stirring, and supporting laboratory equipment.",
+  },
+  {
+    id: "weights",
+    label: "Weights",
+    detail: "Reference, calibration, test, hooked, slotted, and education weights.",
+  },
+  {
+    id: "accessories-printers",
+    label: "Accessories & Printers",
+    detail: "Accessories, interfaces, replacement items, and printing solutions that connect to product families.",
+  },
+];
+
 function unzipEntry(entry) {
   const result = spawnSync("unzip", ["-p", sourcePath, entry], {
     encoding: "utf8",
@@ -120,6 +143,12 @@ const nodes = [
     parentId: "ohaus",
     verified: true,
   },
+  ...placeholderFamilies.map((family) => ({
+    ...family,
+    kind: "family",
+    parentId: "ohaus",
+    verified: false,
+  })),
   {
     id: "portable-balances",
     label: "Portable Balances",

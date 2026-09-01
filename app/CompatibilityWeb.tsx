@@ -68,7 +68,7 @@ type WebData = {
 
 type PositionedNode = WebNode & { x: number; y: number; relationType?: RelationType };
 
-const initialPath = ["ohaus", "balances-scales", "portable-balances"];
+const initialPath = ["ohaus"];
 const pageSize = 12;
 
 function relationLabel(type: RelationType) {
@@ -89,7 +89,7 @@ export default function CompatibilityWeb() {
   const [data, setData] = useState<WebData | null>(null);
   const [loadError, setLoadError] = useState("");
   const [path, setPath] = useState(initialPath);
-  const [selectedId, setSelectedId] = useState("portable-balances");
+  const [selectedId, setSelectedId] = useState("ohaus");
   const [relationFilter, setRelationFilter] = useState<RelationFilter>("accessory");
   const [page, setPage] = useState(0);
   const [query, setQuery] = useState("");
@@ -259,7 +259,7 @@ export default function CompatibilityWeb() {
 
   function resetWeb() {
     setPath(initialPath);
-    setSelectedId("portable-balances");
+    setSelectedId("ohaus");
     setRelationFilter("accessory");
     setPage(0);
     setQuery("");
@@ -293,8 +293,8 @@ export default function CompatibilityWeb() {
       <header className="compatibility-heading compatibility-heading-rich">
         <div>
           <p className="eyebrow">MMDF product relationship explorer</p>
-          <h2>Portable Balance Compatibility Web</h2>
-          <p>Explore every portable balance, accessory, and spare-part link recorded in the master workbook.</p>
+          <h2>OHAUS Compatibility Web</h2>
+          <p>Portable balances are fully mapped. The other original product families are ready as placeholders for future expansion.</p>
         </div>
         <div className="web-catalog-stats" aria-label="Portable balance catalog coverage">
           <span><strong>{data.metadata.portableProducts}</strong> balances</span>
@@ -324,7 +324,7 @@ export default function CompatibilityWeb() {
         </div>
         <div className="web-actions">
           <button onClick={goBack} disabled={path.length === 1 && selectedNode.kind !== "part"}>← Back</button>
-          <button className="reset-web" onClick={resetWeb}>Portable balances</button>
+          <button className="reset-web" onClick={resetWeb}>Center on OHAUS</button>
         </div>
       </div>
 
@@ -395,7 +395,11 @@ export default function CompatibilityWeb() {
 
           <div className="detail-status">
             <span className={selectedNode.verified ? "verified" : "planned"} aria-hidden="true" />
-            {selectedNode.verified ? "Matched to an MMDF catalog row" : "Referenced in MMDF · catalog row missing"}
+            {selectedNode.verified
+              ? "Matched to an MMDF catalog row"
+              : selectedNode.kind === "part"
+                ? "Referenced in MMDF · catalog row missing"
+                : "Placeholder family · catalog expansion pending"}
           </div>
 
           {allRelationships.length > 0 && (

@@ -28,6 +28,16 @@ test("limits the compatibility graph to every portable balance and related part"
   assert.ok(data.nodes.every((node) => !/analytical|bench scale|moisture analyzer/i.test(node.label)));
 });
 
+test("restores the original top-level product families as placeholders", () => {
+  const families = data.nodes.filter((node) => node.kind === "family");
+  assert.deepEqual(
+    families.map((node) => node.label),
+    ["Balances & Scales", "Instruments", "Laboratory Equipment", "Weights", "Accessories & Printers"],
+  );
+  assert.ok(families.filter((node) => node.id !== "balances-scales").every((node) => node.parentId === "ohaus" && node.verified === false));
+  assert.ok(families.filter((node) => node.id !== "balances-scales").every((family) => !data.nodes.some((node) => node.parentId === family.id)));
+});
+
 test("preserves all workbook accessory and spare-part relationships", () => {
   assert.equal(data.links.length, 1820);
   assert.equal(data.links.filter((link) => link.relationType === "accessory").length, 794);
@@ -41,6 +51,8 @@ test("supports concise exploration without hiding catalog coverage", () => {
   assert.match(component, /`Accessories \$\{relationshipCounts\.accessory\}`/);
   assert.match(component, /`Spare parts \$\{relationshipCounts\.spare_part\}`/);
   assert.match(component, /pageSize = 12/);
+  assert.match(component, /const initialPath = \["ohaus"\]/);
+  assert.match(component, /Center on OHAUS/);
   assert.match(component, /<details className="web-relationship-details">/);
   assert.match(component, /Item \{selectedNode\.materialNumber\}/);
   assert.match(component, /Raw_Data row \{selectedNode\.sourceRow\}/);
