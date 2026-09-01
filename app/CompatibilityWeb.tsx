@@ -101,6 +101,26 @@ function pointOnRay(origin: Point, angle: number, distance: number): Point {
   };
 }
 
+function findClearBranchPosition(
+  anchor: Point,
+  angle: number,
+  startingRadius: number,
+  occupied: Map<string, Point>,
+) {
+  let radius = startingRadius;
+  const originClearance = familyRadius + 120;
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const candidate = pointOnRay(anchor, angle, radius);
+    const clearsOrigin = Math.hypot(candidate.x - worldCenter.x, candidate.y - worldCenter.y) >= originClearance;
+    const clearsVisibleNodes = [...occupied.values()].every((point) => (
+      Math.hypot(candidate.x - point.x, candidate.y - point.y) >= 148
+    ));
+    if (clearsOrigin && clearsVisibleNodes) return candidate;
+    radius += 105;
+  }
+  return pointOnRay(anchor, angle, radius);
+}
+
 function CompatibilityWebLoading({ error }: { error?: string }) {
   return (
     <section className="compatibility-shell compatibility-loading">
@@ -362,22 +382,31 @@ export default function CompatibilityWeb() {
         .map((item) => item.node.id)
         .filter((nodeId) => !nextPositions.has(nodeId)),
     )];
-    const circularIndex = new Map(circularNodeIds.map((nodeId, index) => [nodeId, index]));
-    const circularCount = circularNodeIds.length;
-    const arcSpan = circularCount <= 1
-      ? 0
-      : Math.min(Math.PI * 1.5, Math.max(Math.PI / 3, (circularCount - 1) * Math.PI / 6));
-    const arcStep = circularCount <= 1 ? 0 : arcSpan / (circularCount - 1);
-    const connectionRadius = arcStep > 0
-      ? Math.max(380, branchArcSpacing / (2 * Math.sin(arcStep / 2)))
-      : branchLayerSpacing;
+    const nodesPerRing = 6;
+    const circularPlacement = new Map<string, { angle: number; radius: number }>();
+    circularNodeIds.forEach((nodeId, index) => {
+      const ringIndex = Math.floor(index / nodesPerRing);
+      const indexInRing = index % nodesPerRing;
+      const ringCount = Math.min(nodesPerRing, circularNodeIds.length - ringIndex * nodesPerRing);
+      const maximumArc = ringIndex % 2 === 0 ? Math.PI : Math.PI * 5 / 6;
+      const arcSpan = ringCount <= 1 ? 0 : Math.min(maximumArc, ringCount * Math.PI / 6);
+      const arcStep = ringCount <= 1 ? 0 : arcSpan / (ringCount - 1);
+      const minimumRadius = 380 + ringIndex * 245;
+      const spacingRadius = arcStep > 0 ? branchArcSpacing / (2 * Math.sin(arcStep / 2)) : 0;
+      circularPlacement.set(nodeId, {
+        angle: branchAngle + (ringCount <= 1 ? 0 : -arcSpan / 2 + arcStep * indexInRing),
+        radius: Math.max(minimumRadius, spacingRadius),
+      });
+    });
 
     pageItems.forEach((item) => {
       nextIds.add(item.node.id);
       if (!nextPositions.has(item.node.id)) {
-        const index = circularIndex.get(item.node.id) ?? 0;
-        const childAngle = branchAngle + (circularCount <= 1 ? 0 : -arcSpan / 2 + arcStep * index);
-        nextPositions.set(item.node.id, pointOnRay(anchor, childAngle, connectionRadius));
+        const placement = circularPlacement.get(item.node.id) ?? { angle: branchAngle, radius: branchLayerSpacing };
+        nextPositions.set(
+          item.node.id,
+          findClearBranchPosition(anchor, placement.angle, placement.radius, nextPositions),
+        );
       }
       const source = node.id;
       const target = item.node.id;
