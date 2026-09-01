@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
+import type { ReactNode } from "react";
 
 type Evidence = {
   material_number: string;
@@ -112,6 +113,95 @@ function prettyField(field: string) {
 function titleCase(value: string | undefined, fallback: string) {
   const label = value || fallback;
   return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+type AnswerBlock = {
+  type: "heading" | "paragraph" | "unordered-list" | "ordered-list";
+  content: string[];
+};
+
+function parseAnswerBlocks(value: string) {
+  const blocks: AnswerBlock[] = [];
+  let paragraph: string[] = [];
+  let list: AnswerBlock | null = null;
+
+  function flushParagraph() {
+    if (paragraph.length === 0) return;
+    blocks.push({ type: "paragraph", content: [paragraph.join(" ")] });
+    paragraph = [];
+  }
+
+  function flushList() {
+    if (!list) return;
+    blocks.push(list);
+    list = null;
+  }
+
+  for (const rawLine of String(value ?? "").replace(/\\([*_`])/g, "$1").split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line) {
+      flushParagraph();
+      flushList();
+      continue;
+    }
+
+    const heading = line.match(/^#{1,3}\s+(.+)$/);
+    if (heading) {
+      flushParagraph();
+      flushList();
+      blocks.push({ type: "heading", content: [heading[1]] });
+      continue;
+    }
+
+    const unorderedItem = line.match(/^[-*\u2022]\s+(.+)$/);
+    const orderedItem = line.match(/^\d+[.)]\s+(.+)$/);
+    const item = unorderedItem?.[1] ?? orderedItem?.[1];
+    if (item) {
+      flushParagraph();
+      const type = unorderedItem ? "unordered-list" : "ordered-list";
+      if (list?.type !== type) flushList();
+      list ??= { type, content: [] };
+      list.content.push(item);
+      continue;
+    }
+
+    flushList();
+    paragraph.push(line);
+  }
+
+  flushParagraph();
+  flushList();
+  return blocks;
+}
+
+function renderInlineAnswer(value: string, keyPrefix: string): ReactNode[] {
+  return value.split(/(\*\*[^*\n]+\*\*|__[^_\n]+__|`[^`\n]+`)/g).filter(Boolean).map((part, index) => {
+    const key = `${keyPrefix}-${index}`;
+    if ((part.startsWith("**") && part.endsWith("**")) || (part.startsWith("__") && part.endsWith("__"))) {
+      return <strong key={key}>{part.slice(2, -2)}</strong>;
+    }
+    if (part.startsWith("`") && part.endsWith("`")) return <code key={key}>{part.slice(1, -1)}</code>;
+    return part;
+  });
+}
+
+function SalesAnswerContent({ value }: { value: string }) {
+  const blocks = parseAnswerBlocks(value);
+  return (
+    <div className="sales-answer-copy">
+      {blocks.map((block, blockIndex) => {
+        const key = `answer-block-${blockIndex}`;
+        if (block.type === "heading") return <h3 key={key}>{renderInlineAnswer(block.content[0], key)}</h3>;
+        if (block.type === "unordered-list") {
+          return <ul key={key}>{block.content.map((item, itemIndex) => <li key={`${key}-${itemIndex}`}>{renderInlineAnswer(item, `${key}-${itemIndex}`)}</li>)}</ul>;
+        }
+        if (block.type === "ordered-list") {
+          return <ol key={key}>{block.content.map((item, itemIndex) => <li key={`${key}-${itemIndex}`}>{renderInlineAnswer(item, `${key}-${itemIndex}`)}</li>)}</ol>;
+        }
+        return <p key={key}>{renderInlineAnswer(block.content[0], key)}</p>;
+      })}
+    </div>
+  );
 }
 
 export default function SalesAssistant() {
@@ -447,7 +537,7 @@ function SalesExchange({
             <span className={`sales-answer-status ${answer.status}`}>{statusLabel(answer.status)}</span>
             <span>{answer.confidence} confidence</span>
           </div>
-          <p className="sales-answer-copy">{answer.answer}</p>
+          <SalesAnswerContent value={answer.answer} />
 
           {answer.materials.length > 0 && (
             <div className="sales-materials">

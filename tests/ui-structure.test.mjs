@@ -56,6 +56,16 @@ test("keeps the Sales surface concise and supports answer-specific follow-ups", 
   assert.match(styles, /\.sales-inline-follow-up/);
 });
 
+test("renders clean Sales answer formatting with restrained OHAUS-red emphasis", () => {
+  assert.match(salesAssistant, /function SalesAnswerContent/);
+  assert.match(salesAssistant, /unordered-list/);
+  assert.match(salesAssistant, /renderInlineAnswer/);
+  assert.match(salesAssistant, /<SalesAnswerContent value=\{answer\.answer\}/);
+  assert.doesNotMatch(salesAssistant, /<p className="sales-answer-copy">\{answer\.answer\}<\/p>/);
+  assert.match(styles, /\.sales-answer-copy strong\s*\{[^}]*color:\s*#c41230/s);
+  assert.match(styles, /\.sales-answer-copy li::marker\s*\{[^}]*color:\s*#c41230/s);
+});
+
 test("makes the Sales product-knowledge rail collapsible and accessible", () => {
   assert.match(salesAssistant, /productKnowledgeCollapsed/);
   assert.match(salesAssistant, /aria-expanded=\{!productKnowledgeCollapsed\}/);

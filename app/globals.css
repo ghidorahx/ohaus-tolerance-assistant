@@ -264,7 +264,18 @@ button { cursor: pointer; }
 .sales-answer-meta > span { padding: 4px 7px; color: #765e66; background: rgba(255,255,255,.68); border-radius: 999px; font-size: 8px; font-weight: 800; text-transform: uppercase; }
 .sales-answer-status.answered { color: #176a4b !important; background: #e9f7f0 !important; }
 .sales-answer-status.needs_clarification, .sales-answer-status.not_in_source, .sales-answer-status.escalate { color: #8b5c16 !important; background: #fff5df !important; }
-.sales-answer-copy { margin: 9px 0 0; color: #304356; font-size: 14px; line-height: 1.65; white-space: pre-wrap; }
+.sales-answer-copy { margin-top: 10px; color: #304356; font-size: 14px; line-height: 1.62; }
+.sales-answer-copy > :first-child { margin-top: 0; }
+.sales-answer-copy > :last-child { margin-bottom: 0; }
+.sales-answer-copy p { margin: 0 0 9px; }
+.sales-answer-copy h3 { margin: 15px 0 7px; color: #5d2634; font-size: 12px; line-height: 1.35; letter-spacing: .02em; }
+.sales-answer-copy ul, .sales-answer-copy ol { margin: 7px 0 11px; padding-left: 21px; display: grid; gap: 5px; }
+.sales-answer-copy ul { list-style: disc; }
+.sales-answer-copy ol { list-style: decimal; }
+.sales-answer-copy li { padding-left: 2px; }
+.sales-answer-copy li::marker { color: #c41230; font-weight: 900; }
+.sales-answer-copy strong { color: #c41230; font-weight: 850; }
+.sales-answer-copy code { padding: 2px 5px; color: #7d1027; background: #fcecf0; border-radius: 5px; font-family: var(--font-geist-mono), monospace; font-size: .9em; }
 .sales-materials { margin-top: 13px; padding: 10px 12px; display: grid; gap: 3px; color: #6d1428; background: #fcecf0; border-radius: 9px; }
 .sales-materials span { font-size: 8px; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; }
 .sales-materials strong { font-family: var(--font-geist-mono), monospace; font-size: 11px; }
