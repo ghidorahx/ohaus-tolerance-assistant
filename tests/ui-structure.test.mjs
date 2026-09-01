@@ -60,10 +60,29 @@ test("renders clean Sales answer formatting with restrained OHAUS-red emphasis",
   assert.match(salesAssistant, /function SalesAnswerContent/);
   assert.match(salesAssistant, /unordered-list/);
   assert.match(salesAssistant, /renderInlineAnswer/);
-  assert.match(salesAssistant, /<SalesAnswerContent value=\{answer\.answer\}/);
+  assert.match(salesAssistant, /highlightPartNumbers/);
+  assert.match(salesAssistant, /sales-part-number/);
+  assert.match(salesAssistant, /<SalesAnswerContent value=\{answer\.answer\} partNumbers=\{answer\.materials\}/);
   assert.doesNotMatch(salesAssistant, /<p className="sales-answer-copy">\{answer\.answer\}<\/p>/);
   assert.match(styles, /\.sales-answer-copy strong\s*\{[^}]*color:\s*#c41230/s);
   assert.match(styles, /\.sales-answer-copy li::marker\s*\{[^}]*color:\s*#c41230/s);
+});
+
+test("keeps evidence and diagnostics inside one collapsed reference panel", () => {
+  assert.match(salesAssistant, /<details className=\{`sales-reference-panel/);
+  assert.match(salesAssistant, /Sources &amp; details/);
+  assert.match(salesAssistant, /<div className="sales-reference-content">/);
+  assert.match(styles, /\.sales-reference-panel\s*\{/);
+  assert.match(styles, /\.sales-reference-panel\[open\]/);
+
+  const answerStart = salesAssistant.indexOf('<SalesAnswerContent value={answer.answer}');
+  const detailsStart = salesAssistant.indexOf('<details className={`sales-reference-panel', answerStart);
+  const evidenceStart = salesAssistant.indexOf('<div className="sales-evidence">', answerStart);
+  const footerStart = salesAssistant.indexOf('<div className="sales-answer-foot">', answerStart);
+  const detailsEnd = salesAssistant.indexOf('</details>', detailsStart);
+  assert.ok(answerStart >= 0 && detailsStart > answerStart);
+  assert.ok(evidenceStart > detailsStart && evidenceStart < detailsEnd);
+  assert.ok(footerStart > detailsStart && footerStart < detailsEnd);
 });
 
 test("makes the Sales product-knowledge rail collapsible and accessible", () => {

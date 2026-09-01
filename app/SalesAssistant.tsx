@@ -174,31 +174,49 @@ function parseAnswerBlocks(value: string) {
   return blocks;
 }
 
-function renderInlineAnswer(value: string, keyPrefix: string): ReactNode[] {
-  return value.split(/(\*\*[^*\n]+\*\*|__[^_\n]+__|`[^`\n]+`)/g).filter(Boolean).map((part, index) => {
+function escapePattern(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function highlightPartNumbers(value: string, keyPrefix: string, partNumbers: string[]): ReactNode[] {
+  const knownParts = [...new Set(partNumbers.map(String).filter(Boolean))].sort((left, right) => right.length - left.length);
+  const patterns = [...knownParts.map(escapePattern), "\\b\\d{8}\\b"];
+  const matcher = new RegExp(`(${patterns.join("|")})`, "g");
+  const knownPartSet = new Set(knownParts.map((partNumber) => partNumber.toLowerCase()));
+
+  return value.split(matcher).filter(Boolean).map((part, index) => {
+    const isPartNumber = /^\d{8}$/.test(part) || knownPartSet.has(part.toLowerCase());
+    return isPartNumber
+      ? <strong className="sales-part-number" key={`${keyPrefix}-part-${index}`}>{part}</strong>
+      : part;
+  });
+}
+
+function renderInlineAnswer(value: string, keyPrefix: string, partNumbers: string[]): ReactNode[] {
+  return value.split(/(\*\*[^*\n]+\*\*|__[^_\n]+__|`[^`\n]+`)/g).filter(Boolean).flatMap((part, index) => {
     const key = `${keyPrefix}-${index}`;
     if ((part.startsWith("**") && part.endsWith("**")) || (part.startsWith("__") && part.endsWith("__"))) {
       return <strong key={key}>{part.slice(2, -2)}</strong>;
     }
     if (part.startsWith("`") && part.endsWith("`")) return <code key={key}>{part.slice(1, -1)}</code>;
-    return part;
+    return highlightPartNumbers(part, key, partNumbers);
   });
 }
 
-function SalesAnswerContent({ value }: { value: string }) {
+function SalesAnswerContent({ value, partNumbers }: { value: string; partNumbers: string[] }) {
   const blocks = parseAnswerBlocks(value);
   return (
     <div className="sales-answer-copy">
       {blocks.map((block, blockIndex) => {
         const key = `answer-block-${blockIndex}`;
-        if (block.type === "heading") return <h3 key={key}>{renderInlineAnswer(block.content[0], key)}</h3>;
+        if (block.type === "heading") return <h3 key={key}>{renderInlineAnswer(block.content[0], key, partNumbers)}</h3>;
         if (block.type === "unordered-list") {
-          return <ul key={key}>{block.content.map((item, itemIndex) => <li key={`${key}-${itemIndex}`}>{renderInlineAnswer(item, `${key}-${itemIndex}`)}</li>)}</ul>;
+          return <ul key={key}>{block.content.map((item, itemIndex) => <li key={`${key}-${itemIndex}`}>{renderInlineAnswer(item, `${key}-${itemIndex}`, partNumbers)}</li>)}</ul>;
         }
         if (block.type === "ordered-list") {
-          return <ol key={key}>{block.content.map((item, itemIndex) => <li key={`${key}-${itemIndex}`}>{renderInlineAnswer(item, `${key}-${itemIndex}`)}</li>)}</ol>;
+          return <ol key={key}>{block.content.map((item, itemIndex) => <li key={`${key}-${itemIndex}`}>{renderInlineAnswer(item, `${key}-${itemIndex}`, partNumbers)}</li>)}</ol>;
         }
-        return <p key={key}>{renderInlineAnswer(block.content[0], key)}</p>;
+        return <p key={key}>{renderInlineAnswer(block.content[0], key, partNumbers)}</p>;
       })}
     </div>
   );
@@ -532,60 +550,74 @@ function SalesExchange({
       <article className="sales-assistant-message">
         <span className="sales-message-avatar" aria-hidden="true">AI</span>
         <div>
-          <div className="sales-answer-meta">
-            <strong>Product assistant</strong>
-            <span className={`sales-answer-status ${answer.status}`}>{statusLabel(answer.status)}</span>
-            <span>{answer.confidence} confidence</span>
-          </div>
-          <SalesAnswerContent value={answer.answer} />
+          <SalesAnswerContent value={answer.answer} partNumbers={answer.materials} />
 
-          {answer.materials.length > 0 && (
-            <div className="sales-materials">
-              <span>Matched material numbers</span>
-              <strong>{answer.materials.join(" · ")}</strong>
-            </div>
-          )}
-
-          {answer.evidence.length > 0 && (
-            <div className="sales-evidence">
-              <div className="sales-evidence-heading">
-                <span>Verified catalog evidence</span>
-                <small>{answer.evidence.length} field{answer.evidence.length === 1 ? "" : "s"}</small>
+          <details className={`sales-reference-panel ${answer.status}`}>
+            <summary>
+              <span>Sources &amp; details</span>
+              <small>{answer.evidence.length > 0 ? `${answer.evidence.length} verified field${answer.evidence.length === 1 ? "" : "s"}` : statusLabel(answer.status)}</small>
+              <b aria-hidden="true">+</b>
+            </summary>
+            <div className="sales-reference-content">
+              <div className="sales-answer-meta">
+                <span className={`sales-answer-status ${answer.status}`}>{statusLabel(answer.status)}</span>
+                <span>{answer.confidence} confidence</span>
               </div>
-              <div className="sales-evidence-grid">
-                {answer.evidence.map((item, index) => (
-                  <div key={`${item.material_number}-${item.field}-${index}`}>
-                    <span>{item.model_or_item} · {item.material_number}</span>
-                    <small>{prettyField(item.field)}</small>
-                    <strong>{item.value}</strong>
-                    <em>{item.source_file}</em>
+
+              {answer.materials.length > 0 && (
+                <div className="sales-materials">
+                  <span>Matched material numbers</span>
+                  <strong>{answer.materials.join(" · ")}</strong>
+                </div>
+              )}
+
+              {answer.evidence.length > 0 && (
+                <div className="sales-evidence">
+                  <div className="sales-evidence-heading">
+                    <span>Verified catalog evidence</span>
+                    <small>{answer.evidence.length} field{answer.evidence.length === 1 ? "" : "s"}</small>
                   </div>
-                ))}
+                  <div className="sales-evidence-grid">
+                    {answer.evidence.map((item, index) => (
+                      <div key={`${item.material_number}-${item.field}-${index}`}>
+                        <span>{item.model_or_item} · {item.material_number}</span>
+                        <small>{prettyField(item.field)}</small>
+                        <strong>{item.value}</strong>
+                        <em>{item.source_file}</em>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {answer.unresolved_items.length > 0 && (
+                <div className="sales-review-note">
+                  <strong>Needs source review</strong>
+                  <p>{answer.unresolved_items.join(" · ")}</p>
+                </div>
+              )}
+
+              {answer.escalation_reason && (
+                <div className="sales-review-note">
+                  <strong>Why additional information is needed</strong>
+                  <p>{answer.escalation_reason}</p>
+                </div>
+              )}
+
+              {answer.follow_up_suggestions.length > 0 && (
+                <div className="sales-follow-ups">
+                  {answer.follow_up_suggestions.map((question) => (
+                    <button type="button" key={question} onClick={() => onFollowUp(question)} disabled={disabled}>{question}</button>
+                  ))}
+                </div>
+              )}
+
+              <div className="sales-answer-foot">
+                <span>{answer.model}{answer.fallback_used ? " fallback" : ""} · {answer.reasoning_effort} reasoning · {answer.reasoning_mode} mode</span>
+                <span>{answer.catalog_checks} catalog check{answer.catalog_checks === 1 ? "" : "s"}</span>
               </div>
             </div>
-          )}
-
-          {answer.unresolved_items.length > 0 && (
-            <div className="sales-review-note">
-              <strong>Needs source review</strong>
-              <p>{answer.unresolved_items.join(" · ")}</p>
-            </div>
-          )}
-
-          {answer.escalation_reason && (
-            <div className="sales-review-note">
-              <strong>Why additional information is needed</strong>
-              <p>{answer.escalation_reason}</p>
-            </div>
-          )}
-
-          {answer.follow_up_suggestions.length > 0 && (
-            <div className="sales-follow-ups">
-              {answer.follow_up_suggestions.map((question) => (
-                <button type="button" key={question} onClick={() => onFollowUp(question)} disabled={disabled}>{question}</button>
-              ))}
-            </div>
-          )}
+          </details>
 
           {showFollowUpField && (
             <form className="sales-inline-follow-up" onSubmit={submitFollowUp}>
@@ -604,10 +636,6 @@ function SalesExchange({
             </form>
           )}
 
-          <div className="sales-answer-foot">
-            <span>{answer.model}{answer.fallback_used ? " fallback" : ""} · {answer.reasoning_effort} reasoning · {answer.reasoning_mode} mode</span>
-            <span>{answer.catalog_checks} catalog check{answer.catalog_checks === 1 ? "" : "s"}</span>
-          </div>
         </div>
       </article>
     </div>

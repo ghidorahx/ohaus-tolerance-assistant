@@ -59,6 +59,7 @@ test("uses one quality-first GPT-5.6 Responses call with comprehensive workbook 
   assert.match(JSON.stringify(requests[0].input), /retrieval_document_matches/);
   assert.match(requests[0].instructions, /Keep routine answers streamlined/);
   assert.match(requests[0].instructions, /Use \*\*bold\*\* sparingly/);
+  assert.match(requests[0].instructions, /Every material or part number written in the answer/);
   assert.match(JSON.stringify(requests[0].input), /CR221/);
   assert.equal(result.evidence[0].value, "220 g");
   assert.equal(result.catalog_checks, 1);
