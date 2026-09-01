@@ -387,7 +387,7 @@ button { cursor: pointer; }
 .web-node.part.accessory { color: #176342; background: rgba(238,249,243,.94); border-color: rgba(41,140,95,.52); }
 .web-node.part.spare_part { color: #245d91; background: rgba(238,246,255,.95); border-color: rgba(77,143,207,.52); }
 .web-node.selected em { color: #ffd3db; }
-.network-hint { position: absolute; left: 20px; bottom: 15px; z-index: 5; margin: 0; color: #8d6a73; font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; pointer-events: none; }
+.network-hint { position: absolute; left: 20px; bottom: 15px; z-index: 5; margin: 0; color: #8d6a73; font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
 .web-pagination { position: absolute; left: 50%; bottom: 34px; z-index: 8; display: flex; align-items: center; gap: 8px; transform: translateX(-50%); }
 .web-pagination button { width: 30px; height: 30px; color: #eee; background: rgba(17,24,35,.8); border: 1px solid rgba(255,255,255,.14); border-radius: 50%; }
 .web-pagination button:disabled { opacity: .35; }
@@ -527,33 +527,6 @@ button { cursor: pointer; }
 .web-mode .relation-dot.compatible { background: #35d991; box-shadow: 0 0 9px rgba(53,217,145,.45); }
 .web-mode .relation-dot.incompatible { background: #ff7958; box-shadow: 0 0 9px rgba(255,121,88,.42); }
 .web-mode .relation-dot.discontinued { background: #8e9dab; box-shadow: 0 0 9px rgba(142,157,171,.35); }
-
-/* Persistent compatibility world */
-.persistent-web { cursor: grab; touch-action: none; user-select: none; outline: 0; }
-.persistent-web.dragging { cursor: grabbing; }
-.persistent-web:focus-visible { box-shadow: inset 0 0 0 2px rgba(235,62,93,.72); }
-.network-world { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
-.web-edge { height: 2px; position: absolute; z-index: 1; display: block; pointer-events: none; transform-origin: 0 50%; background: rgba(226,59,91,.42); box-shadow: 0 0 7px rgba(226,59,91,.28); }
-.web-edge.accessory { height: 3px; background: rgba(53,217,145,.72); box-shadow: 0 0 11px rgba(53,217,145,.46); }
-.web-edge.spare_part { height: 3px; background: rgba(104,170,255,.7); box-shadow: 0 0 11px rgba(104,170,255,.42); }
-.persistent-web .web-node { width: 156px; min-height: 84px; padding: 13px; z-index: 2; }
-.persistent-web .web-node.root { width: 180px; height: 180px; min-height: 180px; }
-.persistent-web .web-node.family, .persistent-web .web-node.category, .persistent-web .web-node.series { width: 166px; height: 118px; min-height: 118px; }
-.persistent-web .web-node.model, .persistent-web .web-node.part { width: 142px; height: 142px; min-height: 142px; }
-.persistent-web .web-node strong { max-width: 124px; font-size: 13px; }
-.persistent-web .web-node em { font-size: 10px; }
-.persistent-web .web-node.expanded:not(.selected)::after { content: ""; width: 9px; height: 9px; position: absolute; right: 9px; bottom: 9px; background: #ff6f89; border: 2px solid rgba(6,11,18,.9); border-radius: 50%; box-shadow: 0 0 10px rgba(255,111,137,.55); }
-.web-camera-controls { position: absolute; top: 14px; right: 14px; z-index: 8; display: grid; gap: 6px; }
-.web-camera-controls button { width: 34px; height: 34px; color: #e8edf2; background: rgba(12,18,28,.86); border: 1px solid rgba(255,255,255,.14); border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,.28); font-size: 20px; font-weight: 700; }
-.web-camera-controls button:hover { background: rgba(196,18,48,.72); border-color: rgba(255,136,157,.5); }
-.web-expand-button { width: 100%; min-height: 38px; margin: 14px 0 2px; color: white; background: linear-gradient(145deg, #cf2544, #8a0b26); border: 1px solid rgba(255,255,255,.12); border-radius: 10px; font-size: 10px; font-weight: 900; letter-spacing: .03em; }
-.web-expand-button:hover { filter: brightness(1.08); }
-.web-mode .persistent-web .web-node { width: 156px; height: 142px; min-height: 142px; }
-.web-mode .persistent-web .web-node.root { width: 180px; height: 180px; min-height: 180px; }
-.web-mode .persistent-web .web-node.family, .web-mode .persistent-web .web-node.category, .web-mode .persistent-web .web-node.series { width: 166px; height: 118px; min-height: 118px; }
-.web-mode .persistent-web .web-node strong { max-width: 124px; font-size: 13px; }
-.web-mode .persistent-web .web-node small { font-size: 8px; }
-.web-mode .persistent-web .web-node em { font-size: 10px; }
 
 @media (max-width: 900px) {
   .topbar { padding: 0 18px; }

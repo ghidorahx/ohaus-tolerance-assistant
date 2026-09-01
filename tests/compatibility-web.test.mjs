@@ -36,19 +36,11 @@ test("preserves all workbook accessory and spare-part relationships", () => {
   assert.ok(data.links.every((link) => link.source.startsWith("model:") && link.target.startsWith("part:")));
 });
 
-test("supports a persistent expanding and draggable catalog web", () => {
+test("supports concise exploration without hiding catalog coverage", () => {
   assert.match(component, /Find model, item number, or description/);
   assert.match(component, /`Accessories \$\{relationshipCounts\.accessory\}`/);
   assert.match(component, /`Spare parts \$\{relationshipCounts\.spare_part\}`/);
-  assert.match(component, /const \[expandedIds, setExpandedIds\]/);
-  assert.match(component, /new Set\(current\)/);
-  assert.match(component, /network-world/);
-  assert.match(component, /onPointerDown=\{handlePointerDown\}/);
-  assert.match(component, /onPointerMove=\{handlePointerMove\}/);
-  assert.match(component, /onWheel=\{handleWheel\}/);
-  assert.match(component, /Drag to move · Scroll to zoom · Click a node to keep branching/);
-  assert.doesNotMatch(component, /pageSize = 12/);
-  assert.doesNotMatch(component, /Select any node to recenter/);
+  assert.match(component, /pageSize = 12/);
   assert.match(component, /<details className="web-relationship-details">/);
   assert.match(component, /Item \{selectedNode\.materialNumber\}/);
   assert.match(component, /Raw_Data row \{selectedNode\.sourceRow\}/);
