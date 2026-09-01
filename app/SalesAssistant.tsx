@@ -59,8 +59,6 @@ type Health = {
   fallback_model: string;
   reasoning_effort: string;
   reasoning_mode: string;
-  default_reasoning_profile: ReasoningProfile;
-  reasoning_profiles: ReasoningProfile[];
   context: {
     max_verified_turns: number;
     approximate_character_budget: number;
@@ -80,19 +78,6 @@ type Health = {
     source_file: string;
   };
 };
-
-type ReasoningProfile = "auto" | "fast" | "balanced" | "thorough";
-
-const reasoningProfiles: Array<{
-  value: ReasoningProfile;
-  label: string;
-  description: string;
-}> = [
-  { value: "auto", label: "Auto", description: "Adjusts reasoning to the question while keeping GPT‑5.6 Sol." },
-  { value: "fast", label: "Fast", description: "Low reasoning for straightforward lookups and quick answers." },
-  { value: "balanced", label: "Balanced", description: "Medium reasoning for normal recommendations and comparisons." },
-  { value: "thorough", label: "Thorough", description: "High reasoning for complex, multi-condition questions." },
-];
 
 const suggestions = [
   "What are the capacity, readability, power, and battery life of CR221?",
@@ -269,16 +254,11 @@ export default function SalesAssistant() {
   const [needsCode, setNeedsCode] = useState(false);
   const [rateLimitSeconds, setRateLimitSeconds] = useState(0);
   const [productKnowledgeCollapsed, setProductKnowledgeCollapsed] = useState(false);
-  const [reasoningProfile, setReasoningProfile] = useState<ReasoningProfile>("auto");
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     const savedCode = window.localStorage.getItem("sales-pilot-access-code") ?? "";
-    const savedReasoningProfile = window.localStorage.getItem("sales-reasoning-profile");
     const preferenceTimer = window.setTimeout(() => {
-      if (reasoningProfiles.some((profile) => profile.value === savedReasoningProfile)) {
-        setReasoningProfile(savedReasoningProfile as ReasoningProfile);
-      }
       setProductKnowledgeCollapsed(window.localStorage.getItem("sales-product-knowledge-collapsed") === "true");
     }, 0);
     const url = new URL("api/sales", document.baseURI);
@@ -341,7 +321,7 @@ export default function SalesAssistant() {
           "Content-Type": "application/json",
           ...(accessCode.trim() ? { "X-Pilot-Access-Code": accessCode.trim() } : {}),
         },
-        body: JSON.stringify({ question: trimmed, context, reasoning_profile: reasoningProfile }),
+        body: JSON.stringify({ question: trimmed, context }),
       });
       const payload = await response.json().catch(() => ({}));
       if (response.status === 401 && payload.code === "access_code_required") {
@@ -408,19 +388,11 @@ export default function SalesAssistant() {
     });
   }
 
-  function updateReasoningProfile(index: number) {
-    const profile = reasoningProfiles[index]?.value ?? "auto";
-    setReasoningProfile(profile);
-    window.localStorage.setItem("sales-reasoning-profile", profile);
-  }
-
   const ready = Boolean(health?.api_configured);
   const coolingDown = rateLimitSeconds > 0;
   const totalRequestTokens = Math.round((health?.context.max_total_request_tokens ?? 450_000) / 1_000);
   const inputTokens = Math.round((health?.context.max_input_tokens ?? 322_000) / 1_000);
   const outputTokens = Math.round((health?.context.max_output_tokens ?? 128_000) / 1_000);
-  const reasoningProfileIndex = Math.max(0, reasoningProfiles.findIndex((profile) => profile.value === reasoningProfile));
-  const activeReasoningProfile = reasoningProfiles[reasoningProfileIndex];
 
   return (
     <section className={`sales-workspace ${productKnowledgeCollapsed ? "sales-rail-collapsed" : ""}`} aria-label="Sales assistant">
@@ -456,8 +428,8 @@ export default function SalesAssistant() {
 
           <div className="sales-coverage-card">
             <span>Reasoning configuration</span>
-            <strong>GPT‑5.6 Sol · Adaptive · {titleCase(health?.reasoning_mode, "standard")}</strong>
-            <small>Auto routes low, medium, or high reasoning · Terra fallback · {health?.catalog.retrieval_documents ?? 87} generated knowledge documents</small>
+            <strong>GPT‑5.6 Sol · Medium · {titleCase(health?.reasoning_mode, "standard")}</strong>
+            <small>Fixed medium reasoning · Terra fallback · {health?.catalog.retrieval_documents ?? 87} generated knowledge documents</small>
           </div>
 
           <div className="sales-memory-card">
@@ -495,27 +467,6 @@ export default function SalesAssistant() {
               aria-label="Team access code"
             />
           )}
-          <div className="sales-reasoning-control">
-            <div className="sales-reasoning-heading">
-              <label htmlFor="sales-reasoning-profile">Answer mode</label>
-              <strong>{activeReasoningProfile.label}</strong>
-            </div>
-            <input
-              id="sales-reasoning-profile"
-              type="range"
-              min="0"
-              max={reasoningProfiles.length - 1}
-              step="1"
-              value={reasoningProfileIndex}
-              onInput={(event) => updateReasoningProfile(Number(event.currentTarget.value))}
-              aria-valuetext={`${activeReasoningProfile.label}: ${activeReasoningProfile.description}`}
-              disabled={thinking}
-            />
-            <div className="sales-reasoning-labels" aria-hidden="true">
-              {reasoningProfiles.map((profile) => <span key={profile.value}>{profile.label}</span>)}
-            </div>
-            <small>{activeReasoningProfile.description}</small>
-          </div>
           <div className="sales-composer-row">
             <textarea
               ref={inputRef}

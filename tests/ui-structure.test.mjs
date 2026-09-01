@@ -56,15 +56,13 @@ test("keeps the Sales surface concise and supports answer-specific follow-ups", 
   assert.match(styles, /\.sales-inline-follow-up/);
 });
 
-test("offers an accessible adaptive reasoning slider for each Sales question", () => {
-  assert.match(salesAssistant, /type ReasoningProfile = "auto" \| "fast" \| "balanced" \| "thorough"/);
-  assert.match(salesAssistant, /id="sales-reasoning-profile"/);
-  assert.match(salesAssistant, /type="range"/);
-  assert.match(salesAssistant, /onInput=\{\(event\) => updateReasoningProfile\(Number\(event\.currentTarget\.value\)\)\}/);
-  assert.match(salesAssistant, /aria-valuetext=/);
-  assert.match(salesAssistant, /reasoning_profile: reasoningProfile/);
-  assert.match(salesAssistant, /sales-reasoning-profile/);
-  assert.match(styles, /\.sales-reasoning-control\s*\{/);
+test("keeps Sales reasoning fixed at medium without a customer-facing slider", () => {
+  assert.match(salesAssistant, /GPT‑5\.6 Sol · Medium/);
+  assert.match(salesAssistant, /Fixed medium reasoning/);
+  assert.doesNotMatch(salesAssistant, /type="range"/);
+  assert.doesNotMatch(salesAssistant, /reasoning_profile/);
+  assert.doesNotMatch(salesAssistant, /sales-reasoning/);
+  assert.doesNotMatch(styles, /\.sales-reasoning-control\s*\{/);
 });
 
 test("renders clean Sales answer formatting with restrained OHAUS-red emphasis", () => {
