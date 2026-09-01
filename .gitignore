@@ -41,3 +41,6 @@ yarn-error.log*
 /.wrangler/
 /outputs/
 /work/
+
+# local source workbooks (generated web data is committed separately)
+/MMMDF_EN_US_20260605_AI_Organized 2.xlsx

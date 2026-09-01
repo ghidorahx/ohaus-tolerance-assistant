@@ -10,6 +10,11 @@ export default defineConfig({
   base: "/ohaus-tolerance-assistant/",
   publicDir: path.join(projectRoot, "public"),
   plugins: [react()],
+  resolve: {
+    alias: {
+      "@": projectRoot,
+    },
+  },
   build: {
     outDir: path.join(projectRoot, "pages-dist"),
     emptyOutDir: true,
