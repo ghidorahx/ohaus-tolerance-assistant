@@ -1,10 +1,10 @@
 # OHAUS Support Assistants
 
-A browser-first workspace with a source-linked Tolerance Assistant, a workbook-grounded Ask Assistant, and an interactive Compatibility Web.
+A browser-first workspace with a source-linked Tolerance Assistant, a workbook-grounded Sales Assistant, and an interactive Compatibility Web.
 
-## Workbook-grounded Ask Assistant
+## Workbook-grounded Sales Assistant
 
-The Ask Assistant uses the OpenAI Responses API with GPT-5.6 Sol, an Auto/Fast/Balanced/Thorough reasoning control, Standard mode, adaptive workbook retrieval, customer-language intent normalization, and strict structured answers. Safe exact-spec lookups are answered directly from structured catalog records. Other questions use a cache-aligned prompt and typically retrieve eight generated knowledge documents, expanding up to twenty for broad questions. GPT-5.6 Terra is used only as a same-generation fallback when Sol is temporarily rate limited. Model memory and prior chat answers are never treated as product-source evidence.
+The Sales Assistant uses the OpenAI Responses API with GPT-5.6 Sol, an Auto/Fast/Balanced/Thorough reasoning control, Standard mode, hybrid workbook retrieval, customer-language intent normalization, and strict structured answers. GPT-5.6 Terra is used only as a same-generation fallback when Sol is temporarily rate limited. Each request receives exact JSON records, deterministic requirement filtering, exact and nearest capacity alternatives, relevant field matches, relationship data, and a small set of generated Markdown product or family documents before the model answers. Model memory and prior chat answers are never treated as product-source evidence.
 
 The current catalog contains 80 portable balances across 7 families and 91 resolved related items from `Alpha-PortableBalances.xlsx`. Exact material numbers are authoritative, duplicate model labels require clarification, unresolved relationships remain review items, and missing live business fields such as pricing, inventory, and lead time are reported instead of invented.
 

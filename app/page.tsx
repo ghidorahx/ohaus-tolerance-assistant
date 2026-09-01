@@ -609,9 +609,9 @@ export default function Home() {
     fetch(knowledgeUrl)
       .then((response) => {
         if (!response.ok) throw new Error("Knowledge base unavailable");
-        return response.json() as Promise<KnowledgeBase>;
+        return response.json();
       })
-      .then((knowledge) => setData(knowledge))
+      .then((knowledge: KnowledgeBase) => setData(knowledge))
       .catch(() => setLoadError(true))
       .finally(() => setLoading(false));
   }, []);
@@ -674,7 +674,7 @@ export default function Home() {
           <div className="brand-mark" aria-hidden="true">O</div>
           <div>
             <p className="eyebrow">{isCompatibilityMode ? "Product relationships" : isSalesMode ? "Product intelligence" : "Service reference"}</p>
-            <h1>{isCompatibilityMode ? "Compatibility Web" : isSalesMode ? "Ask Assistant" : "Tolerance Assistant"}</h1>
+            <h1>{isCompatibilityMode ? "Compatibility Web" : isSalesMode ? "Sales Assistant" : "Tolerance Assistant"}</h1>
           </div>
         </div>
 
@@ -692,8 +692,8 @@ export default function Home() {
             onClick={() => switchMode("sales")}
             aria-pressed={isSalesMode}
           >
-            <span className="mode-icon" aria-hidden="true">A</span>
-            Ask
+            <span className="mode-icon" aria-hidden="true">S</span>
+            Sales
           </button>
           <button
             className={isCompatibilityMode ? "active" : ""}

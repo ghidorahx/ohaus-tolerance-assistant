@@ -12,11 +12,7 @@ import {
   REASONING_PROFILES,
   resolveReasoningProfile,
 } from "@/lib/sales-agent.mjs";
-import {
-  DEFAULT_RETRIEVAL_DOCUMENTS,
-  getSalesCatalogStatus,
-  MAX_RETRIEVAL_DOCUMENTS,
-} from "@/lib/sales-catalog.mjs";
+import { getSalesCatalogStatus, MAX_RETRIEVAL_DOCUMENTS } from "@/lib/sales-catalog.mjs";
 
 export const runtime = "edge";
 
@@ -134,12 +130,10 @@ export async function GET() {
     context: {
       max_verified_turns: MAX_VERIFIED_CONTEXT_TURNS,
       approximate_character_budget: MAX_CONTEXT_CHARACTERS,
-      default_retrieval_documents: DEFAULT_RETRIEVAL_DOCUMENTS,
       max_retrieval_documents: MAX_RETRIEVAL_DOCUMENTS,
       max_total_request_tokens: MAX_TOTAL_REQUEST_TOKENS,
       max_input_tokens: MAX_INPUT_TOKENS,
       max_output_tokens: MAX_OUTPUT_TOKENS,
-      deterministic_lookup_enabled: true,
     },
     catalog: getSalesCatalogStatus(),
   });
@@ -160,7 +154,7 @@ export async function POST(request: Request) {
   if (requiredCode) {
     const suppliedCode = request.headers.get("x-pilot-access-code") ?? "";
     if (!suppliedCode || !(await sameSecret(suppliedCode, requiredCode))) {
-      return json({ error: "Enter the team access code to continue.", code: "access_code_required" }, 401);
+      return json({ error: "Enter the sales-pilot access code to continue.", code: "access_code_required" }, 401);
     }
   }
 
@@ -194,35 +188,15 @@ export async function POST(request: Request) {
       reasoningEffort: reasoning.effort,
       reasoningMode: process.env.OPENAI_REASONING_MODE ?? DEFAULT_REASONING_MODE,
     });
-    console.log(JSON.stringify({
-      event: "ask_response",
-      delivery: answer.delivery,
-      model: answer.model,
-      reasoning_effort: answer.reasoning_effort,
-      retrieval_documents: answer.grounding?.retrieval_documents ?? null,
-      response_id: answer.response_id,
-      timing: answer.timing,
-      usage: answer.usage,
-    }));
-    const serverTiming = [
-      `grounding;dur=${Math.max(0, answer.timing?.grounding_ms ?? 0).toFixed(1)}`,
-      `openai;dur=${Math.max(0, answer.timing?.openai_ms ?? 0).toFixed(1)}`,
-      `total;dur=${Math.max(0, answer.timing?.total_ms ?? 0).toFixed(1)}`,
-    ].join(", ");
     return json({
       answer,
       reasoning_profile: reasoning.profile,
       context_used: context.length,
       catalog: getSalesCatalogStatus(),
-    }, 200, { "Server-Timing": serverTiming });
+    });
   } catch (error) {
+    console.error("Sales assistant request failed", error);
     const upstream = error as { status?: number; code?: string | null; message?: string; retryAfterSeconds?: number | null };
-    console.error(JSON.stringify({
-      event: "ask_error",
-      status: upstream.status ?? 500,
-      code: upstream.code ?? "unknown",
-      message: upstream.message ?? "Unknown product assistant error",
-    }));
     if (upstream.status === 429 && (upstream.code === "insufficient_quota" || /credits|quota/i.test(upstream.message ?? ""))) {
       return json({ error: "The OpenAI API project needs billing credits before the assistant can answer.", code: "ai_billing_required" }, 503);
     }

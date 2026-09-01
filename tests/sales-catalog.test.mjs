@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  buildDeterministicLookupAnswer,
   buildGroundingBundle,
   compareProducts,
   findNearestCapacityAlternatives,
@@ -133,43 +132,13 @@ test("builds broad current-turn grounding and carries verified follow-up materia
     question: "What accessories are listed for it?",
     sessionContext: [{ materials: ["30428204"] }],
   });
-  assert.equal(bundle.bundle_version, "sales-grounding-v9");
+  assert.equal(bundle.bundle_version, "sales-grounding-v8");
   assert.equal(bundle.exact_identifier_matches[0].record.material_number, "30428204");
   assert.equal(bundle.relationship_results[0].source.material_number, "30428204");
   assert.equal(bundle.catalog_scope.portable_products, 80);
   assert.equal(bundle.retrieval_document_matches.status, "ready");
-  assert.equal(bundle.retrieval_document_matches.result_count, 0);
+  assert.equal(bundle.retrieval_document_matches.result_count, 20);
   assert.equal(bundle.source_file, "Alpha-PortableBalances.xlsx");
-});
-
-test("adapts retrieval breadth to the question instead of always sending twenty documents", () => {
-  const ordinary = buildGroundingBundle({
-    question: "What portable balance works well in a classroom?",
-    sessionContext: [],
-  });
-  const selection = buildGroundingBundle({
-    question: "Which balance is best for a classroom with limited bench space?",
-    sessionContext: [],
-  });
-  const broad = buildGroundingBundle({
-    question: "Show all balances in the complete catalog.",
-    sessionContext: [],
-  });
-
-  assert.ok(ordinary.retrieval_document_matches.result_count <= 8);
-  assert.ok(selection.retrieval_document_matches.result_count <= 6);
-  assert.equal(broad.retrieval_document_matches.result_count, 20);
-});
-
-test("builds deterministic answers only for unambiguous exact specification lookups", () => {
-  const answer = buildDeterministicLookupAnswer("What are the capacity and readability of CR221?");
-  assert.equal(answer.answer_items[0].identifier, "30428204");
-  assert.deepEqual(answer.evidence, [
-    { material_number: "30428204", field: "specifications.maximum_capacity" },
-    { material_number: "30428204", field: "specifications.readability" },
-  ]);
-  assert.equal(buildDeterministicLookupAnswer("Why is CR221 a good choice?"), null);
-  assert.equal(buildDeterministicLookupAnswer("Compare CR221 and CR5200 capacity"), null);
 });
 
 test("supplies the complete populated record when explicitly requested", () => {
