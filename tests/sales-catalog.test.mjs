@@ -9,6 +9,7 @@ import {
   getRecords,
   getRelationships,
   hydrateEvidenceItems,
+  interpretCustomerQuestion,
   searchCatalog,
   searchRetrievalDocuments,
 } from "../lib/sales-catalog.mjs";
@@ -40,6 +41,30 @@ test("searches across natural-language sales and usage fields", () => {
   assert.ok(result.result_count > 0);
   assert.ok(result.results.some((item) => item.record.usage_context.includes("Outdoor")));
   assert.ok(result.results.every((item) => item.matched_fields.length > 0));
+});
+
+test("interprets colloquial customer language before catalog retrieval", () => {
+  const interpreted = interpretCustomerQuestion(
+    "The customer needs to count small components in a warehouse where there may not be an outlet.",
+  );
+  assert.deepEqual(
+    interpreted.recognized_concepts.map((concept) => concept.id),
+    ["battery_operation", "industrial_use", "parts_counting"],
+  );
+  assert.equal(interpreted.derived_selection.battery_required, true);
+  assert.deepEqual(interpreted.derived_selection.applications, ["Parts Counting"]);
+  assert.deepEqual(interpreted.derived_selection.usage_context, ["Work in Industrial"]);
+  assert.match(interpreted.expanded_query, /battery|Parts Counting|Work in Industrial/);
+});
+
+test("recognizes customer outcomes instead of requiring catalog wording", () => {
+  const hold = interpretCustomerQuestion("They need the number to stay visible after removing the item.");
+  assert.ok(hold.recognized_concepts.some((concept) => concept.id === "display_hold"));
+  assert.deepEqual(hold.derived_selection.applications, ["Display Hold"]);
+
+  const compact = interpretCustomerQuestion("Bench space is limited and they want to tuck it away after use.");
+  assert.ok(compact.recognized_concepts.some((concept) => concept.id === "compact_space"));
+  assert.ok(compact.derived_selection.search_terms.includes("space saving"));
 });
 
 test("retrieves generated product and family knowledge documents", () => {
@@ -107,7 +132,7 @@ test("builds broad current-turn grounding and carries verified follow-up materia
     question: "What accessories are listed for it?",
     sessionContext: [{ materials: ["30428204"] }],
   });
-  assert.equal(bundle.bundle_version, "sales-grounding-v7");
+  assert.equal(bundle.bundle_version, "sales-grounding-v8");
   assert.equal(bundle.exact_identifier_matches[0].record.material_number, "30428204");
   assert.equal(bundle.relationship_results[0].source.material_number, "30428204");
   assert.equal(bundle.catalog_scope.portable_products, 80);
@@ -162,5 +187,19 @@ test("pre-filters explicit numerical selection requirements before generation", 
   assert.ok(result.total_matches > 0);
   assert.ok(result.products.every((product) => product.maximum_capacity.value >= 5_000));
   assert.ok(result.products.every((product) => product.readability.value <= 1));
+  assert.ok(result.products.every((product) => /batter/i.test(product.power)));
+});
+
+test("applies inferred customer intent to deterministic product selection", () => {
+  const bundle = buildGroundingBundle({
+    question: "We need to count components on a factory floor with no nearby outlet.",
+    sessionContext: [],
+  });
+  const result = bundle.deterministic_selection_results;
+  assert.equal(result.criteria.battery_required, true);
+  assert.deepEqual(result.criteria.applications, ["Parts Counting"]);
+  assert.deepEqual(result.criteria.usage_context, ["Work in Industrial"]);
+  assert.ok(result.total_matches > 0);
+  assert.ok(result.products.every((product) => /parts counting/i.test(product.application)));
   assert.ok(result.products.every((product) => /batter/i.test(product.power)));
 });

@@ -54,7 +54,7 @@ test("uses one quality-first GPT-5.6 Responses call with comprehensive workbook 
   assert.equal(requests[0].tools, undefined);
   assert.equal(requests[0].text.format.strict, true);
   assert.match(JSON.stringify(requests[0].input), /RECENT VERIFIED CONVERSATION CONTEXT/);
-  assert.match(JSON.stringify(requests[0].input), /sales-grounding-v7/);
+  assert.match(JSON.stringify(requests[0].input), /sales-grounding-v8/);
   assert.match(JSON.stringify(requests[0].input), /deterministic_selection_results/);
   assert.match(JSON.stringify(requests[0].input), /nearest_alternative_results/);
   assert.match(JSON.stringify(requests[0].input), /retrieval_document_matches/);
