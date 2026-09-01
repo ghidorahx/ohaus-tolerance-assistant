@@ -9,7 +9,6 @@ import {
 } from "react";
 import { answerFormatting, answerQuestion } from "@/lib/answer-engine.mjs";
 import SalesAssistant from "./SalesAssistant";
-import PortableCompatibilityWeb from "./CompatibilityWeb";
 
 type Measure = {
   value: number | null;
@@ -85,7 +84,7 @@ type Exchange = {
   assistant: Message;
 };
 
-type AssistantMode = "tolerance" | "sales" | "compatibility";
+type AssistantMode = "tolerance" | "sales";
 
 const starterMessage: Message = {
   id: "welcome",
@@ -216,7 +215,6 @@ export default function Home() {
   );
 
   const isSalesMode = mode === "sales";
-  const isCompatibilityMode = mode === "compatibility";
 
   const exchanges = useMemo(() => {
     const conversation = messages.filter((message) => message.id !== "welcome");
@@ -262,13 +260,13 @@ export default function Home() {
   }
 
   return (
-    <main className={`app-shell ${isSalesMode ? "sales-mode" : isCompatibilityMode ? "web-mode" : "tolerance-mode"}`}>
+    <main className={`app-shell ${isSalesMode ? "sales-mode" : "tolerance-mode"}`}>
       <header className="topbar">
         <div className="brand">
           <div className="brand-mark" aria-hidden="true">O</div>
           <div>
-            <p className="eyebrow">{isCompatibilityMode ? "Product relationships" : isSalesMode ? "Product intelligence" : "Service reference"}</p>
-            <h1>{isCompatibilityMode ? "Compatibility Web" : isSalesMode ? "Ask" : "Tolerance Assistant"}</h1>
+            <p className="eyebrow">{isSalesMode ? "Product intelligence" : "Service reference"}</p>
+            <h1>{isSalesMode ? "Ask" : "Tolerance Assistant"}</h1>
           </div>
         </div>
 
@@ -289,32 +287,17 @@ export default function Home() {
             <span className="mode-icon" aria-hidden="true">?</span>
             Ask
           </button>
-          <button
-            className={isCompatibilityMode ? "active" : ""}
-            onClick={() => switchMode("compatibility")}
-            aria-pressed={isCompatibilityMode}
-          >
-            <span className="mode-icon" aria-hidden="true">◎</span>
-            3D Web
-          </button>
         </nav>
 
         <div className="header-actions">
           {mode === "tolerance" && <button className="clear-button" onClick={clearConversation}>Clear chat</button>}
           <div className="header-status">
             <span className="status-dot" aria-hidden="true" />
-            {isCompatibilityMode
-              ? "Verified links only"
-              : isSalesMode
-                ? "Workbook grounded"
-                : "Verified local data"}
+            {isSalesMode ? "Workbook grounded" : "Verified local data"}
           </div>
         </div>
       </header>
 
-      <div className="mode-surface compatibility-mode-surface" hidden={!isCompatibilityMode}>
-        <PortableCompatibilityWeb />
-      </div>
       <div className="mode-surface sales-mode-surface" hidden={!isSalesMode}>
         <SalesAssistant />
       </div>

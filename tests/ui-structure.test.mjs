@@ -120,10 +120,11 @@ test("makes the Sales product-knowledge rail collapsible and accessible", () => 
   assert.match(styles, /\.sales-rail-body\[hidden\]/);
 });
 
-test("keeps every workspace mounted while switching tabs", () => {
+test("keeps the Tolerance and Ask workspaces mounted while switching tabs", () => {
   assert.match(page, /className="mode-surface tolerance-mode-surface" hidden=\{mode !== "tolerance"\}/);
   assert.match(page, /className="mode-surface sales-mode-surface" hidden=\{!isSalesMode\}/);
-  assert.match(page, /className="mode-surface compatibility-mode-surface" hidden=\{!isCompatibilityMode\}/);
+  assert.doesNotMatch(page, /compatibility-mode-surface/);
+  assert.doesNotMatch(page, />3D Web</);
   assert.doesNotMatch(page, /\{isSalesMode && <SalesAssistant/);
   assert.match(styles, /\.mode-surface\[hidden\]\s*\{\s*display:\s*none\s*!important;/);
 

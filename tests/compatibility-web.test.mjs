@@ -82,6 +82,7 @@ test("supports focused branching and an organized draggable scene without changi
   assert.match(component, /<details className="web-relationship-details">/);
   assert.match(component, /Item \{selectedNode\.materialNumber\}/);
   assert.match(component, /Raw_Data row \{selectedNode\.sourceRow\}/);
-  assert.match(page, /<PortableCompatibilityWeb/);
+  assert.doesNotMatch(page, /<PortableCompatibilityWeb/);
+  assert.doesNotMatch(page, />3D Web</);
   assert.doesNotMatch(page, /const networkNodes/);
 });
