@@ -34,7 +34,7 @@ test("uses the requested neutral glass presentation", () => {
   assert.match(styles, /object-fit:\s*contain/);
 });
 
-test("provides a workbook-grounded Sales assistant with extended verified context", () => {
+test("provides a workbook-grounded Ask assistant with extended verified context", () => {
   assert.match(page, /<SalesAssistant/);
   assert.match(salesAssistant, /new URL\("api\/sales"/);
   assert.match(salesAssistant, /buildContext/);
@@ -42,7 +42,9 @@ test("provides a workbook-grounded Sales assistant with extended verified contex
   assert.match(salesAssistant, /Verified catalog evidence/);
   assert.match(salesAssistant, /retry_after_seconds/);
   assert.match(salesAssistant, /Ready in \$\{rateLimitSeconds\}s/);
-  assert.match(salesAssistant, /Sales pilot owner · T\. Delacruz/);
+  assert.match(salesAssistant, /Ask pilot owner · T\. Delacruz/);
+  assert.match(page, /isSalesMode \? "Ask"/);
+  assert.match(page, /className="mode-icon" aria-hidden="true">\?<\/span>\s+Ask/);
   assert.match(salesAssistant, /generated knowledge documents/);
   assert.match(styles, /\.sales-evidence-grid/);
   assert.match(styles, /\.sales-conversation/);
@@ -63,6 +65,12 @@ test("keeps Sales reasoning fixed at medium without a customer-facing slider", (
   assert.doesNotMatch(salesAssistant, /reasoning_profile/);
   assert.doesNotMatch(salesAssistant, /sales-reasoning/);
   assert.doesNotMatch(styles, /\.sales-reasoning-control\s*\{/);
+});
+
+test("reports Cloudflare Vectorize only inside the supporting details", () => {
+  assert.match(salesAssistant, /Vectorize semantic retrieval/);
+  assert.match(salesAssistant, /Vectorize \+ catalog/);
+  assert.match(salesAssistant, /health\?\.vectorize\?\.configured/);
 });
 
 test("renders clean Sales answer formatting with restrained OHAUS-red emphasis", () => {

@@ -37,6 +37,9 @@ type SalesAnswer = {
   output_token_cap: number;
   output_cap_reduced: boolean;
   catalog_checks: number;
+  retrieval_strategy: string;
+  vectorize_status: string;
+  retrieval_documents_sent: number;
 };
 
 type Message = {
@@ -59,6 +62,14 @@ type Health = {
   fallback_model: string;
   reasoning_effort: string;
   reasoning_mode: string;
+  vectorize: {
+    configured: boolean;
+    index: string;
+    namespace: string;
+    embedding_model: string;
+    source_documents: number;
+    vector_records: number;
+  };
   context: {
     max_verified_turns: number;
     approximate_character_budget: number;
@@ -77,6 +88,13 @@ type Health = {
     retrieval_status: string;
     source_file: string;
   };
+};
+
+type AskApiResponse = {
+  answer?: SalesAnswer;
+  code?: string;
+  error?: string;
+  retry_after_seconds?: number;
 };
 
 const suggestions = [
@@ -166,7 +184,7 @@ function parseAnswerBlocks(value: string) {
     if (item) {
       flushParagraph();
       const type = unorderedItem ? "unordered-list" : "ordered-list";
-      if (list?.type !== type) flushList();
+      if (list && list.type !== type) flushList();
       list ??= { type, content: [] };
       list.content.push(item);
       continue;
@@ -265,9 +283,9 @@ export default function SalesAssistant() {
     fetch(url, { headers: { Accept: "application/json" } })
       .then(async (response) => {
         if (!response.ok) throw new Error("Product knowledge service unavailable");
-        return response.json();
+        return response.json() as Promise<Health>;
       })
-      .then((payload: Health) => {
+      .then((payload) => {
         setAccessCode(savedCode);
         setHealth(payload);
         setNeedsCode(Boolean(payload.access_code_required && !savedCode));
@@ -323,7 +341,7 @@ export default function SalesAssistant() {
         },
         body: JSON.stringify({ question: trimmed, context }),
       });
-      const payload = await response.json().catch(() => ({}));
+      const payload = await response.json().catch(() => ({})) as AskApiResponse;
       if (response.status === 401 && payload.code === "access_code_required") {
         setNeedsCode(true);
         throw new Error("Enter the team access code, then ask the question again.");
@@ -395,7 +413,7 @@ export default function SalesAssistant() {
   const outputTokens = Math.round((health?.context.max_output_tokens ?? 128_000) / 1_000);
 
   return (
-    <section className={`sales-workspace ${productKnowledgeCollapsed ? "sales-rail-collapsed" : ""}`} aria-label="Sales assistant">
+    <section className={`sales-workspace ${productKnowledgeCollapsed ? "sales-rail-collapsed" : ""}`} aria-label="Ask assistant">
       <aside className="sales-rail">
         <div className="sales-rail-header">
           <div className="sales-agent-badge" aria-hidden="true">AI</div>
@@ -436,11 +454,11 @@ export default function SalesAssistant() {
             <span>Extended context</span>
             <strong>{health?.context.max_verified_turns ?? 120} verified turns</strong>
             <small>
-              {totalRequestTokens}K total request budget · {inputTokens}K input reserve · {outputTokens}K output cap · up to {health?.context.max_retrieval_documents ?? 20} knowledge documents
+              {totalRequestTokens}K total request budget · {inputTokens}K input reserve · {outputTokens}K output cap · up to {health?.context.max_retrieval_documents ?? 8} knowledge documents
             </small>
           </div>
 
-          <footer>Sales pilot owner · T. Delacruz</footer>
+          <footer>{health?.vectorize?.configured ? "Vectorize semantic retrieval" : "Local retrieval fallback"} · Ask pilot owner · T. Delacruz</footer>
         </div>
       </aside>
 
@@ -641,6 +659,7 @@ function SalesExchange({
 
               <div className="sales-answer-foot">
                 <span>{answer.model}{answer.fallback_used ? " fallback" : ""} · {answer.reasoning_effort} reasoning · {answer.reasoning_mode} mode</span>
+                <span>{answer.retrieval_strategy === "vectorize_hybrid" ? "Vectorize + catalog" : "Catalog retrieval"} · {answer.retrieval_documents_sent ?? 0} document{answer.retrieval_documents_sent === 1 ? "" : "s"}</span>
                 <span>{answer.catalog_checks} catalog check{answer.catalog_checks === 1 ? "" : "s"}</span>
               </div>
             </div>

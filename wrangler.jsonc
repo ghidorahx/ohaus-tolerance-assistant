@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "support-local",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "ai": {
+    "binding": "AI"
+  },
+  "vectorize": [
+    {
+      "binding": "SALES_VECTORIZE",
+      "index_name": "ohaus-sales-catalog-v1",
+      "remote": true
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

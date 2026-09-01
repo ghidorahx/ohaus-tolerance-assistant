@@ -10,6 +10,11 @@ import {
   MAX_VERIFIED_CONTEXT_TURNS,
 } from "@/lib/sales-agent.mjs";
 import { getSalesCatalogStatus, MAX_RETRIEVAL_DOCUMENTS } from "@/lib/sales-catalog.mjs";
+import {
+  getSalesVectorizeStatus,
+  querySalesVectorize,
+  seedSalesVectorizeBatch,
+} from "@/lib/sales-vectorize.mjs";
 
 export const runtime = "edge";
 
@@ -81,6 +86,23 @@ function isSameOrigin(request: Request) {
   }
 }
 
+async function hasValidAccessCode(request: Request) {
+  const requiredCode = process.env.SALES_PILOT_ACCESS_CODE;
+  if (!requiredCode) return true;
+  const suppliedCode = request.headers.get("x-pilot-access-code") ?? "";
+  return Boolean(suppliedCode && await sameSecret(suppliedCode, requiredCode));
+}
+
+async function cloudflareBindings(): Promise<Partial<Cloudflare.Env>> {
+  try {
+    const workers = await import("cloudflare:workers");
+    return workers.env;
+  } catch {
+    // The Node build test has no workerd-native cloudflare:workers module.
+    return {};
+  }
+}
+
 function boundedContext(value: unknown): SalesContextTurn[] {
   if (!Array.isArray(value)) return [];
   const candidates = value.slice(-MAX_VERIFIED_CONTEXT_TURNS).flatMap((turn) => {
@@ -114,6 +136,8 @@ function boundedContext(value: unknown): SalesContextTurn[] {
 }
 
 export async function GET() {
+  const bindings = await cloudflareBindings();
+  const vectorizeStatus = getSalesVectorizeStatus();
   return json({
     status: "ready",
     model: process.env.OPENAI_MODEL ?? DEFAULT_MODEL,
@@ -122,6 +146,10 @@ export async function GET() {
     reasoning_mode: process.env.OPENAI_REASONING_MODE ?? DEFAULT_REASONING_MODE,
     api_configured: Boolean(process.env.OPENAI_API_KEY),
     access_code_required: Boolean(process.env.SALES_PILOT_ACCESS_CODE),
+    vectorize: {
+      ...vectorizeStatus,
+      configured: Boolean(bindings.AI && bindings.SALES_VECTORIZE),
+    },
     context: {
       max_verified_turns: MAX_VERIFIED_CONTEXT_TURNS,
       approximate_character_budget: MAX_CONTEXT_CHARACTERS,
@@ -145,12 +173,8 @@ export async function POST(request: Request) {
     }, 429, { "Retry-After": String(requestLimit.retryAfterSeconds) });
   }
 
-  const requiredCode = process.env.SALES_PILOT_ACCESS_CODE;
-  if (requiredCode) {
-    const suppliedCode = request.headers.get("x-pilot-access-code") ?? "";
-    if (!suppliedCode || !(await sameSecret(suppliedCode, requiredCode))) {
-      return json({ error: "Enter the sales-pilot access code to continue.", code: "access_code_required" }, 401);
-    }
+  if (!(await hasValidAccessCode(request))) {
+    return json({ error: "Enter the team access code to continue.", code: "access_code_required" }, 401);
   }
 
   let body: { question?: unknown; context?: unknown };
@@ -170,6 +194,23 @@ export async function POST(request: Request) {
 
   try {
     const context = boundedContext(body.context);
+    const bindings = await cloudflareBindings();
+    let semanticRetrieval = { status: "not_configured", matches: [] };
+    if (bindings.AI && bindings.SALES_VECTORIZE) {
+      try {
+        semanticRetrieval = await querySalesVectorize({
+          question,
+          ai: bindings.AI,
+          index: bindings.SALES_VECTORIZE,
+        });
+      } catch (error) {
+        console.error(JSON.stringify({
+          message: "Vectorize query failed; using local retrieval fallback",
+          error: error instanceof Error ? error.message : String(error),
+        }));
+        semanticRetrieval = { status: "fallback", matches: [] };
+      }
+    }
     const answer = await answerSalesQuestionWithAI({
       question,
       sessionContext: context,
@@ -178,6 +219,7 @@ export async function POST(request: Request) {
       fallbackModel: process.env.OPENAI_FALLBACK_MODEL ?? DEFAULT_FALLBACK_MODEL,
       reasoningEffort: DEFAULT_REASONING_EFFORT,
       reasoningMode: process.env.OPENAI_REASONING_MODE ?? DEFAULT_REASONING_MODE,
+      semanticRetrieval,
     });
     return json({
       answer,
@@ -185,7 +227,10 @@ export async function POST(request: Request) {
       catalog: getSalesCatalogStatus(),
     });
   } catch (error) {
-    console.error("Sales assistant request failed", error);
+    console.error(JSON.stringify({
+      message: "Ask assistant request failed",
+      error: error instanceof Error ? error.message : String(error),
+    }));
     const upstream = error as { status?: number; code?: string | null; message?: string; retryAfterSeconds?: number | null };
     if (upstream.status === 429 && (upstream.code === "insufficient_quota" || /credits|quota/i.test(upstream.message ?? ""))) {
       return json({ error: "The OpenAI API project needs billing credits before the assistant can answer.", code: "ai_billing_required" }, 503);
@@ -199,5 +244,43 @@ export async function POST(request: Request) {
       }, 429, { "Retry-After": String(retryAfterSeconds) });
     }
     return json({ error: "The product assistant could not complete this request. Please try again.", code: "ai_request_failed" }, 502);
+  }
+}
+
+export async function PUT(request: Request) {
+  if (!isSameOrigin(request)) return json({ error: "Cross-origin requests are not allowed." }, 403);
+  if (!(await hasValidAccessCode(request))) {
+    return json({ error: "Enter the team access code to continue.", code: "access_code_required" }, 401);
+  }
+  const bindings = await cloudflareBindings();
+  if (!bindings.AI || !bindings.SALES_VECTORIZE) {
+    return json({ error: "Cloudflare Vectorize is not configured.", code: "vectorize_not_configured" }, 503);
+  }
+
+  let body: { cursor?: unknown; batch_size?: unknown };
+  try {
+    body = await request.json();
+  } catch {
+    body = {};
+  }
+
+  try {
+    const result = await seedSalesVectorizeBatch({
+      ai: bindings.AI,
+      index: bindings.SALES_VECTORIZE,
+      cursor: Number(body.cursor) || 0,
+      batchSize: Number(body.batch_size) || undefined,
+    });
+    return json({
+      status: result.complete ? "complete" : "in_progress",
+      ...result,
+      vectorize: getSalesVectorizeStatus(),
+    });
+  } catch (error) {
+    console.error(JSON.stringify({
+      message: "Vectorize seed batch failed",
+      error: error instanceof Error ? error.message : String(error),
+    }));
+    return json({ error: "The Vectorize catalog batch could not be indexed.", code: "vectorize_seed_failed" }, 502);
   }
 }

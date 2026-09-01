@@ -132,13 +132,34 @@ test("builds broad current-turn grounding and carries verified follow-up materia
     question: "What accessories are listed for it?",
     sessionContext: [{ materials: ["30428204"] }],
   });
-  assert.equal(bundle.bundle_version, "sales-grounding-v8");
+  assert.equal(bundle.bundle_version, "sales-grounding-v9-vectorize");
   assert.equal(bundle.exact_identifier_matches[0].record.material_number, "30428204");
   assert.equal(bundle.relationship_results[0].source.material_number, "30428204");
   assert.equal(bundle.catalog_scope.portable_products, 80);
   assert.equal(bundle.retrieval_document_matches.status, "ready");
-  assert.equal(bundle.retrieval_document_matches.result_count, 20);
+  assert.equal(bundle.retrieval_document_matches.result_count, 8);
+  assert.equal(bundle.retrieval_document_matches.strategy, "local_fallback");
   assert.equal(bundle.source_file, "Alpha-PortableBalances.xlsx");
+});
+
+test("hydrates Vectorize candidates from the authoritative local retrieval index", () => {
+  const bundle = buildGroundingBundle({
+    question: "I need a slim stackable classroom balance.",
+    semanticRetrieval: {
+      status: "ready",
+      index: "ohaus-sales-catalog-v1",
+      matches: [
+        { document_id: "family:scout-skx", score: 0.93 },
+        { document_id: "unknown:document", score: 0.99 },
+      ],
+    },
+  });
+  assert.equal(bundle.retrieval_document_matches.strategy, "vectorize_hybrid");
+  assert.equal(bundle.retrieval_document_matches.vectorize_status, "ready");
+  assert.equal(bundle.retrieval_document_matches.results[0].document_id, "family:scout-skx");
+  assert.equal(bundle.retrieval_document_matches.results[0].semantic_score, 0.93);
+  assert.equal(bundle.retrieval_document_matches.results.some((item) => item.document_id === "unknown:document"), false);
+  assert.equal(bundle.retrieval_document_matches.result_count, 8);
 });
 
 test("supplies the complete populated record when explicitly requested", () => {

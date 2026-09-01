@@ -1,10 +1,10 @@
 # OHAUS Support Assistants
 
-A browser-first workspace with a source-linked Tolerance Assistant, a workbook-grounded Sales Assistant, and an interactive Compatibility Web.
+A browser-first workspace with a source-linked Tolerance Assistant, a workbook-grounded Ask assistant, and an interactive Compatibility Web.
 
-## Workbook-grounded Sales Assistant
+## Workbook-grounded Ask assistant
 
-The Sales Assistant uses the OpenAI Responses API with GPT-5.6 Sol, fixed medium reasoning, Standard mode, hybrid workbook retrieval, customer-language intent normalization, and strict structured answers. GPT-5.6 Terra is used only as a same-generation fallback when Sol is temporarily rate limited. Each request receives exact JSON records, deterministic requirement filtering, exact and nearest capacity alternatives, relevant field matches, relationship data, and a small set of generated Markdown product or family documents before the model answers. Model memory and prior chat answers are never treated as product-source evidence.
+Ask uses the OpenAI Responses API with GPT-5.6 Sol, fixed medium reasoning, Standard mode, Cloudflare Vectorize plus deterministic workbook retrieval, customer-language intent normalization, and strict structured answers. GPT-5.6 Terra is used only as a same-generation fallback when Sol is temporarily rate limited. Each request receives exact JSON records, deterministic requirement filtering, exact and nearest capacity alternatives, relevant field matches, relationship data, and up to eight generated Markdown product or family excerpts before the model answers. Model memory and prior chat answers are never treated as product-source evidence.
 
 The current catalog contains 80 portable balances across 7 families and 91 resolved related items from `Alpha-PortableBalances.xlsx`. Exact material numbers are authoritative, duplicate model labels require clarification, unresolved relationships remain review items, and missing live business fields such as pricing, inventory, and lead time are reported instead of invented.
 
@@ -19,7 +19,7 @@ The workbook remains the only human-edited master. Do not manually edit the gene
 - `data/sales-data-quality-report.json` — required-field checks plus visible source-review items.
 - `data/sales-catalog-version.json` and `data/sales-rag/manifest.json` — source hashes, record counts, generated-file hashes, and version traceability.
 
-The current generated layer contains 80 product documents and 7 family documents. Exact or numeric claims still come from the structured JSON; Markdown helps find and explain descriptive details. This keeps one OpenAI model call per user question and avoids an additional embedding or vector-store request during the pilot.
+The current generated layer contains 80 product documents and 7 family documents. Exact or numeric claims still come from the structured JSON; Vectorize and the generated Markdown layer help find and explain descriptive details. Cloudflare Workers AI embeds each question, Vectorize returns semantic candidates, and the local index fills any remaining retrieval slots or takes over automatically if semantic retrieval is unavailable.
 
 To import a refreshed workbook, install the maintenance-only Python dependencies and run:
 
@@ -30,13 +30,13 @@ npm run import:sales-workbook -- /absolute/path/to/Alpha-PortableBalances.xlsx
 
 Set `SALES_IMPORT_PYTHON` when the required Python executable is not named `python3`.
 
-For the expanded-context test, the Tier 1 profile uses a 450K total request budget: up to 322K tokens are reserved for instructions, current catalog evidence, and verified conversation context, while GPT-5.6's maximum 128K output allowance is available for the answer. This leaves 50K of headroom under the model's 500K Tier 1 TPM limit. Conversation memory retains up to 120 verified turns, and each question may retrieve up to 20 generated knowledge documents with expanded excerpts. Requests for all information about an identified model receive its complete populated structured record. These are safety ceilings, not targets: only compact conversation summaries and relevant catalog evidence are sent. Every new question revalidates product facts against the catalog. The OpenAI response is not stored by the app, and the API key and catalog remain server-side.
+For the expanded-context test, the Tier 1 profile uses a 450K total request budget: up to 322K tokens are reserved for instructions, current catalog evidence, and verified conversation context, while GPT-5.6's maximum 128K output allowance is available for the answer. This leaves 50K of headroom under the model's 500K Tier 1 TPM limit. Conversation memory retains up to 120 verified turns, and each question may retrieve up to eight generated knowledge documents with expanded excerpts. Requests for all information about an identified model receive its complete populated structured record. These are safety ceilings, not targets: only compact conversation summaries and relevant catalog evidence are sent. Every new question revalidates product facts against the catalog. The OpenAI response is not stored by the app, and the API key and catalog remain server-side.
 
 To reduce avoidable API throttling, generated answers are capped to the size expected by this interface, Sol enters a short circuit-breaker period after a rate limit, and the browser honors the API retry interval with a visible countdown. Repeatedly submitting during a limit window should be avoided because rejected requests also count toward OpenAI rate limits.
 
 ## Compatibility Web rule
 
-The Compatibility Web is centered on OHAUS and branches through product families, categories, series, models, and parts. Hierarchy nodes may be added from the current product catalog, but compatibility, incompatibility, replacement, and lifecycle links must only be shown as verified facts. Unverified branches remain visibly marked as awaiting relationship data. Every verified relationship must be navigable in both directions, and switching between Tolerance, Sales, and the Compatibility Web must preserve each mode's working state.
+The Compatibility Web is centered on OHAUS and branches through product families, categories, series, models, and parts. Hierarchy nodes may be added from the current product catalog, but compatibility, incompatibility, replacement, and lifecycle links must only be shown as verified facts. Unverified branches remain visibly marked as awaiting relationship data. Every verified relationship must be navigable in both directions, and switching between Tolerance, Ask, and the Compatibility Web must preserve each mode's working state.
 
 ## Local browser test
 
@@ -49,7 +49,7 @@ npm run prepare:sales-data
 npm run dev
 ```
 
-Open `http://localhost:3000` in a browser. The Tolerance Assistant remains local-only. Sales questions are processed through the server-side OpenAI connection and are grounded in the server-side catalog.
+Open `http://localhost:3000` in a browser. The Tolerance Assistant remains local-only. Ask questions are processed through the server-side OpenAI connection and are grounded in the server-side catalog.
 
 ## Electron test on this laptop
 

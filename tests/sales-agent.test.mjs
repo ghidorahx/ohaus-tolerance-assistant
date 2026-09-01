@@ -54,7 +54,7 @@ test("uses one medium-reasoning GPT-5.6 Responses call with comprehensive workbo
   assert.equal(requests[0].tools, undefined);
   assert.equal(requests[0].text.format.strict, true);
   assert.match(JSON.stringify(requests[0].input), /RECENT VERIFIED CONVERSATION CONTEXT/);
-  assert.match(JSON.stringify(requests[0].input), /sales-grounding-v8/);
+  assert.match(JSON.stringify(requests[0].input), /sales-grounding-v9-vectorize/);
   assert.match(JSON.stringify(requests[0].input), /deterministic_selection_results/);
   assert.match(JSON.stringify(requests[0].input), /nearest_alternative_results/);
   assert.match(JSON.stringify(requests[0].input), /retrieval_document_matches/);
@@ -69,6 +69,9 @@ test("uses one medium-reasoning GPT-5.6 Responses call with comprehensive workbo
   assert.equal(result.fallback_used, false);
   assert.equal(result.output_token_cap, 128_000);
   assert.equal(result.output_cap_reduced, false);
+  assert.equal(result.retrieval_strategy, "local_fallback");
+  assert.equal(result.vectorize_status, "not_configured");
+  assert.equal(result.retrieval_documents_sent, 8);
 });
 
 test("retains up to one hundred twenty compact verified turns for follow-up resolution", async () => {

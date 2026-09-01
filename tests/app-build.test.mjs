@@ -58,7 +58,7 @@ test("packages the workbook-grounded AI sales endpoint and extended context poli
   assert.equal(payload.reasoning_profiles, undefined);
   assert.equal(payload.context.max_verified_turns, 120);
   assert.equal(payload.context.approximate_character_budget, 966_000);
-  assert.equal(payload.context.max_retrieval_documents, 20);
+  assert.equal(payload.context.max_retrieval_documents, 8);
   assert.equal(payload.context.max_total_request_tokens, 450_000);
   assert.equal(payload.context.max_input_tokens, 322_000);
   assert.equal(payload.context.max_output_tokens, 128_000);
@@ -66,4 +66,8 @@ test("packages the workbook-grounded AI sales endpoint and extended context poli
   assert.equal(payload.catalog.api_records, 171);
   assert.equal(payload.catalog.retrieval_documents, 87);
   assert.equal(payload.catalog.retrieval_status, "ready");
+  assert.equal(payload.vectorize.configured, false);
+  assert.equal(payload.vectorize.index, "ohaus-sales-catalog-v1");
+  assert.equal(payload.vectorize.source_documents, 87);
+  assert.ok(payload.vectorize.vector_records > payload.vectorize.source_documents);
 });

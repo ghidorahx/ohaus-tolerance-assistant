@@ -14,6 +14,14 @@ const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
 const localBindingConfig = {
   main: "./worker/index.ts",
   compatibility_flags: ["nodejs_compat"],
+  ai: { binding: "AI", remote: true },
+  vectorize: [
+    {
+      binding: "SALES_VECTORIZE",
+      index_name: "ohaus-sales-catalog-v1",
+      remote: true,
+    },
+  ],
   d1_databases: d1
     ? [
         {
