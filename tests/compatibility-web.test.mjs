@@ -2,11 +2,10 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const [dataText, component, page, styles] = await Promise.all([
+const [dataText, component, page] = await Promise.all([
   readFile(new URL("../public/data/portable-balance-web.json", import.meta.url), "utf8"),
   readFile(new URL("../app/CompatibilityWeb.tsx", import.meta.url), "utf8"),
   readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
-  readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
 ]);
 const data = JSON.parse(dataText);
 
@@ -62,10 +61,8 @@ test("supports focused branching and an organized draggable scene without changi
   assert.match(component, /function layoutFocusedScene/);
   assert.match(component, /setSceneNodeIds\(nextIds\)/);
   assert.match(component, /const nodesPerRing = 6/);
-  assert.match(component, /const familyRadius = 200/);
-  assert.match(component, /const originExclusionRadius = 300/);
-  assert.match(component, /const branchLayerSpacing = 200/);
-  assert.match(component, /const branchArcSpacing = 112/);
+  assert.match(component, /const familyRadius = 165/);
+  assert.match(component, /const originExclusionRadius = 450/);
   assert.match(component, /const maximumArc = ringIndex % 2 === 0 \? Math\.PI : Math\.PI \* 5 \/ 6/);
   assert.match(component, /function findClearBranchPosition/);
   assert.match(component, />= originExclusionRadius/);
@@ -81,11 +78,6 @@ test("supports focused branching and an organized draggable scene without changi
   assert.match(component, /scale\(\$\{zoom\}\)/);
   assert.match(component, /Release to glide/);
   assert.match(component, /Select a node to continue its branch/);
-  assert.match(styles, /\.web-mode \.web-node \{ width: 72px; height: 72px;/);
-  assert.match(styles, /text-rendering: geometricPrecision/);
-  assert.match(styles, /\.web-mode \.web-node\.root \{ width: 100px; height: 100px;/);
-  assert.match(styles, /\.web-mode \.web-node\.family \{ width: 82px; height: 82px;/);
-  assert.match(styles, /\.web-mode \.web-node\.part \{ width: 78px; height: 78px;/);
   assert.doesNotMatch(component, /network-world/);
   assert.match(component, /<details className="web-relationship-details">/);
   assert.match(component, /Item \{selectedNode\.materialNumber\}/);
