@@ -61,9 +61,11 @@ test("supports focused branching and an organized draggable scene without changi
   assert.match(component, /function layoutFocusedScene/);
   assert.match(component, /setSceneNodeIds\(nextIds\)/);
   assert.match(component, /const nodesPerRing = 6/);
+  assert.match(component, /const familyRadius = 165/);
+  assert.match(component, /const originExclusionRadius = 450/);
   assert.match(component, /const maximumArc = ringIndex % 2 === 0 \? Math\.PI : Math\.PI \* 5 \/ 6/);
   assert.match(component, /function findClearBranchPosition/);
-  assert.match(component, /const originClearance = familyRadius \+ 120/);
+  assert.match(component, />= originExclusionRadius/);
   assert.match(component, /findClearBranchPosition\(anchor, placement\.angle, placement\.radius, nextPositions\)/);
   assert.doesNotMatch(component, /Math\.PI \* 1\.5/);
   assert.doesNotMatch(component, /const columns = Math\.min\(6/);

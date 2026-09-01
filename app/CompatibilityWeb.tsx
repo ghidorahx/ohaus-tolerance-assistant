@@ -82,7 +82,8 @@ const initialPath = ["ohaus"];
 const pageSize = 12;
 const worldCenter = { x: 2600, y: 2300 };
 const worldSize = { width: 5200, height: 4600 };
-const familyRadius = 330;
+const familyRadius = 165;
+const originExclusionRadius = 450;
 const branchLayerSpacing = 330;
 const branchArcSpacing = 175;
 
@@ -108,10 +109,9 @@ function findClearBranchPosition(
   occupied: Map<string, Point>,
 ) {
   let radius = startingRadius;
-  const originClearance = familyRadius + 120;
   for (let attempt = 0; attempt < 10; attempt += 1) {
     const candidate = pointOnRay(anchor, angle, radius);
-    const clearsOrigin = Math.hypot(candidate.x - worldCenter.x, candidate.y - worldCenter.y) >= originClearance;
+    const clearsOrigin = Math.hypot(candidate.x - worldCenter.x, candidate.y - worldCenter.y) >= originExclusionRadius;
     const clearsVisibleNodes = [...occupied.values()].every((point) => (
       Math.hypot(candidate.x - point.x, candidate.y - point.y) >= 148
     ));
@@ -218,8 +218,8 @@ export default function CompatibilityWeb() {
     familyNodes.forEach((node, index) => {
       const angle = (-90 + index * (360 / Math.max(familyNodes.length, 1))) * Math.PI / 180;
       nextPositions.set(node.id, {
-        x: worldCenter.x + Math.cos(angle) * 330,
-        y: worldCenter.y + Math.sin(angle) * 330,
+        x: worldCenter.x + Math.cos(angle) * familyRadius,
+        y: worldCenter.y + Math.sin(angle) * familyRadius,
       });
     });
     positionsRef.current = nextPositions;
@@ -475,8 +475,8 @@ export default function CompatibilityWeb() {
     familyNodes.forEach((node, index) => {
       const angle = (-90 + index * (360 / Math.max(familyNodes.length, 1))) * Math.PI / 180;
       nextPositions.set(node.id, {
-        x: worldCenter.x + Math.cos(angle) * 330,
-        y: worldCenter.y + Math.sin(angle) * 330,
+        x: worldCenter.x + Math.cos(angle) * familyRadius,
+        y: worldCenter.y + Math.sin(angle) * familyRadius,
       });
     });
     positionsRef.current = nextPositions;
