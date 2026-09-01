@@ -425,7 +425,7 @@ export default function SalesAssistant() {
 
           <div className="sales-coverage-card">
             <span>Reasoning configuration</span>
-            <strong>GPT‑5.6 Sol · {titleCase(health?.reasoning_effort, "medium")} · {titleCase(health?.reasoning_mode, "standard")}</strong>
+            <strong>GPT‑5.6 Sol · {titleCase(health?.reasoning_effort, "high")} · {titleCase(health?.reasoning_mode, "standard")}</strong>
             <small>Terra fallback · deterministic retrieval · {health?.catalog.retrieval_documents ?? 87} generated knowledge documents</small>
           </div>
 

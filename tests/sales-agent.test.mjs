@@ -44,11 +44,11 @@ test("uses one quality-first GPT-5.6 Responses call with comprehensive workbook 
 
   assert.equal(DEFAULT_MODEL, "gpt-5.6-sol");
   assert.equal(DEFAULT_FALLBACK_MODEL, "gpt-5.6-terra");
-  assert.equal(DEFAULT_REASONING_EFFORT, "medium");
+  assert.equal(DEFAULT_REASONING_EFFORT, "high");
   assert.equal(DEFAULT_REASONING_MODE, "standard");
   assert.equal(requests.length, 1);
   assert.equal(requests[0].model, "gpt-5.6-sol");
-  assert.deepEqual(requests[0].reasoning, { effort: "medium", mode: "standard", context: "all_turns" });
+  assert.deepEqual(requests[0].reasoning, { effort: "high", mode: "standard", context: "all_turns" });
   assert.equal(requests[0].max_output_tokens, 128_000);
   assert.equal(requests[0].store, false);
   assert.equal(requests[0].tools, undefined);

@@ -52,7 +52,7 @@ test("packages the workbook-grounded AI sales endpoint and extended context poli
   const payload = await response.json();
   assert.equal(payload.model, "gpt-5.6-sol");
   assert.equal(payload.fallback_model, "gpt-5.6-terra");
-  assert.equal(payload.reasoning_effort, "medium");
+  assert.equal(payload.reasoning_effort, "high");
   assert.equal(payload.reasoning_mode, "standard");
   assert.equal(payload.context.max_verified_turns, 120);
   assert.equal(payload.context.approximate_character_budget, 966_000);
