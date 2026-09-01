@@ -46,7 +46,7 @@ test("preserves all workbook accessory and spare-part relationships", () => {
   assert.ok(data.links.every((link) => link.source.startsWith("model:") && link.target.startsWith("part:")));
 });
 
-test("supports persistent branching and a draggable scene without changing the catalog controls", () => {
+test("supports focused branching and an organized draggable scene without changing the catalog controls", () => {
   assert.match(component, /Find model, item number, or description/);
   assert.match(component, /`Accessories \$\{relationshipCounts\.accessory\}`/);
   assert.match(component, /`Spare parts \$\{relationshipCounts\.spare_part\}`/);
@@ -58,8 +58,12 @@ test("supports persistent branching and a draggable scene without changing the c
   assert.match(component, /className="network-scene"/);
   assert.match(component, /onPointerDown=\{handlePointerDown\}/);
   assert.match(component, /onPointerMove=\{handlePointerMove\}/);
+  assert.match(component, /function layoutFocusedScene/);
+  assert.match(component, /setSceneNodeIds\(nextIds\)/);
+  assert.match(component, /const columns = Math\.min\(6/);
+  assert.doesNotMatch(component, /new Set\(sceneNodeIds\)/);
   assert.match(component, /Drag empty space to move/);
-  assert.match(component, /Select any node to branch/);
+  assert.match(component, /Select any node to focus its branch/);
   assert.doesNotMatch(component, /network-world/);
   assert.match(component, /<details className="web-relationship-details">/);
   assert.match(component, /Item \{selectedNode\.materialNumber\}/);

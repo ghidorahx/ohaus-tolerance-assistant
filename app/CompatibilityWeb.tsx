@@ -80,8 +80,11 @@ type ConnectionItem = {
 
 const initialPath = ["ohaus"];
 const pageSize = 12;
-const worldCenter = { x: 2100, y: 1600 };
-const worldSize = { width: 4200, height: 3200 };
+const worldCenter = { x: 2600, y: 2300 };
+const worldSize = { width: 5200, height: 4600 };
+const familyRadius = 330;
+const branchLayerSpacing = 330;
+const branchItemSpacing = 165;
 
 function relationLabel(type: RelationType) {
   return type === "accessory" ? "Accessory" : "Spare part";
@@ -91,31 +94,10 @@ function edgeKey(source: string, target: string, relationType?: RelationType) {
   return `${source}|${target}|${relationType ?? "hierarchy"}`;
 }
 
-function distanceBetween(first: Point, second: Point) {
-  return Math.hypot(first.x - second.x, first.y - second.y);
-}
-
-function findOpenPosition(
-  anchor: Point,
-  baseAngle: number,
-  index: number,
-  total: number,
-  occupied: Map<string, Point>,
-) {
-  const spread = total <= 1 ? 0 : Math.min(250, Math.max(70, (total - 1) * 18));
-  const offset = total <= 1 ? 0 : -spread / 2 + spread * (index / (total - 1));
-  for (let attempt = 0; attempt < 30; attempt += 1) {
-    const angle = (baseAngle + offset + attempt * 19) * Math.PI / 180;
-    const radius = 285 + Math.floor(attempt / 6) * 95 + Math.floor(index / pageSize) * 90;
-    const point = {
-      x: Math.max(120, Math.min(worldSize.width - 120, anchor.x + Math.cos(angle) * radius)),
-      y: Math.max(120, Math.min(worldSize.height - 120, anchor.y + Math.sin(angle) * radius)),
-    };
-    if ([...occupied.values()].every((existing) => distanceBetween(existing, point) >= 128)) return point;
-  }
+function pointOnRay(origin: Point, angle: number, distance: number): Point {
   return {
-    x: Math.max(120, Math.min(worldSize.width - 120, anchor.x + (index + 1) * 145)),
-    y: Math.max(120, Math.min(worldSize.height - 120, anchor.y + 300)),
+    x: origin.x + Math.cos(angle) * distance,
+    y: origin.y + Math.sin(angle) * distance,
   };
 }
 
@@ -301,66 +283,78 @@ export default function CompatibilityWeb() {
       .map((node) => ({ node }));
   }
 
-  function addPathToScene(node: WebNode, nextPositions: Map<string, Point>, nextIds: Set<string>, nextEdges: Map<string, SceneEdge>) {
-    if (node.kind === "part" && !nextPositions.has(node.id)) {
-      const relation = data.links.find((link) => link.target === node.id);
-      const sourceNode = relation ? nodeMap.get(relation.source) : undefined;
-      if (relation && sourceNode) {
-        addPathToScene(sourceNode, nextPositions, nextIds, nextEdges);
-        const sourcePoint = nextPositions.get(sourceNode.id) ?? worldCenter;
-        const baseAngle = Math.atan2(sourcePoint.y - worldCenter.y, sourcePoint.x - worldCenter.x) * 180 / Math.PI;
-        nextPositions.set(node.id, findOpenPosition(sourcePoint, baseAngle, 0, 1, nextPositions));
-        nextIds.add(node.id);
-        const key = edgeKey(sourceNode.id, node.id, relation.relationType);
-        nextEdges.set(key, { key, source: sourceNode.id, target: node.id, relationType: relation.relationType });
-        return;
-      }
+  function layoutFocusedScene(node: WebNode, filter: RelationFilter, pageIndex: number) {
+    const connections = getConnections(node.id, filter);
+    const pageItems = connections.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
+    const familyNodes = data.nodes.filter((candidate) => candidate.parentId === "ohaus");
+    const nextPositions = new Map<string, Point>([["ohaus", worldCenter]]);
+    const nextIds = new Set<string>(["ohaus"]);
+    const nextEdges = new Map<string, SceneEdge>();
+
+    familyNodes.forEach((family, index) => {
+      const angle = (-90 + index * (360 / Math.max(familyNodes.length, 1))) * Math.PI / 180;
+      nextPositions.set(family.id, pointOnRay(worldCenter, angle, familyRadius));
+      nextIds.add(family.id);
+      const key = edgeKey("ohaus", family.id);
+      nextEdges.set(key, { key, source: "ohaus", target: family.id });
+    });
+
+    let ancestry = pathToNode(node.id);
+    if (node.kind === "part") {
+      const pathModel = [...path]
+        .reverse()
+        .map((nodeId) => nodeMap.get(nodeId))
+        .find((candidate) => candidate?.kind === "model"
+          && data.links.some((link) => link.source === candidate.id && link.target === node.id));
+      const anchorLink = data.links.find((link) => link.target === node.id && link.source === pathModel?.id)
+        ?? data.links.find((link) => link.target === node.id);
+      const anchorModel = anchorLink ? nodeMap.get(anchorLink.source) : undefined;
+      if (anchorModel) ancestry = [...pathToNode(anchorModel.id), node.id];
     }
-    const ancestry = pathToNode(node.id);
+
+    const familyId = ancestry.find((nodeId) => nodeMap.get(nodeId)?.kind === "family");
+    const familyIndex = Math.max(0, familyNodes.findIndex((family) => family.id === familyId));
+    const branchAngle = (-90 + familyIndex * (360 / Math.max(familyNodes.length, 1))) * Math.PI / 180;
+
     ancestry.forEach((nodeId, index) => {
       const pathNode = nodeMap.get(nodeId);
       if (!pathNode) return;
       nextIds.add(nodeId);
-      if (index === 0) {
-        if (!nextPositions.has(nodeId)) nextPositions.set(nodeId, worldCenter);
-        return;
-      }
+      if (index > 1) nextPositions.set(nodeId, pointOnRay(worldCenter, branchAngle, familyRadius + (index - 1) * branchLayerSpacing));
+      if (index === 0) return;
       const parentId = ancestry[index - 1];
-      const parentPoint = nextPositions.get(parentId) ?? worldCenter;
-      if (!nextPositions.has(nodeId)) {
-        const parentDirection = Math.atan2(parentPoint.y - worldCenter.y, parentPoint.x - worldCenter.x) * 180 / Math.PI;
-        nextPositions.set(nodeId, findOpenPosition(parentPoint, parentDirection || -90, index, ancestry.length, nextPositions));
-      }
-      nextEdges.set(edgeKey(parentId, nodeId), {
-        key: edgeKey(parentId, nodeId),
+      const relationship = data.links.find((link) => link.source === parentId && link.target === nodeId);
+      const key = edgeKey(parentId, nodeId, relationship?.relationType);
+      nextEdges.set(key, {
+        key,
         source: parentId,
         target: nodeId,
+        relationType: relationship?.relationType,
       });
     });
-  }
 
-  function revealConnections(node: WebNode, filter: RelationFilter, pageIndex: number) {
-    const connections = getConnections(node.id, filter);
-    const pageItems = connections.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
-    const nextPositions = new Map(positionsRef.current);
-    const nextIds = new Set(sceneNodeIds);
-    const nextEdges = new Map(sceneEdges.map((edge) => [edge.key, edge]));
-    addPathToScene(node, nextPositions, nextIds, nextEdges);
-    const parentPoint = nextPositions.get(node.id) ?? worldCenter;
-    const baseAngle = node.id === "ohaus"
-      ? -90
-      : Math.atan2(parentPoint.y - worldCenter.y, parentPoint.x - worldCenter.x) * 180 / Math.PI;
-    pageItems.forEach((item, pageItemIndex) => {
-      const globalIndex = pageIndex * pageSize + pageItemIndex;
+    const anchor = nextPositions.get(node.id) ?? worldCenter;
+    const columns = Math.min(6, Math.max(1, pageItems.length));
+    pageItems.forEach((item, index) => {
+      const row = Math.floor(index / columns);
+      const column = index % columns;
+      const itemsInRow = Math.min(columns, pageItems.length - row * columns);
+      const crossOffset = (column - (itemsInRow - 1) / 2) * branchItemSpacing;
+      const forwardDistance = branchLayerSpacing + row * 180;
       nextIds.add(item.node.id);
       if (!nextPositions.has(item.node.id)) {
-        nextPositions.set(
-          item.node.id,
-          findOpenPosition(parentPoint, baseAngle, globalIndex, connections.length, nextPositions),
-        );
+        nextPositions.set(item.node.id, {
+          x: anchor.x + Math.cos(branchAngle) * forwardDistance - Math.sin(branchAngle) * crossOffset,
+          y: anchor.y + Math.sin(branchAngle) * forwardDistance + Math.cos(branchAngle) * crossOffset,
+        });
       }
       const source = node.id;
       const target = item.node.id;
+      const alreadyConnected = [...nextEdges.values()].some((edge) => (
+        (edge.source === source && edge.target === target)
+        || (edge.source === target && edge.target === source)
+      ));
+      if (alreadyConnected) return;
       const key = edgeKey(source, target, item.relationType);
       nextEdges.set(key, { key, source, target, relationType: item.relationType });
     });
@@ -381,7 +375,7 @@ export default function CompatibilityWeb() {
     setPage(0);
     setQuery("");
     if (node.kind !== "part") setPath(pathToNode(node.id));
-    revealConnections(node, nextFilter, 0);
+    layoutFocusedScene(node, nextFilter, 0);
     if (center) window.requestAnimationFrame(() => centerOnNode(node.id));
   }
 
@@ -402,10 +396,7 @@ export default function CompatibilityWeb() {
     if (path.length <= 1) return;
     const nextPath = path.slice(0, -1);
     const parent = nodeMap.get(nextPath[nextPath.length - 1]);
-    setPath(nextPath);
-    setSelectedId(nextPath[nextPath.length - 1]);
-    setPage(0);
-    if (parent) window.requestAnimationFrame(() => centerOnNode(parent.id));
+    if (parent) focusNode(parent, true);
   }
 
   function resetWeb() {
@@ -437,13 +428,13 @@ export default function CompatibilityWeb() {
 
   function changePage(nextPage: number) {
     setPage(nextPage);
-    revealConnections(selectedNode, relationFilter, nextPage);
+    layoutFocusedScene(selectedNode, relationFilter, nextPage);
   }
 
   function changeRelationFilter(nextFilter: RelationFilter) {
     setRelationFilter(nextFilter);
     setPage(0);
-    revealConnections(selectedNode, nextFilter, 0);
+    layoutFocusedScene(selectedNode, nextFilter, 0);
   }
 
   function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
@@ -605,7 +596,7 @@ export default function CompatibilityWeb() {
               <button disabled={safePage + 1 >= pageCount} onClick={() => changePage(Math.min(pageCount - 1, safePage + 1))}>→</button>
             </div>
           )}
-          <p className="network-hint">Move to tilt · Drag empty space to move · Select any node to branch · {graphItems.length} connected item{graphItems.length === 1 ? "" : "s"}</p>
+          <p className="network-hint">Move to tilt · Drag empty space to move · Select any node to focus its branch · {graphItems.length} connected item{graphItems.length === 1 ? "" : "s"}</p>
         </div>
 
         <aside className="web-detail" aria-live="polite">
