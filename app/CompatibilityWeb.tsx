@@ -82,10 +82,10 @@ const initialPath = ["ohaus"];
 const pageSize = 12;
 const worldCenter = { x: 2600, y: 2300 };
 const worldSize = { width: 5200, height: 4600 };
-const familyRadius = 165;
-const originExclusionRadius = 450;
-const branchLayerSpacing = 330;
-const branchArcSpacing = 175;
+const familyRadius = 200;
+const originExclusionRadius = 300;
+const branchLayerSpacing = 200;
+const branchArcSpacing = 112;
 
 function relationLabel(type: RelationType) {
   return type === "accessory" ? "Accessory" : "Spare part";
@@ -113,10 +113,10 @@ function findClearBranchPosition(
     const candidate = pointOnRay(anchor, angle, radius);
     const clearsOrigin = Math.hypot(candidate.x - worldCenter.x, candidate.y - worldCenter.y) >= originExclusionRadius;
     const clearsVisibleNodes = [...occupied.values()].every((point) => (
-      Math.hypot(candidate.x - point.x, candidate.y - point.y) >= 148
+      Math.hypot(candidate.x - point.x, candidate.y - point.y) >= 105
     ));
     if (clearsOrigin && clearsVisibleNodes) return candidate;
-    radius += 105;
+    radius += 70;
   }
   return pointOnRay(anchor, angle, radius);
 }
@@ -391,7 +391,7 @@ export default function CompatibilityWeb() {
       const maximumArc = ringIndex % 2 === 0 ? Math.PI : Math.PI * 5 / 6;
       const arcSpan = ringCount <= 1 ? 0 : Math.min(maximumArc, ringCount * Math.PI / 6);
       const arcStep = ringCount <= 1 ? 0 : arcSpan / (ringCount - 1);
-      const minimumRadius = 380 + ringIndex * 245;
+      const minimumRadius = 205 + ringIndex * 85;
       const spacingRadius = arcStep > 0 ? branchArcSpacing / (2 * Math.sin(arcStep / 2)) : 0;
       circularPlacement.set(nodeId, {
         angle: branchAngle + (ringCount <= 1 ? 0 : -arcSpan / 2 + arcStep * indexInRing),
