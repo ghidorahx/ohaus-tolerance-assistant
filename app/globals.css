@@ -392,6 +392,11 @@ button { cursor: pointer; }
 .web-node.part.spare_part { color: #245d91; background: rgba(238,246,255,.95); border-color: rgba(77,143,207,.52); }
 .web-node.selected em { color: #ffd3db; }
 .network-hint { position: absolute; left: 20px; bottom: 15px; z-index: 5; margin: 0; color: #8d6a73; font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.web-zoom-controls { position: absolute; top: 18px; right: 18px; z-index: 9; padding: 4px; display: flex; align-items: center; gap: 3px; background: rgba(8,13,22,.82); border: 1px solid rgba(255,255,255,.12); border-radius: 999px; box-shadow: 0 12px 28px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.07); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.web-zoom-controls button { width: 30px; height: 30px; display: grid; place-items: center; color: #dce4eb; background: transparent; border: 0; border-radius: 50%; font-size: 17px; font-weight: 800; }
+.web-zoom-controls button:hover:not(:disabled) { color: white; background: rgba(211,38,69,.22); }
+.web-zoom-controls button:disabled { opacity: .28; cursor: default; }
+.web-zoom-controls .zoom-level { width: 48px; border-radius: 999px; color: #ff8197; font-size: 9px; letter-spacing: .04em; }
 .web-pagination { position: absolute; left: 50%; bottom: 34px; z-index: 8; display: flex; align-items: center; gap: 8px; transform: translateX(-50%); }
 .web-pagination button { width: 30px; height: 30px; color: #eee; background: rgba(17,24,35,.8); border: 1px solid rgba(255,255,255,.14); border-radius: 50%; }
 .web-pagination button:disabled { opacity: .35; }
@@ -594,6 +599,7 @@ button { cursor: pointer; }
   .web-breadcrumb { padding-left: 14px; padding-right: 14px; }
   .compatibility-layout, .network-viewport { min-height: 560px; }
   .network-stage { inset: 10px; }
+  .web-zoom-controls { top: 12px; right: 12px; }
   .web-node { width: 92px; min-height: 48px; padding: 7px; border-radius: 10px; }
   .web-node.root { width: 90px; min-height: 66px; }
   .web-node strong { font-size: 9px; }

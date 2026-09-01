@@ -64,8 +64,14 @@ test("supports focused branching and an organized draggable scene without changi
   assert.match(component, /pointOnRay\(anchor, childAngle, connectionRadius\)/);
   assert.doesNotMatch(component, /const columns = Math\.min\(6/);
   assert.doesNotMatch(component, /new Set\(sceneNodeIds\)/);
-  assert.match(component, /Drag empty space to move/);
-  assert.match(component, /Select any node to focus its branch/);
+  assert.match(component, /preferredBranchAngle/);
+  assert.match(component, /existingPosition \?\? pointOnRay/);
+  assert.match(component, /Math\.pow\(\.92, frameScale\)/);
+  assert.match(component, /function setCanvasZoom/);
+  assert.match(component, /aria-label="Zoom controls"/);
+  assert.match(component, /scale\(\$\{zoom\}\)/);
+  assert.match(component, /Release to glide/);
+  assert.match(component, /Select a node to continue its branch/);
   assert.doesNotMatch(component, /network-world/);
   assert.match(component, /<details className="web-relationship-details">/);
   assert.match(component, /Item \{selectedNode\.materialNumber\}/);

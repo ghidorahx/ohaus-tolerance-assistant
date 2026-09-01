@@ -123,11 +123,15 @@ export default function CompatibilityWeb() {
   const [sceneEdges, setSceneEdges] = useState<SceneEdge[]>([]);
   const [positions, setPositions] = useState<Map<string, Point>>(() => new Map());
   const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const positionsRef = useRef<Map<string, Point>>(new Map());
-  const pointerRef = useRef({ pointerId: -1, x: 0, y: 0 });
+  const pointerRef = useRef({ pointerId: -1, x: 0, y: 0, time: 0 });
+  const velocityRef = useRef({ x: 0, y: 0 });
+  const inertiaFrameRef = useRef<number | null>(null);
+  const zoomRef = useRef(1);
   const initializedRef = useRef(false);
 
   useEffect(() => {
@@ -210,6 +214,12 @@ export default function CompatibilityWeb() {
   }, [data]);
 
   useEffect(() => {
+    return () => {
+      if (inertiaFrameRef.current !== null) window.cancelAnimationFrame(inertiaFrameRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     const stage = stageRef.current;
     if (!canvas || !stage) return;
@@ -229,10 +239,10 @@ export default function CompatibilityWeb() {
         const source = positions.get(edge.source);
         const target = positions.get(edge.target);
         if (!source || !target) return;
-        const startX = source.x + pan.x;
-        const startY = source.y + pan.y;
-        const endX = target.x + pan.x;
-        const endY = target.y + pan.y;
+        const startX = source.x * zoom + pan.x;
+        const startY = source.y * zoom + pan.y;
+        const endX = target.x * zoom + pan.x;
+        const endY = target.y * zoom + pan.y;
         const color = edge.relationType === "accessory"
           ? "rgba(53, 217, 145, .88)"
           : edge.relationType === "spare_part"
@@ -240,10 +250,10 @@ export default function CompatibilityWeb() {
             : "rgba(226, 59, 91, .52)";
         context.beginPath();
         context.moveTo(startX, startY);
-        context.quadraticCurveTo((startX + endX) / 2, (startY + endY) / 2 - 13, endX, endY);
+        context.quadraticCurveTo((startX + endX) / 2, (startY + endY) / 2 - 13 * zoom, endX, endY);
         context.strokeStyle = color;
-        context.lineWidth = edge.relationType ? 2 : 1.25;
-        context.shadowBlur = edge.relationType ? 9 : 4;
+        context.lineWidth = (edge.relationType ? 2 : 1.25) * Math.max(.72, zoom);
+        context.shadowBlur = (edge.relationType ? 9 : 4) * Math.max(.72, zoom);
         context.shadowColor = color;
         context.stroke();
         context.shadowBlur = 0;
@@ -253,7 +263,7 @@ export default function CompatibilityWeb() {
     observer.observe(stage);
     drawNetwork();
     return () => observer.disconnect();
-  }, [pan, positions, sceneEdges]);
+  }, [pan, positions, sceneEdges, zoom]);
 
   if (!data || !selectedNode) return <CompatibilityWebLoading error={loadError || undefined} />;
 
@@ -283,7 +293,7 @@ export default function CompatibilityWeb() {
       .map((node) => ({ node }));
   }
 
-  function layoutFocusedScene(node: WebNode, filter: RelationFilter, pageIndex: number) {
+  function layoutFocusedScene(node: WebNode, filter: RelationFilter, pageIndex: number, preferredBranchAngle?: number) {
     const connections = getConnections(node.id, filter);
     const pageItems = connections.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
     const familyNodes = data.nodes.filter((candidate) => candidate.parentId === "ohaus");
@@ -314,13 +324,26 @@ export default function CompatibilityWeb() {
 
     const familyId = ancestry.find((nodeId) => nodeMap.get(nodeId)?.kind === "family");
     const familyIndex = Math.max(0, familyNodes.findIndex((family) => family.id === familyId));
-    const branchAngle = (-90 + familyIndex * (360 / Math.max(familyNodes.length, 1))) * Math.PI / 180;
+    const familyAngle = (-90 + familyIndex * (360 / Math.max(familyNodes.length, 1))) * Math.PI / 180;
+    const ancestryParentId = ancestry.at(-2);
+    const existingAnchor = positionsRef.current.get(node.id);
+    const existingParent = ancestryParentId ? positionsRef.current.get(ancestryParentId) : undefined;
+    const existingBranchAngle = existingAnchor && existingParent
+      ? Math.atan2(existingAnchor.y - existingParent.y, existingAnchor.x - existingParent.x)
+      : undefined;
+    const branchAngle = preferredBranchAngle ?? existingBranchAngle ?? familyAngle;
 
     ancestry.forEach((nodeId, index) => {
       const pathNode = nodeMap.get(nodeId);
       if (!pathNode) return;
       nextIds.add(nodeId);
-      if (index > 1) nextPositions.set(nodeId, pointOnRay(worldCenter, branchAngle, familyRadius + (index - 1) * branchLayerSpacing));
+      if (index > 1) {
+        const existingPosition = positionsRef.current.get(nodeId);
+        nextPositions.set(
+          nodeId,
+          existingPosition ?? pointOnRay(worldCenter, familyAngle, familyRadius + (index - 1) * branchLayerSpacing),
+        );
+      }
       if (index === 0) return;
       const parentId = ancestry[index - 1];
       const relationship = data.links.find((link) => link.source === parentId && link.target === nodeId);
@@ -383,7 +406,16 @@ export default function CompatibilityWeb() {
     setPage(0);
     setQuery("");
     if (node.kind !== "part") setPath(pathToNode(node.id));
-    layoutFocusedScene(node, nextFilter, 0);
+    const clickedConnection = sceneEdges.find((edge) => (
+      (edge.source === selectedId && edge.target === node.id)
+      || (edge.source === node.id && edge.target === selectedId)
+    ));
+    const currentPoint = positionsRef.current.get(selectedId);
+    const clickedPoint = positionsRef.current.get(node.id);
+    const preferredBranchAngle = clickedConnection && !path.includes(node.id) && currentPoint && clickedPoint
+      ? Math.atan2(clickedPoint.y - currentPoint.y, clickedPoint.x - currentPoint.x)
+      : undefined;
+    layoutFocusedScene(node, nextFilter, 0, preferredBranchAngle);
     if (center) window.requestAnimationFrame(() => centerOnNode(node.id));
   }
 
@@ -392,7 +424,7 @@ export default function CompatibilityWeb() {
     const point = positionsRef.current.get(nodeId);
     if (!stage || !point) return;
     const rect = stage.getBoundingClientRect();
-    setPan({ x: rect.width / 2 - point.x, y: rect.height / 2 - point.y });
+    setPan({ x: rect.width / 2 - point.x * zoomRef.current, y: rect.height / 2 - point.y * zoomRef.current });
   }
 
   function goBack() {
@@ -445,9 +477,59 @@ export default function CompatibilityWeb() {
     layoutFocusedScene(selectedNode, nextFilter, 0);
   }
 
+  function stopInertia() {
+    if (inertiaFrameRef.current !== null) {
+      window.cancelAnimationFrame(inertiaFrameRef.current);
+      inertiaFrameRef.current = null;
+    }
+  }
+
+  function startInertia() {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let previousTime = performance.now();
+    function glide(currentTime: number) {
+      const frameScale = Math.min(2, (currentTime - previousTime) / (1000 / 60));
+      previousTime = currentTime;
+      const decay = Math.pow(.92, frameScale);
+      velocityRef.current = {
+        x: velocityRef.current.x * decay,
+        y: velocityRef.current.y * decay,
+      };
+      if (Math.hypot(velocityRef.current.x, velocityRef.current.y) < .12) {
+        inertiaFrameRef.current = null;
+        return;
+      }
+      setPan((current) => ({
+        x: current.x + velocityRef.current.x * frameScale,
+        y: current.y + velocityRef.current.y * frameScale,
+      }));
+      inertiaFrameRef.current = window.requestAnimationFrame(glide);
+    }
+    inertiaFrameRef.current = window.requestAnimationFrame(glide);
+  }
+
+  function setCanvasZoom(requestedZoom: number) {
+    const nextZoom = Math.min(1.65, Math.max(.55, Math.round(requestedZoom * 100) / 100));
+    const currentZoom = zoomRef.current;
+    if (nextZoom === currentZoom) return;
+    const stage = stageRef.current;
+    if (stage) {
+      const rect = stage.getBoundingClientRect();
+      const center = { x: rect.width / 2, y: rect.height / 2 };
+      setPan((current) => ({
+        x: center.x - ((center.x - current.x) / currentZoom) * nextZoom,
+        y: center.y - ((center.y - current.y) / currentZoom) * nextZoom,
+      }));
+    }
+    zoomRef.current = nextZoom;
+    setZoom(nextZoom);
+  }
+
   function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
     if (event.button !== 0) return;
-    pointerRef.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
+    stopInertia();
+    velocityRef.current = { x: 0, y: 0 };
+    pointerRef.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, time: performance.now() };
     event.currentTarget.setPointerCapture(event.pointerId);
     setIsDragging(true);
   }
@@ -458,8 +540,15 @@ export default function CompatibilityWeb() {
     if (pointerRef.current.pointerId === event.pointerId) {
       const dx = event.clientX - pointerRef.current.x;
       const dy = event.clientY - pointerRef.current.y;
+      const currentTime = performance.now();
+      const elapsedFrames = Math.max(.5, (currentTime - pointerRef.current.time) / (1000 / 60));
+      velocityRef.current = {
+        x: velocityRef.current.x * .68 + (dx / elapsedFrames) * .32,
+        y: velocityRef.current.y * .68 + (dy / elapsedFrames) * .32,
+      };
       pointerRef.current.x = event.clientX;
       pointerRef.current.y = event.clientY;
+      pointerRef.current.time = currentTime;
       setPan((current) => ({ x: current.x + dx, y: current.y + dy }));
       return;
     }
@@ -473,6 +562,7 @@ export default function CompatibilityWeb() {
     pointerRef.current.pointerId = -1;
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
     setIsDragging(false);
+    startInertia();
   }
 
   const relationshipCounts = {
@@ -567,7 +657,7 @@ export default function CompatibilityWeb() {
               style={{
                 width: worldSize.width,
                 height: worldSize.height,
-                transform: `translate3d(${pan.x}px, ${pan.y}px, 0)`,
+                transform: `translate3d(${pan.x}px, ${pan.y}px, 0) scale(${zoom})`,
               }}
             >
               {sceneNodes.map((node) => {
@@ -597,6 +687,12 @@ export default function CompatibilityWeb() {
             </div>
           </div>
 
+          <div className="web-zoom-controls" role="group" aria-label="Zoom controls">
+            <button type="button" onPointerDown={(event) => event.stopPropagation()} onClick={() => setCanvasZoom(zoom - .15)} disabled={zoom <= .55} aria-label="Zoom out">−</button>
+            <button type="button" className="zoom-level" onPointerDown={(event) => event.stopPropagation()} onClick={() => setCanvasZoom(1)} aria-label="Reset zoom to 100 percent">{Math.round(zoom * 100)}%</button>
+            <button type="button" onPointerDown={(event) => event.stopPropagation()} onClick={() => setCanvasZoom(zoom + .15)} disabled={zoom >= 1.65} aria-label="Zoom in">+</button>
+          </div>
+
           {graphItems.length > pageSize && (
             <div className="web-pagination">
               <button disabled={safePage === 0} onClick={() => changePage(Math.max(0, safePage - 1))}>←</button>
@@ -604,7 +700,7 @@ export default function CompatibilityWeb() {
               <button disabled={safePage + 1 >= pageCount} onClick={() => changePage(Math.min(pageCount - 1, safePage + 1))}>→</button>
             </div>
           )}
-          <p className="network-hint">Move to tilt · Drag empty space to move · Select any node to focus its branch · {graphItems.length} connected item{graphItems.length === 1 ? "" : "s"}</p>
+          <p className="network-hint">Drag to move · Release to glide · Zoom with canvas controls · Select a node to continue its branch · {graphItems.length} connected item{graphItems.length === 1 ? "" : "s"}</p>
         </div>
 
         <aside className="web-detail" aria-live="polite">
