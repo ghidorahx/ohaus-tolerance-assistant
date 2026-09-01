@@ -14,16 +14,16 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "OHAUS Support Assistants",
-  description: "Internal tolerance, workbook-grounded product sales, and compatibility tools in one workspace.",
+  description: "Internal tolerance and workbook-grounded product support tools in one workspace.",
   openGraph: {
     title: "OHAUS Support Assistants",
-    description: "Tolerance lookup, workbook-grounded product answers, and an interactive compatibility web.",
+    description: "Tolerance lookup and workbook-grounded product answers in one support workspace.",
     images: [{ url: "/og.png", width: 1730, height: 909 }],
   },
   twitter: {
     card: "summary_large_image",
     title: "OHAUS Support Assistants",
-    description: "Tolerance lookup, workbook-grounded product answers, and an interactive compatibility web.",
+    description: "Tolerance lookup and workbook-grounded product answers in one support workspace.",
     images: ["/og.png"],
   },
   icons: {
