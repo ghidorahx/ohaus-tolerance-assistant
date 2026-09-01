@@ -84,7 +84,7 @@ const worldCenter = { x: 2600, y: 2300 };
 const worldSize = { width: 5200, height: 4600 };
 const familyRadius = 330;
 const branchLayerSpacing = 330;
-const branchItemSpacing = 165;
+const branchArcSpacing = 175;
 
 function relationLabel(type: RelationType) {
   return type === "accessory" ? "Accessory" : "Spare part";
@@ -334,19 +334,27 @@ export default function CompatibilityWeb() {
     });
 
     const anchor = nextPositions.get(node.id) ?? worldCenter;
-    const columns = Math.min(6, Math.max(1, pageItems.length));
-    pageItems.forEach((item, index) => {
-      const row = Math.floor(index / columns);
-      const column = index % columns;
-      const itemsInRow = Math.min(columns, pageItems.length - row * columns);
-      const crossOffset = (column - (itemsInRow - 1) / 2) * branchItemSpacing;
-      const forwardDistance = branchLayerSpacing + row * 180;
+    const circularNodeIds = [...new Set(
+      pageItems
+        .map((item) => item.node.id)
+        .filter((nodeId) => !nextPositions.has(nodeId)),
+    )];
+    const circularIndex = new Map(circularNodeIds.map((nodeId, index) => [nodeId, index]));
+    const circularCount = circularNodeIds.length;
+    const arcSpan = circularCount <= 1
+      ? 0
+      : Math.min(Math.PI * 1.5, Math.max(Math.PI / 3, (circularCount - 1) * Math.PI / 6));
+    const arcStep = circularCount <= 1 ? 0 : arcSpan / (circularCount - 1);
+    const connectionRadius = arcStep > 0
+      ? Math.max(380, branchArcSpacing / (2 * Math.sin(arcStep / 2)))
+      : branchLayerSpacing;
+
+    pageItems.forEach((item) => {
       nextIds.add(item.node.id);
       if (!nextPositions.has(item.node.id)) {
-        nextPositions.set(item.node.id, {
-          x: anchor.x + Math.cos(branchAngle) * forwardDistance - Math.sin(branchAngle) * crossOffset,
-          y: anchor.y + Math.sin(branchAngle) * forwardDistance + Math.cos(branchAngle) * crossOffset,
-        });
+        const index = circularIndex.get(item.node.id) ?? 0;
+        const childAngle = branchAngle + (circularCount <= 1 ? 0 : -arcSpan / 2 + arcStep * index);
+        nextPositions.set(item.node.id, pointOnRay(anchor, childAngle, connectionRadius));
       }
       const source = node.id;
       const target = item.node.id;

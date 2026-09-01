@@ -60,7 +60,9 @@ test("supports focused branching and an organized draggable scene without changi
   assert.match(component, /onPointerMove=\{handlePointerMove\}/);
   assert.match(component, /function layoutFocusedScene/);
   assert.match(component, /setSceneNodeIds\(nextIds\)/);
-  assert.match(component, /const columns = Math\.min\(6/);
+  assert.match(component, /const arcSpan = circularCount <= 1/);
+  assert.match(component, /pointOnRay\(anchor, childAngle, connectionRadius\)/);
+  assert.doesNotMatch(component, /const columns = Math\.min\(6/);
   assert.doesNotMatch(component, /new Set\(sceneNodeIds\)/);
   assert.match(component, /Drag empty space to move/);
   assert.match(component, /Select any node to focus its branch/);
