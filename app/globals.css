@@ -276,6 +276,13 @@ button { cursor: pointer; }
 .sales-answer-copy li::marker { color: #c41230; font-weight: 900; }
 .sales-answer-copy strong { color: #c41230; font-weight: 850; }
 .sales-answer-copy code { padding: 2px 5px; color: #7d1027; background: #fcecf0; border-radius: 5px; font-family: var(--font-geist-mono), monospace; font-size: .9em; }
+.sales-answer-items { margin-top: 10px; display: grid; gap: 6px; }
+.sales-answer-items > div { padding: 8px 10px; display: grid; grid-template-columns: max-content 12px minmax(0,1fr); align-items: baseline; gap: 4px; background: rgba(252,236,240,.4); border-left: 2px solid rgba(196,18,48,.5); border-radius: 4px 8px 8px 4px; }
+.sales-answer-items > div > strong { color: #c41230; font-family: var(--font-geist-mono), monospace; font-size: 12px; }
+.sales-answer-items span { color: #bd8995; text-align: center; }
+.sales-answer-items p { margin: 0; color: #405063; font-size: 13px; line-height: 1.45; }
+.sales-answer-items b { color: #693240; font-weight: 850; }
+.sales-answer-items p strong { color: #c41230; font-family: inherit; font-weight: 850; }
 .sales-reference-panel { margin-top: 13px; overflow: hidden; background: rgba(255,255,255,.52); border: 1px solid rgba(196,18,48,.12); border-radius: 11px; }
 .sales-reference-panel > summary { min-height: 42px; padding: 9px 11px; display: flex; align-items: center; gap: 8px; color: #6f4d56; list-style: none; cursor: pointer; }
 .sales-reference-panel > summary::-webkit-details-marker { display: none; }

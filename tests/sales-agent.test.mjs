@@ -17,6 +17,7 @@ test("uses one quality-first GPT-5.6 Responses call with comprehensive workbook 
       id: "resp-final",
       output_text: JSON.stringify({
         answer: "CR221 (30428204) has a maximum capacity of 220 g and readability of 0.1 g.",
+        answer_items: [{ identifier: "30428204", label: "CR221", description: "220 g capacity with 0.1 g readability" }],
         status: "answered",
         confidence: "high",
         intent: "lookup",
@@ -59,9 +60,10 @@ test("uses one quality-first GPT-5.6 Responses call with comprehensive workbook 
   assert.match(JSON.stringify(requests[0].input), /retrieval_document_matches/);
   assert.match(requests[0].instructions, /Keep routine answers streamlined/);
   assert.match(requests[0].instructions, /Use \*\*bold\*\* sparingly/);
-  assert.match(requests[0].instructions, /Every material or part number written in the answer/);
+  assert.match(requests[0].instructions, /Put every referenced material, item, or part number in answer_items/);
   assert.match(JSON.stringify(requests[0].input), /CR221/);
   assert.equal(result.evidence[0].value, "220 g");
+  assert.deepEqual(result.answer_items, [{ identifier: "30428204", label: "CR221", description: "220 g capacity with 0.1 g readability" }]);
   assert.equal(result.catalog_checks, 1);
   assert.equal(result.grounding_products, 80);
   assert.equal(result.fallback_used, false);
@@ -77,6 +79,7 @@ test("retains up to one hundred twenty compact verified turns for follow-up reso
       id: "resp-context",
       output_text: JSON.stringify({
         answer: "The requested follow-up is not available in the loaded catalog.",
+        answer_items: [],
         status: "not_in_source",
         confidence: "high",
         intent: "unsupported",
@@ -142,6 +145,7 @@ test("falls back to GPT-5.6 Terra only when the Sol request is rate limited", as
       id: "resp-terra",
       output_text: JSON.stringify({
         answer: "Live price is not available in the loaded catalog.",
+        answer_items: [],
         status: "not_in_source",
         confidence: "high",
         intent: "unsupported",

@@ -68,6 +68,15 @@ test("renders clean Sales answer formatting with restrained OHAUS-red emphasis",
   assert.match(styles, /\.sales-answer-copy li::marker\s*\{[^}]*color:\s*#c41230/s);
 });
 
+test("renders every numbered Sales item on its own descriptive line", () => {
+  assert.match(salesAssistant, /type AnswerItem/);
+  assert.match(salesAssistant, /function SalesAnswerItems/);
+  assert.match(salesAssistant, /<SalesAnswerItems items=\{answerItems\} partNumbers=\{answer\.materials\}/);
+  assert.match(salesAssistant, /aria-label="Referenced items"/);
+  assert.match(styles, /\.sales-answer-items\s*\{[^}]*display:\s*grid/s);
+  assert.match(styles, /\.sales-answer-items > div > strong\s*\{[^}]*color:\s*#c41230/s);
+});
+
 test("keeps evidence and diagnostics inside one collapsed reference panel", () => {
   assert.match(salesAssistant, /<details className=\{`sales-reference-panel/);
   assert.match(salesAssistant, /Sources &amp; details/);

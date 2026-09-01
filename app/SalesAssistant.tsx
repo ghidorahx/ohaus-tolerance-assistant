@@ -11,8 +11,15 @@ type Evidence = {
   source_file: string;
 };
 
+type AnswerItem = {
+  identifier: string;
+  label: string;
+  description: string;
+};
+
 type SalesAnswer = {
   answer: string;
+  answer_items: AnswerItem[];
   status: "answered" | "needs_clarification" | "not_in_source" | "escalate";
   confidence: "high" | "medium" | "low";
   intent: string;
@@ -218,6 +225,21 @@ function SalesAnswerContent({ value, partNumbers }: { value: string; partNumbers
         }
         return <p key={key}>{renderInlineAnswer(block.content[0], key, partNumbers)}</p>;
       })}
+    </div>
+  );
+}
+
+function SalesAnswerItems({ items, partNumbers }: { items: AnswerItem[]; partNumbers: string[] }) {
+  if (items.length === 0) return null;
+  return (
+    <div className="sales-answer-items" aria-label="Referenced items">
+      {items.map((item, index) => (
+        <div key={`${item.identifier}-${index}`}>
+          <strong>{item.identifier}</strong>
+          <span aria-hidden="true">—</span>
+          <p><b>{item.label}</b>{item.description ? ": " : ""}{renderInlineAnswer(item.description, `answer-item-${index}`, partNumbers)}</p>
+        </div>
+      ))}
     </div>
   );
 }
@@ -532,6 +554,7 @@ function SalesExchange({
   const [followUp, setFollowUp] = useState("");
   const answer = exchange.assistant.answer;
   if (!answer) return null;
+  const answerItems = Array.isArray(answer.answer_items) ? answer.answer_items : [];
 
   function submitFollowUp(event: FormEvent) {
     event.preventDefault();
@@ -551,6 +574,7 @@ function SalesExchange({
         <span className="sales-message-avatar" aria-hidden="true">AI</span>
         <div>
           <SalesAnswerContent value={answer.answer} partNumbers={answer.materials} />
+          <SalesAnswerItems items={answerItems} partNumbers={answer.materials} />
 
           <details className={`sales-reference-panel ${answer.status}`}>
             <summary>
