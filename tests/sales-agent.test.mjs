@@ -27,7 +27,7 @@ test("routes adaptive answer modes without changing the GPT-5.6 Sol model", () =
   assert.equal(resolveReasoningProfile("Any question", "not-valid").profile, "auto");
 });
 
-test("uses one quality-first GPT-5.6 Responses call with comprehensive workbook grounding", async () => {
+test("uses one cache-aligned GPT-5.6 Responses call with adaptive workbook grounding", async () => {
   const requests = [];
   const fetchImpl = async (_url, init) => {
     const body = JSON.parse(init.body);
@@ -51,11 +51,18 @@ test("uses one quality-first GPT-5.6 Responses call with comprehensive workbook 
         escalation_reason: null,
       }),
       output: [],
+      usage: {
+        input_tokens: 4_200,
+        input_tokens_details: { cached_tokens: 2_000, cache_write_tokens: 0 },
+        output_tokens: 320,
+        output_tokens_details: { reasoning_tokens: 120 },
+        total_tokens: 4_520,
+      },
     });
   };
 
   const result = await answerSalesQuestionWithAI({
-    question: "What is the capacity and readability of CR221?",
+    question: "Why would the capacity and readability of CR221 matter for a customer?",
     sessionContext: [{ question: "Tell me about CR221", answer: "CR221 is material 30428204.", materials: ["30428204"] }],
     apiKey: "test-key",
     fetchImpl,
@@ -67,27 +74,66 @@ test("uses one quality-first GPT-5.6 Responses call with comprehensive workbook 
   assert.equal(DEFAULT_REASONING_MODE, "standard");
   assert.equal(requests.length, 1);
   assert.equal(requests[0].model, "gpt-5.6-sol");
-  assert.deepEqual(requests[0].reasoning, { effort: "high", mode: "standard", context: "all_turns" });
-  assert.equal(requests[0].max_output_tokens, 128_000);
+  assert.deepEqual(requests[0].reasoning, { effort: "high", mode: "standard", context: "current_turn" });
+  assert.equal(requests[0].max_output_tokens, 8_000);
   assert.equal(requests[0].store, false);
+  assert.equal(requests[0].prompt_cache_key, "ohaus-ask-workbook-v1");
+  assert.deepEqual(requests[0].prompt_cache_options, { mode: "explicit", ttl: "30m" });
   assert.equal(requests[0].tools, undefined);
   assert.equal(requests[0].text.format.strict, true);
   assert.match(JSON.stringify(requests[0].input), /RECENT VERIFIED CONVERSATION CONTEXT/);
-  assert.match(JSON.stringify(requests[0].input), /sales-grounding-v8/);
+  assert.match(JSON.stringify(requests[0].input), /sales-grounding-v9/);
   assert.match(JSON.stringify(requests[0].input), /deterministic_selection_results/);
   assert.match(JSON.stringify(requests[0].input), /nearest_alternative_results/);
   assert.match(JSON.stringify(requests[0].input), /retrieval_document_matches/);
-  assert.match(requests[0].instructions, /Keep routine answers streamlined/);
-  assert.match(requests[0].instructions, /Use \*\*bold\*\* sparingly/);
-  assert.match(requests[0].instructions, /Put every referenced material, item, or part number in answer_items/);
+  assert.equal(requests[0].instructions, undefined);
+  assert.equal(requests[0].input[0].role, "developer");
+  assert.deepEqual(requests[0].input[0].content[0].prompt_cache_breakpoint, { mode: "explicit" });
+  assert.match(requests[0].input[0].content[0].text, /Keep routine answers streamlined/);
+  assert.match(requests[0].input[0].content[0].text, /Use \*\*bold\*\* sparingly/);
+  assert.match(requests[0].input[0].content[0].text, /Put every referenced material, item, or part number in answer_items/);
   assert.match(JSON.stringify(requests[0].input), /CR221/);
   assert.equal(result.evidence[0].value, "220 g");
   assert.deepEqual(result.answer_items, [{ identifier: "30428204", label: "CR221", description: "220 g capacity with 0.1 g readability" }]);
   assert.equal(result.catalog_checks, 1);
   assert.equal(result.grounding_products, 80);
   assert.equal(result.fallback_used, false);
-  assert.equal(result.output_token_cap, 128_000);
+  assert.equal(result.output_token_cap, 8_000);
   assert.equal(result.output_cap_reduced, false);
+  assert.equal(result.delivery, "openai");
+  assert.equal(result.usage.input_tokens, 4_200);
+  assert.equal(result.usage.cached_tokens, 2_000);
+  assert.equal(result.grounding.retrieval_documents, 0);
+  assert.ok(result.timing.total_ms >= result.timing.openai_ms);
+});
+
+test("answers safe exact specification lookups without an OpenAI round trip", async () => {
+  let calls = 0;
+  const result = await answerSalesQuestionWithAI({
+    question: "What are the capacity, readability, power, and battery life of CR221?",
+    apiKey: "test-key",
+    fetchImpl: async () => {
+      calls += 1;
+      throw new Error("OpenAI should not be called for a deterministic lookup.");
+    },
+  });
+
+  assert.equal(calls, 0);
+  assert.equal(result.delivery, "catalog_fast_path");
+  assert.equal(result.model, "Catalog lookup");
+  assert.equal(result.reasoning_effort, "none");
+  assert.equal(result.output_token_cap, 0);
+  assert.deepEqual(result.answer_items, [{
+    identifier: "30428204",
+    label: "CR221",
+    description: "maximum capacity: 220 g · readability: 0.1 g · power: 3 AA (LR6) Batteries (Included);AC Adapter (Not Included) · battery life: 300 Hours with Disposable Batteries",
+  }]);
+  assert.deepEqual(result.evidence.map((item) => item.value), [
+    "220 g",
+    "0.1 g",
+    "3 AA (LR6) Batteries (Included);AC Adapter (Not Included)",
+    "300 Hours with Disposable Batteries",
+  ]);
 });
 
 test("retains up to one hundred twenty compact verified turns for follow-up resolution", async () => {
@@ -186,11 +232,11 @@ test("falls back to GPT-5.6 Terra only when the Sol request is rate limited", as
   });
 
   assert.deepEqual(requests.map((request) => request.model), ["gpt-5.6-sol", "gpt-5.6-terra"]);
-  assert.deepEqual(requests.map((request) => request.max_output_tokens), [128_000, 128_000]);
+  assert.deepEqual(requests.map((request) => request.max_output_tokens), [8_000, 8_000]);
   assert.equal(result.model, "gpt-5.6-terra");
   assert.equal(result.primary_model, "gpt-5.6-sol");
   assert.equal(result.fallback_used, true);
-  assert.equal(result.output_token_cap, 128_000);
+  assert.equal(result.output_token_cap, 8_000);
   assert.equal(result.output_cap_reduced, false);
 
   const retry = await answerSalesQuestionWithAI({

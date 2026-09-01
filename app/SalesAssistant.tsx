@@ -37,6 +37,17 @@ type SalesAnswer = {
   output_token_cap: number;
   output_cap_reduced: boolean;
   catalog_checks: number;
+  delivery?: "openai" | "catalog_fast_path";
+  timing?: { grounding_ms: number; openai_ms: number; total_ms: number };
+  usage?: {
+    input_tokens: number | null;
+    cached_tokens: number;
+    cache_write_tokens: number;
+    output_tokens: number | null;
+    reasoning_tokens: number;
+    total_tokens: number | null;
+  };
+  grounding?: { retrieval_documents: number; exact_match_count: number };
 };
 
 type Message = {
@@ -64,10 +75,12 @@ type Health = {
   context: {
     max_verified_turns: number;
     approximate_character_budget: number;
+    default_retrieval_documents: number;
     max_retrieval_documents: number;
     max_total_request_tokens: number;
     max_input_tokens: number;
     max_output_tokens: number;
+    deterministic_lookup_enabled: boolean;
   };
   catalog: {
     portable_products: number;
@@ -145,7 +158,7 @@ type AnswerBlock = {
 function parseAnswerBlocks(value: string) {
   const blocks: AnswerBlock[] = [];
   let paragraph: string[] = [];
-  let list: AnswerBlock | null = null;
+  const listState: { current: AnswerBlock | null } = { current: null };
 
   function flushParagraph() {
     if (paragraph.length === 0) return;
@@ -154,9 +167,9 @@ function parseAnswerBlocks(value: string) {
   }
 
   function flushList() {
-    if (!list) return;
-    blocks.push(list);
-    list = null;
+    if (!listState.current) return;
+    blocks.push(listState.current);
+    listState.current = null;
   }
 
   for (const rawLine of String(value ?? "").replace(/\\([*_`])/g, "$1").split(/\r?\n/)) {
@@ -180,10 +193,11 @@ function parseAnswerBlocks(value: string) {
     const item = unorderedItem?.[1] ?? orderedItem?.[1];
     if (item) {
       flushParagraph();
-      const type = unorderedItem ? "unordered-list" : "ordered-list";
-      if (list?.type !== type) flushList();
-      list ??= { type, content: [] };
-      list.content.push(item);
+      const type: AnswerBlock["type"] = unorderedItem ? "unordered-list" : "ordered-list";
+      const currentList = listState.current;
+      if (!currentList || currentList.type !== type) flushList();
+      listState.current ??= { type, content: [] };
+      listState.current.content.push(item);
       continue;
     }
 
@@ -285,9 +299,9 @@ export default function SalesAssistant() {
     fetch(url, { headers: { Accept: "application/json" } })
       .then(async (response) => {
         if (!response.ok) throw new Error("Product knowledge service unavailable");
-        return response.json();
+        return response.json() as Promise<Health>;
       })
-      .then((payload: Health) => {
+      .then((payload) => {
         setAccessCode(savedCode);
         setHealth(payload);
         setNeedsCode(Boolean(payload.access_code_required && !savedCode));
@@ -343,7 +357,12 @@ export default function SalesAssistant() {
         },
         body: JSON.stringify({ question: trimmed, context, reasoning_profile: reasoningProfile }),
       });
-      const payload = await response.json().catch(() => ({}));
+      const payload = await response.json().catch(() => ({})) as {
+        answer?: SalesAnswer;
+        code?: string;
+        error?: string;
+        retry_after_seconds?: number;
+      };
       if (response.status === 401 && payload.code === "access_code_required") {
         setNeedsCode(true);
         throw new Error("Enter the team access code, then ask the question again.");
@@ -416,14 +435,12 @@ export default function SalesAssistant() {
 
   const ready = Boolean(health?.api_configured);
   const coolingDown = rateLimitSeconds > 0;
-  const totalRequestTokens = Math.round((health?.context.max_total_request_tokens ?? 450_000) / 1_000);
-  const inputTokens = Math.round((health?.context.max_input_tokens ?? 322_000) / 1_000);
-  const outputTokens = Math.round((health?.context.max_output_tokens ?? 128_000) / 1_000);
+  const outputTokens = Math.round((health?.context.max_output_tokens ?? 8_000) / 1_000);
   const reasoningProfileIndex = Math.max(0, reasoningProfiles.findIndex((profile) => profile.value === reasoningProfile));
   const activeReasoningProfile = reasoningProfiles[reasoningProfileIndex];
 
   return (
-    <section className={`sales-workspace ${productKnowledgeCollapsed ? "sales-rail-collapsed" : ""}`} aria-label="Sales assistant">
+    <section className={`sales-workspace ${productKnowledgeCollapsed ? "sales-rail-collapsed" : ""}`} aria-label="Ask assistant">
       <aside className="sales-rail">
         <div className="sales-rail-header">
           <div className="sales-agent-badge" aria-hidden="true">AI</div>
@@ -461,14 +478,14 @@ export default function SalesAssistant() {
           </div>
 
           <div className="sales-memory-card">
-            <span>Extended context</span>
+            <span>Adaptive context</span>
             <strong>{health?.context.max_verified_turns ?? 120} verified turns</strong>
             <small>
-              {totalRequestTokens}K total request budget · {inputTokens}K input reserve · {outputTokens}K output cap · up to {health?.context.max_retrieval_documents ?? 20} knowledge documents
+              {health?.context.default_retrieval_documents ?? 8} typical knowledge documents · exact lookups use structured records · broad questions may expand to {health?.context.max_retrieval_documents ?? 20} · {outputTokens}K answer cap
             </small>
           </div>
 
-          <footer>Sales pilot owner · T. Delacruz</footer>
+          <footer>Ask pilot owner · T. Delacruz</footer>
         </div>
       </aside>
 
@@ -689,8 +706,17 @@ function SalesExchange({
               )}
 
               <div className="sales-answer-foot">
-                <span>{answer.model}{answer.fallback_used ? " fallback" : ""} · {answer.reasoning_effort} reasoning · {answer.reasoning_mode} mode</span>
-                <span>{answer.catalog_checks} catalog check{answer.catalog_checks === 1 ? "" : "s"}</span>
+                <span>
+                  {answer.delivery === "catalog_fast_path"
+                    ? "Instant catalog lookup"
+                    : `${answer.model}${answer.fallback_used ? " fallback" : ""} · ${answer.reasoning_effort} reasoning · ${answer.reasoning_mode} mode`}
+                </span>
+                <span>
+                  {answer.usage?.input_tokens != null ? `${answer.usage.input_tokens.toLocaleString()} input · ` : ""}
+                  {answer.usage?.cached_tokens ? `${answer.usage.cached_tokens.toLocaleString()} cached · ` : ""}
+                  {answer.timing?.total_ms != null ? `${(answer.timing.total_ms / 1_000).toFixed(1)}s · ` : ""}
+                  {answer.grounding?.retrieval_documents ?? 0} knowledge docs
+                </span>
               </div>
             </div>
           </details>

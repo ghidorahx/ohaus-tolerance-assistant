@@ -46,7 +46,7 @@ test("packages the structured knowledge base", async () => {
   assert.equal(knowledge.current.length + knowledge.legacy.length, 746);
 });
 
-test("packages the workbook-grounded AI sales endpoint and extended context policy", async () => {
+test("packages the workbook-grounded Ask endpoint and adaptive context policy", async () => {
   const response = await fetchBuiltWorker("/api/sales");
   assert.equal(response.status, 200);
   const payload = await response.json();
@@ -57,11 +57,13 @@ test("packages the workbook-grounded AI sales endpoint and extended context poli
   assert.equal(payload.default_reasoning_profile, "auto");
   assert.deepEqual(payload.reasoning_profiles, ["auto", "fast", "balanced", "thorough"]);
   assert.equal(payload.context.max_verified_turns, 120);
-  assert.equal(payload.context.approximate_character_budget, 966_000);
+  assert.equal(payload.context.approximate_character_budget, 1_326_000);
+  assert.equal(payload.context.default_retrieval_documents, 8);
   assert.equal(payload.context.max_retrieval_documents, 20);
   assert.equal(payload.context.max_total_request_tokens, 450_000);
-  assert.equal(payload.context.max_input_tokens, 322_000);
-  assert.equal(payload.context.max_output_tokens, 128_000);
+  assert.equal(payload.context.max_input_tokens, 442_000);
+  assert.equal(payload.context.max_output_tokens, 8_000);
+  assert.equal(payload.context.deterministic_lookup_enabled, true);
   assert.equal(payload.catalog.portable_products, 80);
   assert.equal(payload.catalog.api_records, 171);
   assert.equal(payload.catalog.retrieval_documents, 87);

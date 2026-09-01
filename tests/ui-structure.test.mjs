@@ -34,7 +34,7 @@ test("uses the requested neutral glass presentation", () => {
   assert.match(styles, /object-fit:\s*contain/);
 });
 
-test("provides a workbook-grounded Sales assistant with extended verified context", () => {
+test("provides a workbook-grounded Ask assistant with adaptive verified context", () => {
   assert.match(page, /<SalesAssistant/);
   assert.match(salesAssistant, /new URL\("api\/sales"/);
   assert.match(salesAssistant, /buildContext/);
@@ -42,7 +42,10 @@ test("provides a workbook-grounded Sales assistant with extended verified contex
   assert.match(salesAssistant, /Verified catalog evidence/);
   assert.match(salesAssistant, /retry_after_seconds/);
   assert.match(salesAssistant, /Ready in \$\{rateLimitSeconds\}s/);
-  assert.match(salesAssistant, /Sales pilot owner · T\. Delacruz/);
+  assert.match(page, /"Ask Assistant"/);
+  assert.match(page, /\n\s+Ask\s*\n/);
+  assert.match(salesAssistant, /Ask pilot owner · T\. Delacruz/);
+  assert.match(salesAssistant, /Adaptive context/);
   assert.match(salesAssistant, /generated knowledge documents/);
   assert.match(styles, /\.sales-evidence-grid/);
   assert.match(styles, /\.sales-conversation/);
@@ -92,6 +95,9 @@ test("keeps evidence and diagnostics inside one collapsed reference panel", () =
   assert.match(salesAssistant, /<details className=\{`sales-reference-panel/);
   assert.match(salesAssistant, /Sources &amp; details/);
   assert.match(salesAssistant, /<div className="sales-reference-content">/);
+  assert.match(salesAssistant, /Instant catalog lookup/);
+  assert.match(salesAssistant, /cached/);
+  assert.match(salesAssistant, /knowledge docs/);
   assert.match(styles, /\.sales-reference-panel\s*\{/);
   assert.match(styles, /\.sales-reference-panel\[open\]/);
 
