@@ -72,10 +72,13 @@ do {
     batch_size: batchSize,
   });
   const seeded = Number(result.seeded ?? result.processed ?? 0);
-  const remaining = Number(result.remaining ?? 0);
+  const remaining = result.remaining == null ? null : Number(result.remaining);
   const total = Number(result.total ?? manifest.counts?.chunks ?? 0);
   if (batchNumber === 1 || batchNumber % 20 === 0 || result.complete) {
-    console.log(`Batch ${batchNumber}: ${seeded} indexed, ${remaining} remaining${total ? ` of ${total}` : ""}.`);
+    const progress = remaining === null || !Number.isFinite(remaining)
+      ? `exact progress deferred${total ? ` (${total} total)` : ""}`
+      : `${remaining} remaining${total ? ` of ${total}` : ""}`;
+    console.log(`Batch ${batchNumber}: ${seeded} indexed, ${progress}.`);
   }
   if (!result.complete && seeded === 0) {
     throw new Error("Catalog seeding made no progress. Inspect status and use --reset-failed only after correcting the recorded failure.");

@@ -1011,7 +1011,78 @@ test("seeds the pending progress queue idempotently in a deterministic namespace
   assert.equal(result.seeded, 1);
   assert.equal(result.remaining, 0);
   assert.equal(result.complete, true);
+  assert.equal(result.progress_exact, true);
   assert.equal(result.mutation_id, "mutation-master-1");
+});
+
+test("defers the full seed-progress aggregate after an ordinary full batch", async () => {
+  const rows = ["one", "two"].map((suffix, index) => ({
+    chunk_id: `mc_${suffix}`,
+    vector_id: `mc_${suffix}`,
+    attempts: 0,
+    material_number: `3042820${index + 4}`,
+    chunk_kind: "performance",
+    parent_family: "Balances & Scales",
+    family: "Compass CR",
+    content: `Catalog chunk ${suffix}.`,
+    metadata_json: JSON.stringify({ source_sheet: activeVersion.source_sheet, source_row: 122 + index }),
+  }));
+  const db = createDb((sql, parameters, method) => {
+    const version = versionHandler(sql, parameters, method);
+    if (version !== undefined) return version;
+    if (sql.includes("JOIN master_chunks AS c") && sql.includes("p.status IN")) return rows;
+    if (sql.startsWith("UPDATE master_vector_seed_progress")) return { success: true };
+    if (sql.includes("COUNT(*) AS total")) {
+      throw new Error("ordinary batches must not scan the full seed queue");
+    }
+    return [];
+  });
+  const result = await seedMasterVectorizeBatch({
+    db,
+    ai: { async run() { return { data: rows.map(() => vector()) }; } },
+    index: { async upsert() { return { mutationId: "mutation-master-full" }; } },
+    versionId: activeVersion.version_id,
+    batchSize: rows.length,
+  });
+
+  assert.equal(result.seeded, rows.length);
+  assert.equal(result.complete, false);
+  assert.equal(result.progress_exact, false);
+  assert.equal(result.seeded_total, null);
+  assert.equal(result.remaining, null);
+  assert.equal(result.total, null);
+  assert.equal(result.failed, null);
+  assert.equal(db.calls.some((call) => call.sql?.includes("COUNT(*) AS total")), false);
+});
+
+test("uses an exact aggregate when no eligible seed rows remain", async () => {
+  let progressQueries = 0;
+  const db = createDb((sql, parameters, method) => {
+    const version = versionHandler(sql, parameters, method);
+    if (version !== undefined) return version;
+    if (sql.includes("JOIN master_chunks AS c") && sql.includes("p.status IN")) return [];
+    if (sql.includes("COUNT(*) AS total")) {
+      progressQueries += 1;
+      return { total: 3, seeded: 2, pending: 0, failed: 1 };
+    }
+    return [];
+  });
+  const result = await seedMasterVectorizeBatch({
+    db,
+    ai: { async run() { throw new Error("empty queues must not embed"); } },
+    index: { async upsert() { throw new Error("empty queues must not upsert"); } },
+    versionId: activeVersion.version_id,
+    batchSize: 2,
+  });
+
+  assert.equal(result.status, "stalled");
+  assert.equal(result.seeded, 0);
+  assert.equal(result.seeded_total, 2);
+  assert.equal(result.remaining, 1);
+  assert.equal(result.failed, 1);
+  assert.equal(result.complete, false);
+  assert.equal(result.progress_exact, true);
+  assert.equal(progressQueries, 1);
 });
 
 test("rejects overlong queued Vectorize IDs before embedding", async () => {
