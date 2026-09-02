@@ -6,6 +6,7 @@ import {
   DEFAULT_MODEL,
   DEFAULT_REASONING_EFFORT,
   DEFAULT_REASONING_MODE,
+  outputTokenLimitForQuestion,
 } from "../lib/sales-agent.mjs";
 
 test("uses one medium-reasoning GPT-5.6 Responses call with comprehensive workbook grounding", async () => {
@@ -48,9 +49,12 @@ test("uses one medium-reasoning GPT-5.6 Responses call with comprehensive workbo
   assert.equal(DEFAULT_REASONING_MODE, "standard");
   assert.equal(requests.length, 1);
   assert.equal(requests[0].model, "gpt-5.6-sol");
-  assert.deepEqual(requests[0].reasoning, { effort: "medium", mode: "standard", context: "all_turns" });
-  assert.equal(requests[0].max_output_tokens, 128_000);
+  assert.deepEqual(requests[0].reasoning, { effort: "medium", mode: "standard", context: "current_turn" });
+  assert.equal(requests[0].max_output_tokens, 2_400);
   assert.equal(requests[0].store, false);
+  assert.equal(requests[0].prompt_cache_key, "ohaus-ask-master-catalog-v1");
+  assert.deepEqual(requests[0].prompt_cache_options, { mode: "implicit", ttl: "30m" });
+  assert.equal(requests[0].text.verbosity, "low");
   assert.equal(requests[0].tools, undefined);
   assert.equal(requests[0].text.format.strict, true);
   assert.match(JSON.stringify(requests[0].input), /RECENT VERIFIED CONVERSATION CONTEXT/);
@@ -67,14 +71,14 @@ test("uses one medium-reasoning GPT-5.6 Responses call with comprehensive workbo
   assert.equal(result.catalog_checks, 1);
   assert.equal(result.grounding_products, 80);
   assert.equal(result.fallback_used, false);
-  assert.equal(result.output_token_cap, 128_000);
-  assert.equal(result.output_cap_reduced, false);
+  assert.equal(result.output_token_cap, 2_400);
+  assert.equal(result.output_cap_reduced, true);
   assert.equal(result.retrieval_strategy, "local_fallback");
   assert.equal(result.vectorize_status, "not_configured");
   assert.equal(result.retrieval_documents_sent, 8);
 });
 
-test("retains up to one hundred twenty compact verified turns for follow-up resolution", async () => {
+test("retains only the twelve most recent compact verified turns", async () => {
   const requests = [];
   const fetchImpl = async (_url, init) => {
     requests.push(JSON.parse(init.body));
@@ -113,8 +117,8 @@ test("retains up to one hundred twenty compact verified turns for follow-up reso
   });
 
   const input = JSON.stringify(requests[0].input);
-  assert.doesNotMatch(input, /Verified context marker 4\b/);
-  assert.match(input, /Verified context marker 5\b/);
+  assert.doesNotMatch(input, /Verified context marker 112\b/);
+  assert.match(input, /Verified context marker 113\b/);
   assert.match(input, /Verified context marker 124\b/);
 });
 
@@ -170,12 +174,12 @@ test("falls back to GPT-5.6 Terra only when the Sol request is rate limited", as
   });
 
   assert.deepEqual(requests.map((request) => request.model), ["gpt-5.6-sol", "gpt-5.6-terra"]);
-  assert.deepEqual(requests.map((request) => request.max_output_tokens), [128_000, 128_000]);
+  assert.deepEqual(requests.map((request) => request.max_output_tokens), [2_400, 2_400]);
   assert.equal(result.model, "gpt-5.6-terra");
   assert.equal(result.primary_model, "gpt-5.6-sol");
   assert.equal(result.fallback_used, true);
-  assert.equal(result.output_token_cap, 128_000);
-  assert.equal(result.output_cap_reduced, false);
+  assert.equal(result.output_token_cap, 2_400);
+  assert.equal(result.output_cap_reduced, true);
 
   const retry = await answerSalesQuestionWithAI({
     question: "Is current pricing in the catalog?",
@@ -185,4 +189,62 @@ test("falls back to GPT-5.6 Terra only when the Sol request is rate limited", as
   assert.equal(requests.length, 3);
   assert.equal(requests[2].model, "gpt-5.6-terra");
   assert.equal(retry.fallback_used, true);
+});
+
+test("uses intent-sized output budgets", () => {
+  assert.equal(outputTokenLimitForQuestion("What is CR221's capacity?"), 2_400);
+  assert.equal(outputTokenLimitForQuestion("Compare CR221 and CR5200"), 4_000);
+  assert.equal(outputTokenLimitForQuestion("Give me every detail in the complete record"), 6_000);
+});
+
+test("accepts a pre-retrieved grounding bundle and custom evidence hydrator", async () => {
+  const groundingBundle = {
+    bundle_version: "master-catalog-rag-v1",
+    catalog_scope: { materials: 6_407 },
+    retrieval: { strategy: "hybrid_rrf", vectorize_status: "ready", result_count: 1 },
+    allowed_material_numbers: ["30428204"],
+    records: [{ material_number: "30428204", fields: { "Maximum Capacity {metric}": "220 g" } }],
+  };
+  const fetchImpl = async () => Response.json({
+    id: "resp-master",
+    output_text: JSON.stringify({
+      answer: "The maximum capacity is verified.",
+      answer_items: [
+        { identifier: "30428204", label: "CR221", description: "Maximum capacity 220 g" },
+        { identifier: "99999999", label: "Invented", description: "Must not be trusted" },
+      ],
+      status: "answered",
+      confidence: "high",
+      intent: "lookup",
+      materials: ["30428204"],
+      evidence: [{ material_number: "30428204", field: "Maximum Capacity {metric}" }],
+      unresolved_items: [],
+      follow_up_suggestions: [],
+      context_summary: "CR221 is active.",
+      escalation_reason: null,
+    }),
+    output: [],
+  });
+
+  const result = await answerSalesQuestionWithAI({
+    question: "What is the capacity of 30428204?",
+    apiKey: "test-key",
+    groundingBundle,
+    evidenceHydrator(items, bundle) {
+      return items.map((item) => ({
+        ...item,
+        model_or_item: "CR221",
+        value: bundle.records[0].fields[item.field],
+        source_file: "MMMDF.xlsx",
+      }));
+    },
+    fetchImpl,
+  });
+
+  assert.equal(result.grounding_products, 6_407);
+  assert.equal(result.retrieval_strategy, "hybrid_rrf");
+  assert.equal(result.vectorize_status, "ready");
+  assert.equal(result.evidence[0].value, "220 g");
+  assert.deepEqual(result.answer_items.map((item) => item.identifier), ["30428204"]);
+  assert.deepEqual(result.materials, ["30428204"]);
 });

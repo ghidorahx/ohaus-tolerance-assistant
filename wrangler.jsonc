@@ -12,6 +12,19 @@
       "binding": "SALES_VECTORIZE",
       "index_name": "ohaus-sales-catalog-v1",
       "remote": true
+    },
+    {
+      "binding": "CATALOG_VECTORIZE",
+      "index_name": "ohaus-master-catalog-fast-v1",
+      "remote": true
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "CATALOG_DB",
+      "database_name": "ohaus-master-catalog-v1",
+      "database_id": "70bd6c91-01ec-4ce8-81ff-07956b5737c6",
+      "remote": true
     }
   ],
   "observability": {

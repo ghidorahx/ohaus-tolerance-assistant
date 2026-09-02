@@ -2,9 +2,13 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "support",
   "account_id": "184954aa769a7b5fbc3776178662c8cf",
-  "main": "./.wrangler/worker-wrapper.js",
+  "main": "./dist/server/index.js",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist/client",
+    "binding": "ASSETS"
+  },
   "ai": {
     "binding": "AI"
   },
@@ -12,6 +16,17 @@
     {
       "binding": "SALES_VECTORIZE",
       "index_name": "ohaus-sales-catalog-v1"
+    },
+    {
+      "binding": "CATALOG_VECTORIZE",
+      "index_name": "ohaus-master-catalog-fast-v1"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "CATALOG_DB",
+      "database_name": "ohaus-master-catalog-v1",
+      "database_id": "70bd6c91-01ec-4ce8-81ff-07956b5737c6"
     }
   ],
   "observability": {

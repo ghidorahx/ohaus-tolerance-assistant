@@ -1,0 +1,5443 @@
+{
+  "schema_version": "2.0.0",
+  "source": {
+    "file": "MMMDF_EN_US_20260605_AI_Organized 2.xlsx",
+    "sheet": "Product_Catalog_AI",
+    "sha256": "5651c886837bf7b6817d829273d3c9a608658cd107798a9d206d01ad404950bb",
+    "rows": 6407,
+    "columns": 428,
+    "selection_rule": "Use Product_Catalog_AI only; exclude Raw_Data and blank Parent Family Name values."
+  },
+  "manifest": {
+    "case_count": 115,
+    "grounded_case_count": 108,
+    "required_case_count": 109,
+    "unsupported_case_count": 6,
+    "categories": {
+      "category_filter": 1,
+      "document_link": 8,
+      "exact_material": 48,
+      "model_alias": 15,
+      "no_results": 1,
+      "numeric_filter": 3,
+      "relationship": 10,
+      "semantic_discovery": 3,
+      "technical_field": 20,
+      "unsupported_live_data": 6
+    },
+    "parent_family_count": 46,
+    "parent_families": [
+      "Accessories",
+      "Analytical Balances",
+      "Balance Calibration Weights",
+      "Bead Mill Homogenizers",
+      "Beam Load Cells",
+      "Bench Scale Bases",
+      "Bench Scales",
+      "Calibration Weight Accessories",
+      "Centrifuge Accessories",
+      "Colorimeters",
+      "Compact Bench Scales",
+      "Counting Scales",
+      "Dry Block Heaters",
+      "Electrodes",
+      "Equipment Accessories",
+      "Floor Scale Platforms",
+      "Floor Scales",
+      "Food Scales",
+      "Hooked and Slotted Weights and Weight Sets",
+      "Hotplates & Stirrers",
+      "Incubating & Incubating Cooling Shakers",
+      "Indicators",
+      "Jewelry Scales",
+      "LabJaws Clamps & Supports",
+      "Laboratory Vortex Mixers",
+      "Mechanical Scales & Balances",
+      "Micro Centrifuges",
+      "Mini Centrifuges",
+      "Moisture Analyzers",
+      "Multi Centrifuges",
+      "Multi Pro Centrifuges",
+      "Open Air Shakers",
+      "Overhead Stirrers",
+      "pH/Conductivity/DO Meter",
+      "Portable Balances",
+      "Precision Balances",
+      "Printers",
+      "Reference Weights and Mass Standards",
+      "Rotors",
+      "Scale Weights and Test Weights",
+      "Semi-Micro Balances",
+      "Shipping Scales",
+      "Solutions & Buffers",
+      "Spare Parts",
+      "Specialty Stirrers",
+      "Turbidimeters"
+    ],
+    "exact_parent_family_materials": [
+      {
+        "parent_family": "Accessories",
+        "material_number": "11113857"
+      },
+      {
+        "parent_family": "Analytical Balances",
+        "material_number": "30100600"
+      },
+      {
+        "parent_family": "Balance Calibration Weights",
+        "material_number": "30390001"
+      },
+      {
+        "parent_family": "Bead Mill Homogenizers",
+        "material_number": "30391393"
+      },
+      {
+        "parent_family": "Beam Load Cells",
+        "material_number": "61038662"
+      },
+      {
+        "parent_family": "Bench Scale Bases",
+        "material_number": "30379439"
+      },
+      {
+        "parent_family": "Bench Scales",
+        "material_number": "30461464"
+      },
+      {
+        "parent_family": "Calibration Weight Accessories",
+        "material_number": "30390725"
+      },
+      {
+        "parent_family": "Centrifuge Accessories",
+        "material_number": "30129561"
+      },
+      {
+        "parent_family": "Colorimeters",
+        "material_number": "30853393"
+      },
+      {
+        "parent_family": "Compact Bench Scales",
+        "material_number": "30031707"
+      },
+      {
+        "parent_family": "Counting Scales",
+        "material_number": "30031787"
+      },
+      {
+        "parent_family": "Dry Block Heaters",
+        "material_number": "30392066"
+      },
+      {
+        "parent_family": "Electrodes",
+        "material_number": "30031639"
+      },
+      {
+        "parent_family": "Equipment Accessories",
+        "material_number": "30400051"
+      },
+      {
+        "parent_family": "Floor Scale Platforms",
+        "material_number": "30716491"
+      },
+      {
+        "parent_family": "Floor Scales",
+        "material_number": "30716508"
+      },
+      {
+        "parent_family": "Food Scales",
+        "material_number": "30031827"
+      },
+      {
+        "parent_family": "Hooked and Slotted Weights and Weight Sets",
+        "material_number": "30390726"
+      },
+      {
+        "parent_family": "Hotplates & Stirrers",
+        "material_number": "30392031"
+      },
+      {
+        "parent_family": "Incubating & Incubating Cooling Shakers",
+        "material_number": "30391924"
+      },
+      {
+        "parent_family": "Indicators",
+        "material_number": "30126959"
+      },
+      {
+        "parent_family": "Jewelry Scales",
+        "material_number": "30253054"
+      },
+      {
+        "parent_family": "LabJaws Clamps & Supports",
+        "material_number": "30392195"
+      },
+      {
+        "parent_family": "Laboratory Vortex Mixers",
+        "material_number": "30392122"
+      },
+      {
+        "parent_family": "Mechanical Scales & Balances",
+        "material_number": "80000003"
+      },
+      {
+        "parent_family": "Micro Centrifuges",
+        "material_number": "30130866"
+      },
+      {
+        "parent_family": "Mini Centrifuges",
+        "material_number": "30134157"
+      },
+      {
+        "parent_family": "Moisture Analyzers",
+        "material_number": "30241165"
+      },
+      {
+        "parent_family": "Multi Centrifuges",
+        "material_number": "30130875"
+      },
+      {
+        "parent_family": "Multi Pro Centrifuges",
+        "material_number": "30314810"
+      },
+      {
+        "parent_family": "Open Air Shakers",
+        "material_number": "30391307"
+      },
+      {
+        "parent_family": "Overhead Stirrers",
+        "material_number": "30586763"
+      },
+      {
+        "parent_family": "pH/Conductivity/DO Meter",
+        "material_number": "30031655"
+      },
+      {
+        "parent_family": "Portable Balances",
+        "material_number": "30253005"
+      },
+      {
+        "parent_family": "Precision Balances",
+        "material_number": "30057099"
+      },
+      {
+        "parent_family": "Printers",
+        "material_number": "30064203"
+      },
+      {
+        "parent_family": "Reference Weights and Mass Standards",
+        "material_number": "30390008"
+      },
+      {
+        "parent_family": "Rotors",
+        "material_number": "30129559"
+      },
+      {
+        "parent_family": "Scale Weights and Test Weights",
+        "material_number": "30390020"
+      },
+      {
+        "parent_family": "Semi-Micro Balances",
+        "material_number": "30139512"
+      },
+      {
+        "parent_family": "Shipping Scales",
+        "material_number": "30745796"
+      },
+      {
+        "parent_family": "Solutions & Buffers",
+        "material_number": "30059255"
+      },
+      {
+        "parent_family": "Spare Parts",
+        "material_number": "214642"
+      },
+      {
+        "parent_family": "Specialty Stirrers",
+        "material_number": "30573789"
+      },
+      {
+        "parent_family": "Turbidimeters",
+        "material_number": "30853395"
+      }
+    ],
+    "exact_parent_family_materials_sha256": "3775602079c3c96ef5a989a7badbce90342b5c78bc86e2d823fd4b78fb22b5fe",
+    "six_digit_material_numbers": [
+      "214642",
+      "923345",
+      "923389"
+    ],
+    "grounded_material_numbers": [
+      "214642",
+      "923345",
+      "923389",
+      "11113857",
+      "30031639",
+      "30031655",
+      "30031656",
+      "30031707",
+      "30031708",
+      "30031709",
+      "30031710",
+      "30031711",
+      "30031787",
+      "30031827",
+      "30035439",
+      "30038553",
+      "30057099",
+      "30059255",
+      "30064203",
+      "30073970",
+      "30073971",
+      "30073972",
+      "30100600",
+      "30100605",
+      "30126959",
+      "30129559",
+      "30129561",
+      "30130866",
+      "30130869",
+      "30130872",
+      "30130875",
+      "30134157",
+      "30139512",
+      "30241165",
+      "30253005",
+      "30253006",
+      "30253008",
+      "30253009",
+      "30253012",
+      "30253013",
+      "30253054",
+      "30304361",
+      "30314810",
+      "30314813",
+      "30379439",
+      "30390001",
+      "30390007",
+      "30390008",
+      "30390012",
+      "30390020",
+      "30390172",
+      "30390725",
+      "30390726",
+      "30391307",
+      "30391393",
+      "30391924",
+      "30392031",
+      "30392066",
+      "30392122",
+      "30392195",
+      "30393189",
+      "30400018",
+      "30400051",
+      "30419628",
+      "30428204",
+      "30428205",
+      "30428206",
+      "30428207",
+      "30461464",
+      "30539390",
+      "30573789",
+      "30586763",
+      "30586842",
+      "30680262",
+      "30685174",
+      "30716491",
+      "30716508",
+      "30745796",
+      "30853393",
+      "30853395",
+      "61037237",
+      "61037530",
+      "61038121",
+      "61038661",
+      "61038662",
+      "62031509",
+      "80000003",
+      "80000031",
+      "83033966",
+      "83041308",
+      "83041315"
+    ],
+    "technical_fields": [
+      "Maximum Capacity {metric}",
+      "Readability {metric}",
+      "Stabilization Time",
+      "Battery Life",
+      "Power",
+      "Legal for Trade",
+      "IP Rating",
+      "Maximum Speed",
+      "Speed Range",
+      "Temperature Range {metric}",
+      "Measurement Range",
+      "pH measuring range",
+      "Conductivity measuring range",
+      "Accuracy",
+      "Calibration Certificate",
+      "Weight Tolerance",
+      "NTEP Approval",
+      "Pan Size {Width} {metric}",
+      "Platform Size {Length} {metric}",
+      "Working Environment {metric}"
+    ],
+    "relationship_fields": [
+      "Relationship / Accessories",
+      "Relationship / Cross Selling",
+      "Relationship / Services",
+      "Relationship / Spare Parts",
+      "Relationship / Upsellings",
+      "Relationship / Replacements",
+      "Compatible Models",
+      "Rotor Compatibility",
+      "Accessories Included",
+      "Sample Vials Compatibility"
+    ],
+    "document_fields": [
+      "EN Data Sheets 1",
+      "EN Data Sheets 2",
+      "EN Data Sheets 3",
+      "EN User Guide 1",
+      "EN User Guide 2",
+      "EN Manuals 1",
+      "EN Manuals 2"
+    ]
+  },
+  "cases": [
+    {
+      "id": "exact-material-parent-accessories",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Accessories",
+      "query": "What catalog item is OHAUS material number 11113857?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "11113857"
+        ],
+        "parent_families": [
+          "Accessories"
+        ],
+        "families": [
+          "Moisture Analyzer Accessories"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "11113857",
+            "source_row": 189,
+            "fields": {
+              "Material Number": "11113857",
+              "Material Description (Global English)": "Temp. calibration kit MB Series",
+              "Parent Family Name": "Accessories",
+              "Family Name": "Moisture Analyzer Accessories",
+              "Trade Name": "HA-TC TEMPJUST"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-analytical-balances",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Analytical Balances",
+      "query": "What catalog item is OHAUS material number 30100600?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30100600"
+        ],
+        "parent_families": [
+          "Analytical Balances"
+        ],
+        "families": [
+          "Adventurer™ Analytical"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30100600",
+            "source_row": 314,
+            "fields": {
+              "Material Number": "30100600",
+              "Material Description (Global English)": "Analytical Balance AX124",
+              "Parent Family Name": "Analytical Balances",
+              "Family Name": "Adventurer™ Analytical",
+              "Trade Name": "AX124"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-balance-calibration-weights",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Balance Calibration Weights",
+      "query": "What catalog item is OHAUS material number 30390001?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30390001"
+        ],
+        "parent_families": [
+          "Balance Calibration Weights"
+        ],
+        "families": [
+          "ASTM Calibration Weight Sets"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30390001",
+            "source_row": 343,
+            "fields": {
+              "Material Number": "30390001",
+              "Material Description (Global English)": "CalPak ASTM 5kg,200g,20g CL1 Accrd TR",
+              "Parent Family Name": "Balance Calibration Weights",
+              "Family Name": "ASTM Calibration Weight Sets"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-bead-mill-homogenizers",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Bead Mill Homogenizers",
+      "query": "What catalog item is OHAUS material number 30391393?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30391393"
+        ],
+        "parent_families": [
+          "Bead Mill Homogenizers"
+        ],
+        "families": [
+          "HT Lysing Homogenizer"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30391393",
+            "source_row": 1304,
+            "fields": {
+              "Material Number": "30391393",
+              "Material Description (Global English)": "Homogenizer, HT Lysing, HOHTDG, US",
+              "Parent Family Name": "Bead Mill Homogenizers",
+              "Family Name": "HT Lysing Homogenizer",
+              "Trade Name": "HOHTDG"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-beam-load-cells",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Beam Load Cells",
+      "query": "What catalog item is OHAUS material number 61038662?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "61038662"
+        ],
+        "parent_families": [
+          "Beam Load Cells"
+        ],
+        "families": [
+          "Sensortronics"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "61038662",
+            "source_row": 1305,
+            "fields": {
+              "Material Number": "61038662",
+              "Material Description (Global English)": "LC SQB 2.5K 5KC 8CBL CELTRON",
+              "Parent Family Name": "Beam Load Cells",
+              "Family Name": "Sensortronics",
+              "Trade Name": "SQB-2.5K-SN-8"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-bench-scale-bases",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Bench Scale Bases",
+      "query": "What catalog item is OHAUS material number 30379439?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30379439"
+        ],
+        "parent_families": [
+          "Bench Scale Bases"
+        ],
+        "families": [
+          "Defender™ B Series"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30379439",
+            "source_row": 1366,
+            "fields": {
+              "Material Number": "30379439",
+              "Material Description (Global English)": "Base, D150BX AM",
+              "Parent Family Name": "Bench Scale Bases",
+              "Family Name": "Defender™ B Series",
+              "Trade Name": "D150BX"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-bench-scales",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Bench Scales",
+      "query": "What catalog item is OHAUS material number 30461464?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30461464"
+        ],
+        "parent_families": [
+          "Bench Scales"
+        ],
+        "families": [
+          "Defender™ 5000 Washdown - D52"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30461464",
+            "source_row": 1480,
+            "fields": {
+              "Material Number": "30461464",
+              "Material Description (Global English)": "Bench Scale, D52XW50WQR5",
+              "Parent Family Name": "Bench Scales",
+              "Family Name": "Defender™ 5000 Washdown - D52",
+              "Trade Name": "D52XW50WQR5"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-calibration-weight-accessories",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Calibration Weight Accessories",
+      "query": "What catalog item is OHAUS material number 30390725?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30390725"
+        ],
+        "parent_families": [
+          "Calibration Weight Accessories"
+        ],
+        "families": [
+          "Calibration Weight Handling & Cleaning Accessories"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30390725",
+            "source_row": 1553,
+            "fields": {
+              "Material Number": "30390725",
+              "Material Description (Global English)": "3-5/16\" Weight Forceps",
+              "Parent Family Name": "Calibration Weight Accessories",
+              "Family Name": "Calibration Weight Handling & Cleaning Accessories"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-centrifuge-accessories",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Centrifuge Accessories",
+      "query": "What catalog item is OHAUS material number 30129561?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30129561"
+        ],
+        "parent_families": [
+          "Centrifuge Accessories"
+        ],
+        "families": [
+          "Centrifuge Accessories"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30129561",
+            "source_row": 1554,
+            "fields": {
+              "Material Number": "30129561",
+              "Material Description (Global English)": "Adapter 1x0.2ml D6mm 8/pk",
+              "Parent Family Name": "Centrifuge Accessories",
+              "Family Name": "Centrifuge Accessories"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-colorimeters",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Colorimeters",
+      "query": "What catalog item is OHAUS material number 30853393?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30853393"
+        ],
+        "parent_families": [
+          "Colorimeters"
+        ],
+        "families": [
+          "AP50 Portable Colorimeters"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30853393",
+            "source_row": 1748,
+            "fields": {
+              "Material Number": "30853393",
+              "Material Description (Global English)": "Photometer a-AP50MM-F",
+              "Parent Family Name": "Colorimeters",
+              "Family Name": "AP50 Portable Colorimeters",
+              "Trade Name": "AQUASEARCHER"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-compact-bench-scales",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Compact Bench Scales",
+      "query": "What catalog item is OHAUS material number 30031707?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30031707"
+        ],
+        "parent_families": [
+          "Compact Bench Scales"
+        ],
+        "families": [
+          "Ranger™ 3000"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30031707",
+            "source_row": 1750,
+            "fields": {
+              "Material Number": "30031707",
+              "Material Description (Global English)": "Compact Scale, R31P1502       AM",
+              "Parent Family Name": "Compact Bench Scales",
+              "Family Name": "Ranger™ 3000",
+              "Trade Name": "R31P1502"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-counting-scales",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Counting Scales",
+      "query": "What catalog item is OHAUS material number 30031787?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30031787"
+        ],
+        "parent_families": [
+          "Counting Scales"
+        ],
+        "families": [
+          "Ranger™ Count 3000"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30031787",
+            "source_row": 1768,
+            "fields": {
+              "Material Number": "30031787",
+              "Material Description (Global English)": "Counting Scale, RC31P1502       AM",
+              "Parent Family Name": "Counting Scales",
+              "Family Name": "Ranger™ Count 3000",
+              "Trade Name": "RC31P1502"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-dry-block-heaters",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Dry Block Heaters",
+      "query": "What catalog item is OHAUS material number 30392066?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30392066"
+        ],
+        "parent_families": [
+          "Dry Block Heaters"
+        ],
+        "families": [
+          "4 Block Dry Block Heaters"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30392066",
+            "source_row": 1785,
+            "fields": {
+              "Material Number": "30392066",
+              "Material Description (Global English)": "Dry Block Heater, 4 Block, HB4AL, US",
+              "Parent Family Name": "Dry Block Heaters",
+              "Family Name": "4 Block Dry Block Heaters",
+              "Trade Name": "HB4AL"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-electrodes",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Electrodes",
+      "query": "What catalog item is OHAUS material number 30031639?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30031639"
+        ],
+        "parent_families": [
+          "Electrodes"
+        ],
+        "families": [
+          "Starter Electrodes"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30031639",
+            "source_row": 1789,
+            "fields": {
+              "Material Number": "30031639",
+              "Material Description (Global English)": "DO Electrode, STDO11",
+              "Parent Family Name": "Electrodes",
+              "Family Name": "Starter Electrodes",
+              "Trade Name": "STDO11"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-equipment-accessories",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Equipment Accessories",
+      "query": "What catalog item is OHAUS material number 30400051?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30400051"
+        ],
+        "parent_families": [
+          "Equipment Accessories"
+        ],
+        "families": [
+          "Shaker Accessories"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30400051",
+            "source_row": 1919,
+            "fields": {
+              "Material Number": "30400051",
+              "Material Description (Global English)": "Double Tier Braces, Set of 4",
+              "Parent Family Name": "Equipment Accessories",
+              "Family Name": "Shaker Accessories",
+              "Trade Name": "30400051"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-floor-scale-platforms",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Floor Scale Platforms",
+      "query": "What catalog item is OHAUS material number 30716491?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30716491"
+        ],
+        "parent_families": [
+          "Floor Scale Platforms"
+        ],
+        "families": [
+          "Defender™ 3000 Floor Platforms {US}"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30716491",
+            "source_row": 2108,
+            "fields": {
+              "Material Number": "30716491",
+              "Material Description (Global English)": "Floor platform i-DF2500B1R",
+              "Parent Family Name": "Floor Scale Platforms",
+              "Family Name": "Defender™ 3000 Floor Platforms {US}",
+              "Trade Name": "I-DF2500B1R"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-floor-scales",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Floor Scales",
+      "query": "What catalog item is OHAUS material number 30716508?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30716508"
+        ],
+        "parent_families": [
+          "Floor Scales"
+        ],
+        "families": [
+          "Defender™ 3000 Floor Scales - i-DF33 {US}"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30716508",
+            "source_row": 2123,
+            "fields": {
+              "Material Number": "30716508",
+              "Material Description (Global English)": "Floor Scale i-DF33P5000B1X",
+              "Parent Family Name": "Floor Scales",
+              "Family Name": "Defender™ 3000 Floor Scales - i-DF33 {US}",
+              "Trade Name": "I-DF33P5000B1X"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-food-scales",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Food Scales",
+      "query": "What catalog item is OHAUS material number 30031827?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30031827"
+        ],
+        "parent_families": [
+          "Food Scales"
+        ],
+        "families": [
+          "Valor™ 7000"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30031827",
+            "source_row": 2181,
+            "fields": {
+              "Material Number": "30031827",
+              "Material Description (Global English)": "Compact Scale, V71P1502T       AM",
+              "Parent Family Name": "Food Scales",
+              "Family Name": "Valor™ 7000",
+              "Trade Name": "V71P1502T"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-hooked-and-slotted-weights-and-weight-sets",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Hooked and Slotted Weights and Weight Sets",
+      "query": "What catalog item is OHAUS material number 30390726?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30390726"
+        ],
+        "parent_families": [
+          "Hooked and Slotted Weights and Weight Sets"
+        ],
+        "families": [
+          "Slotted Weights and Slotted Weight Sets"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30390726",
+            "source_row": 2435,
+            "fields": {
+              "Material Number": "30390726",
+              "Material Description (Global English)": "Weight Set Slot 5-0.1N Case CL7 NoCrt TR",
+              "Parent Family Name": "Hooked and Slotted Weights and Weight Sets",
+              "Family Name": "Slotted Weights and Slotted Weight Sets"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-hotplates-stirrers",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Hotplates & Stirrers",
+      "query": "What catalog item is OHAUS material number 30392031?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30392031"
+        ],
+        "parent_families": [
+          "Hotplates & Stirrers"
+        ],
+        "families": [
+          "Mini Hotplates & Stirrers"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30392031",
+            "source_row": 2811,
+            "fields": {
+              "Material Number": "30392031",
+              "Material Description (Global English)": "Hotplate, Mini, Fixed, HSMNHP4CFT, US",
+              "Parent Family Name": "Hotplates & Stirrers",
+              "Family Name": "Mini Hotplates & Stirrers",
+              "Trade Name": "HSMNHP4CFT"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-incubating-incubating-cooling-shakers",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Incubating & Incubating Cooling Shakers",
+      "query": "What catalog item is OHAUS material number 30391924?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30391924"
+        ],
+        "parent_families": [
+          "Incubating & Incubating Cooling Shakers"
+        ],
+        "families": [
+          "Incubating Light Duty Orbital Shakers"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30391924",
+            "source_row": 2820,
+            "fields": {
+              "Material Number": "30391924",
+              "Material Description (Global English)": "Incubating Shaker, Light, ISLD04HDG, US",
+              "Parent Family Name": "Incubating & Incubating Cooling Shakers",
+              "Family Name": "Incubating Light Duty Orbital Shakers",
+              "Trade Name": "ISLD04HDG"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-indicators",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Indicators",
+      "query": "What catalog item is OHAUS material number 30126959?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30126959"
+        ],
+        "parent_families": [
+          "Indicators"
+        ],
+        "families": [
+          "T72XW"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30126959",
+            "source_row": 2835,
+            "fields": {
+              "Material Number": "30126959",
+              "Material Description (Global English)": "Indicator, T72XW AM",
+              "Parent Family Name": "Indicators",
+              "Family Name": "T72XW",
+              "Trade Name": "T72XW"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-jewelry-scales",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Jewelry Scales",
+      "query": "What catalog item is OHAUS material number 30253054?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30253054"
+        ],
+        "parent_families": [
+          "Jewelry Scales"
+        ],
+        "families": [
+          "Scout™ SJX/E"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30253054",
+            "source_row": 2839,
+            "fields": {
+              "Material Number": "30253054",
+              "Material Description (Global English)": "Portable Precision Balance SJX323N/E",
+              "Parent Family Name": "Jewelry Scales",
+              "Family Name": "Scout™ SJX/E",
+              "Trade Name": "SJX323N/E"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-labjaws-clamps-supports",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "LabJaws Clamps & Supports",
+      "query": "What catalog item is OHAUS material number 30392195?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30392195"
+        ],
+        "parent_families": [
+          "LabJaws Clamps & Supports"
+        ],
+        "families": [
+          "Rods, Frames & Supports"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30392195",
+            "source_row": 2916,
+            "fields": {
+              "Material Number": "30392195",
+              "Material Description (Global English)": "Clamp, Holder CLC-CLMPHA",
+              "Parent Family Name": "LabJaws Clamps & Supports",
+              "Family Name": "Rods, Frames & Supports",
+              "Trade Name": "CLC-CLMPHA"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-laboratory-vortex-mixers",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Laboratory Vortex Mixers",
+      "query": "What catalog item is OHAUS material number 30392122?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30392122"
+        ],
+        "parent_families": [
+          "Laboratory Vortex Mixers"
+        ],
+        "families": [
+          "Vortex Mixers"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30392122",
+            "source_row": 3051,
+            "fields": {
+              "Material Number": "30392122",
+              "Material Description (Global English)": "Vortex Mixer Digital VXMNDG US",
+              "Parent Family Name": "Laboratory Vortex Mixers",
+              "Family Name": "Vortex Mixers",
+              "Trade Name": "VXMNDG"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-mechanical-scales-balances",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Mechanical Scales & Balances",
+      "query": "What catalog item is OHAUS material number 80000003?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "80000003"
+        ],
+        "parent_families": [
+          "Mechanical Scales & Balances"
+        ],
+        "families": [
+          "Harvard Trip™"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "80000003",
+            "source_row": 3059,
+            "fields": {
+              "Material Number": "80000003",
+              "Material Description (Global English)": "Mechanical Scale, 1450-SD",
+              "Parent Family Name": "Mechanical Scales & Balances",
+              "Family Name": "Harvard Trip™",
+              "Trade Name": "1450-SD"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-micro-centrifuges",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Micro Centrifuges",
+      "query": "What catalog item is OHAUS material number 30130866?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30130866"
+        ],
+        "parent_families": [
+          "Micro Centrifuges"
+        ],
+        "families": [
+          "Frontier™ 5000 Series Micro"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30130866",
+            "source_row": 3095,
+            "fields": {
+              "Material Number": "30130866",
+              "Material Description (Global English)": "Centrifuge Micro 230V FC5515",
+              "Parent Family Name": "Micro Centrifuges",
+              "Family Name": "Frontier™ 5000 Series Micro",
+              "Trade Name": "FC5515 230V"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-mini-centrifuges",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Mini Centrifuges",
+      "query": "What catalog item is OHAUS material number 30134157?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30134157"
+        ],
+        "parent_families": [
+          "Mini Centrifuges"
+        ],
+        "families": [
+          "Frontier™ 5000 Series Mini"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30134157",
+            "source_row": 3105,
+            "fields": {
+              "Material Number": "30134157",
+              "Material Description (Global English)": "Centrifuge, Mini, FC5306, AM",
+              "Parent Family Name": "Mini Centrifuges",
+              "Family Name": "Frontier™ 5000 Series Mini",
+              "Trade Name": "FC5306"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-moisture-analyzers",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Moisture Analyzers",
+      "query": "What catalog item is OHAUS material number 30241165?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30241165"
+        ],
+        "parent_families": [
+          "Moisture Analyzers"
+        ],
+        "families": [
+          "MB120"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30241165",
+            "source_row": 3106,
+            "fields": {
+              "Material Number": "30241165",
+              "Material Description (Global English)": "Moisture Analyzer, MB120       AM",
+              "Parent Family Name": "Moisture Analyzers",
+              "Family Name": "MB120",
+              "Trade Name": "MB120"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-multi-centrifuges",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Multi Centrifuges",
+      "query": "What catalog item is OHAUS material number 30130875?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30130875"
+        ],
+        "parent_families": [
+          "Multi Centrifuges"
+        ],
+        "families": [
+          "Frontier™ 5000 Series Multi"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30130875",
+            "source_row": 3111,
+            "fields": {
+              "Material Number": "30130875",
+              "Material Description (Global English)": "Centrifuge Multi 230V FC5706",
+              "Parent Family Name": "Multi Centrifuges",
+              "Family Name": "Frontier™ 5000 Series Multi",
+              "Trade Name": "FC5706 230V"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-multi-pro-centrifuges",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Multi Pro Centrifuges",
+      "query": "What catalog item is OHAUS material number 30314810?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30314810"
+        ],
+        "parent_families": [
+          "Multi Pro Centrifuges"
+        ],
+        "families": [
+          "Frontier™ 5000 Series Multi Pro"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30314810",
+            "source_row": 3118,
+            "fields": {
+              "Material Number": "30314810",
+              "Material Description (Global English)": "Centrifuge Multi 230V FC5714",
+              "Parent Family Name": "Multi Pro Centrifuges",
+              "Family Name": "Frontier™ 5000 Series Multi Pro",
+              "Trade Name": "FC5714 230V"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-open-air-shakers",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Open Air Shakers",
+      "query": "What catalog item is OHAUS material number 30391307?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30391307"
+        ],
+        "parent_families": [
+          "Open Air Shakers"
+        ],
+        "families": [
+          "Heavy Duty Orbital Shakers"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30391307",
+            "source_row": 3140,
+            "fields": {
+              "Material Number": "30391307",
+              "Material Description (Global English)": "Shaker, Heavy Duty, SHHD1619AL, US",
+              "Parent Family Name": "Open Air Shakers",
+              "Family Name": "Heavy Duty Orbital Shakers",
+              "Trade Name": "SHHD1619AL"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-overhead-stirrers",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Overhead Stirrers",
+      "query": "What catalog item is OHAUS material number 30586763?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30586763"
+        ],
+        "parent_families": [
+          "Overhead Stirrers"
+        ],
+        "families": [
+          "Achiever™ 5000"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30586763",
+            "source_row": 3160,
+            "fields": {
+              "Material Number": "30586763",
+              "Material Description (Global English)": "Overhead Stirrer e-A51ST020",
+              "Parent Family Name": "Overhead Stirrers",
+              "Family Name": "Achiever™ 5000",
+              "Trade Name": "E-A51ST020"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-ph-conductivity-do-meter",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "pH/Conductivity/DO Meter",
+      "query": "What catalog item is OHAUS material number 30031655?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30031655"
+        ],
+        "parent_families": [
+          "pH/Conductivity/DO Meter"
+        ],
+        "families": [
+          "Starter 300D DO Portable"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30031655",
+            "source_row": 3183,
+            "fields": {
+              "Material Number": "30031655",
+              "Material Description (Global English)": "DO Meter, ST300D",
+              "Parent Family Name": "pH/Conductivity/DO Meter",
+              "Family Name": "Starter 300D DO Portable",
+              "Trade Name": "ST300D-F"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-portable-balances",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Portable Balances",
+      "query": "What catalog item is OHAUS material number 30253005?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30253005"
+        ],
+        "parent_families": [
+          "Portable Balances"
+        ],
+        "families": [
+          "Scout™ STX"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30253005",
+            "source_row": 3286,
+            "fields": {
+              "Material Number": "30253005",
+              "Material Description (Global English)": "Portable Precision Balance STX123 AM",
+              "Parent Family Name": "Portable Balances",
+              "Family Name": "Scout™ STX",
+              "Trade Name": "STX123"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-precision-balances",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Precision Balances",
+      "query": "What catalog item is OHAUS material number 30057099?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30057099"
+        ],
+        "parent_families": [
+          "Precision Balances"
+        ],
+        "families": [
+          "Explorer™ Precision High Capacity"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30057099",
+            "source_row": 3386,
+            "fields": {
+              "Material Number": "30057099",
+              "Material Description (Global English)": "Precision Balance EX12001 AM",
+              "Parent Family Name": "Precision Balances",
+              "Family Name": "Explorer™ Precision High Capacity",
+              "Trade Name": "EX12001"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-printers",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Printers",
+      "query": "What catalog item is OHAUS material number 30064203?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30064203"
+        ],
+        "parent_families": [
+          "Printers"
+        ],
+        "families": [
+          "SF40A"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30064203",
+            "source_row": 3430,
+            "fields": {
+              "Material Number": "30064203",
+              "Material Description (Global English)": "Printer, Impact, SF40A, AM",
+              "Parent Family Name": "Printers",
+              "Family Name": "SF40A"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-reference-weights-and-mass-standards",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Reference Weights and Mass Standards",
+      "query": "What catalog item is OHAUS material number 30390008?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30390008"
+        ],
+        "parent_families": [
+          "Reference Weights and Mass Standards"
+        ],
+        "families": [
+          "ASTM Reference Calibration Weight Sets"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30390008",
+            "source_row": 3617,
+            "fields": {
+              "Material Number": "30390008",
+              "Material Description (Global English)": "Weight Set ASTM (2)200g-1mg UC NoCert TR",
+              "Parent Family Name": "Reference Weights and Mass Standards",
+              "Family Name": "ASTM Reference Calibration Weight Sets"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-rotors",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Rotors",
+      "query": "What catalog item is OHAUS material number 30129559?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30129559"
+        ],
+        "parent_families": [
+          "Rotors"
+        ],
+        "families": [
+          "Frontier™ 5000 Rotors"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30129559",
+            "source_row": 3736,
+            "fields": {
+              "Material Number": "30129559",
+              "Material Description (Global English)": "Rotor 1.5/2ml x8 FC5306",
+              "Parent Family Name": "Rotors",
+              "Family Name": "Frontier™ 5000 Rotors",
+              "Trade Name": "R-A8X2/6M"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-scale-weights-and-test-weights",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Scale Weights and Test Weights",
+      "query": "What catalog item is OHAUS material number 30390020?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30390020"
+        ],
+        "parent_families": [
+          "Scale Weights and Test Weights"
+        ],
+        "families": [
+          "ASTM Scale Calibration Weight Sets"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30390020",
+            "source_row": 4334,
+            "fields": {
+              "Material Number": "30390020",
+              "Material Description (Global English)": "Weight Set TEST (6)5lb CL6 No Cert TR",
+              "Parent Family Name": "Scale Weights and Test Weights",
+              "Family Name": "ASTM Scale Calibration Weight Sets"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-semi-micro-balances",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Semi-Micro Balances",
+      "query": "What catalog item is OHAUS material number 30139512?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30139512"
+        ],
+        "parent_families": [
+          "Semi-Micro Balances"
+        ],
+        "families": [
+          "Explorer™ Semi-Micro"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30139512",
+            "source_row": 4567,
+            "fields": {
+              "Material Number": "30139512",
+              "Material Description (Global English)": "Semi-Micro Balance EX225D",
+              "Parent Family Name": "Semi-Micro Balances",
+              "Family Name": "Explorer™ Semi-Micro",
+              "Trade Name": "EX225D"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-shipping-scales",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Shipping Scales",
+      "query": "What catalog item is OHAUS material number 30745796?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30745796"
+        ],
+        "parent_families": [
+          "Shipping Scales"
+        ],
+        "families": [
+          "Courier™ 5000"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30745796",
+            "source_row": 4582,
+            "fields": {
+              "Material Number": "30745796",
+              "Material Description (Global English)": "Shipping Scale i-C52M50R AM",
+              "Parent Family Name": "Shipping Scales",
+              "Family Name": "Courier™ 5000",
+              "Trade Name": "I-C52M50R"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-solutions-buffers",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Solutions & Buffers",
+      "query": "What catalog item is OHAUS material number 30059255?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30059255"
+        ],
+        "parent_families": [
+          "Solutions & Buffers"
+        ],
+        "families": [
+          "Water Analysis Solutions"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30059255",
+            "source_row": 4595,
+            "fields": {
+              "Material Number": "30059255",
+              "Material Description (Global English)": "pH electrolyte (KCl saturated AgCl, 30ml",
+              "Parent Family Name": "Solutions & Buffers",
+              "Family Name": "Water Analysis Solutions"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-spare-parts",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Spare Parts",
+      "query": "What catalog item is OHAUS material number 214642?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "214642"
+        ],
+        "parent_families": [
+          "Spare Parts"
+        ],
+        "families": [
+          "Mechanical Parts"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "214642",
+            "source_row": 5422,
+            "fields": {
+              "Material Number": "214642",
+              "Material Description (Global English)": "Pan support compl.",
+              "Parent Family Name": "Spare Parts",
+              "Family Name": "Mechanical Parts"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-specialty-stirrers",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Specialty Stirrers",
+      "query": "What catalog item is OHAUS material number 30573789?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30573789"
+        ],
+        "parent_families": [
+          "Specialty Stirrers"
+        ],
+        "families": [
+          "Multi-Position Stirrers"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30573789",
+            "source_row": 6386,
+            "fields": {
+              "Material Number": "30573789",
+              "Material Description (Global English)": "Stirrer Multi Position STMP4AL US",
+              "Parent Family Name": "Specialty Stirrers",
+              "Family Name": "Multi-Position Stirrers"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-parent-turbidimeters",
+      "category": "exact_material",
+      "subcategory": "parent_family_lookup",
+      "coverage_key": "Turbidimeters",
+      "query": "What catalog item is OHAUS material number 30853395?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30853395"
+        ],
+        "parent_families": [
+          "Turbidimeters"
+        ],
+        "families": [
+          "AP30TURL Portable Turbidimeters"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30853395",
+            "source_row": 6392,
+            "fields": {
+              "Material Number": "30853395",
+              "Material Description (Global English)": "Turbidimeter a-AP30TURL-F",
+              "Parent Family Name": "Turbidimeters",
+              "Family Name": "AP30TURL Portable Turbidimeters",
+              "Trade Name": "A-AP30TURL-F"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-six-digit-923345",
+      "category": "exact_material",
+      "subcategory": "six_digit_material_lookup",
+      "coverage_key": "923345",
+      "query": "Identify OHAUS material number 923345.",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "923345"
+        ],
+        "parent_families": [
+          "Spare Parts"
+        ],
+        "families": [
+          "Service Tools"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "923345",
+            "source_row": 6379,
+            "fields": {
+              "Material Number": "923345",
+              "Material Description (Global English)": "Service tool mounting gauge 3 place",
+              "Parent Family Name": "Spare Parts",
+              "Family Name": "Service Tools",
+              "Trade Name": "MOUNTING GAUGE"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "exact-material-six-digit-923389",
+      "category": "exact_material",
+      "subcategory": "six_digit_material_lookup",
+      "coverage_key": "923389",
+      "query": "Identify OHAUS material number 923389.",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "923389"
+        ],
+        "parent_families": [
+          "Spare Parts"
+        ],
+        "families": [
+          "Service Tools"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "923389",
+            "source_row": 6380,
+            "fields": {
+              "Material Number": "923389",
+              "Material Description (Global English)": "Service tool mounting gauge 2 place",
+              "Parent Family Name": "Spare Parts",
+              "Family Name": "Service Tools"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "model-alias-alternative-9123",
+      "category": "model_alias",
+      "subcategory": "alternative_model",
+      "coverage_key": "Alternative Model_#1",
+      "query": "Which catalog materials use the alternative model number 9123?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "61037237",
+          "61037530",
+          "61038121"
+        ],
+        "parent_families": [
+          "Spare Parts"
+        ],
+        "families": [
+          "Miscellaneous"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Alternative Model_#1"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "61037237",
+            "source_row": 6012,
+            "fields": {
+              "Material Number": "61037237",
+              "Material Description (Global English)": "Load Cell 793 500LB 20FT",
+              "Parent Family Name": "Spare Parts",
+              "Family Name": "Miscellaneous",
+              "Alternative Model_#1": "9123"
+            }
+          },
+          {
+            "material_number": "61037530",
+            "source_row": 6013,
+            "fields": {
+              "Material Number": "61037530",
+              "Material Description (Global English)": "Load Cell 793 1K 20FT",
+              "Parent Family Name": "Spare Parts",
+              "Family Name": "Miscellaneous",
+              "Alternative Model_#1": "9123"
+            }
+          },
+          {
+            "material_number": "61038121",
+            "source_row": 6014,
+            "fields": {
+              "Material Number": "61038121",
+              "Material Description (Global English)": "Load Cell 793 2.5K 20FT",
+              "Parent Family Name": "Spare Parts",
+              "Family Name": "Miscellaneous",
+              "Alternative Model_#1": "9123"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "model-alias-alternative-713",
+      "category": "model_alias",
+      "subcategory": "alternative_model",
+      "coverage_key": "Alternative Model_#2",
+      "query": "Which catalog materials use the alternative model number 713?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "61037237",
+          "61037530",
+          "61038121"
+        ],
+        "parent_families": [
+          "Spare Parts"
+        ],
+        "families": [
+          "Miscellaneous"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Alternative Model_#2"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "61037237",
+            "source_row": 6012,
+            "fields": {
+              "Material Number": "61037237",
+              "Material Description (Global English)": "Load Cell 793 500LB 20FT",
+              "Parent Family Name": "Spare Parts",
+              "Family Name": "Miscellaneous",
+              "Alternative Model_#2": "713"
+            }
+          },
+          {
+            "material_number": "61037530",
+            "source_row": 6013,
+            "fields": {
+              "Material Number": "61037530",
+              "Material Description (Global English)": "Load Cell 793 1K 20FT",
+              "Parent Family Name": "Spare Parts",
+              "Family Name": "Miscellaneous",
+              "Alternative Model_#2": "713"
+            }
+          },
+          {
+            "material_number": "61038121",
+            "source_row": 6014,
+            "fields": {
+              "Material Number": "61038121",
+              "Material Description (Global English)": "Load Cell 793 2.5K 20FT",
+              "Parent Family Name": "Spare Parts",
+              "Family Name": "Miscellaneous",
+              "Alternative Model_#2": "713"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "model-alias-trade-name-01-61038661",
+      "category": "model_alias",
+      "subcategory": "trade_name_normalization",
+      "coverage_key": "Spare Parts",
+      "query": "Which OHAUS material corresponds to the model alias ta 100783?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "61038661"
+        ],
+        "parent_families": [
+          "Spare Parts"
+        ],
+        "families": [
+          "Miscellaneous"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "61038661",
+            "source_row": 6015,
+            "fields": {
+              "Material Number": "61038661",
+              "Material Description (Global English)": "Assembly Pjb",
+              "Parent Family Name": "Spare Parts",
+              "Family Name": "Miscellaneous",
+              "Trade Name": "TA100783"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "model-alias-trade-name-02-30586842",
+      "category": "model_alias",
+      "subcategory": "trade_name_normalization",
+      "coverage_key": "Accessories",
+      "query": "Which OHAUS material corresponds to the model alias e a 51?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30586842"
+        ],
+        "parent_families": [
+          "Accessories"
+        ],
+        "families": [
+          "Overhead Stirrer Accessories"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30586842",
+            "source_row": 225,
+            "fields": {
+              "Material Number": "30586842",
+              "Material Description (Global English)": "Chuck Cover e-A51",
+              "Parent Family Name": "Accessories",
+              "Family Name": "Overhead Stirrer Accessories",
+              "Trade Name": "E-A51"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "model-alias-trade-name-03-30685174",
+      "category": "model_alias",
+      "subcategory": "trade_name_normalization",
+      "coverage_key": "Bench Scales",
+      "query": "Which OHAUS material corresponds to the model alias d 33 p 15 b 1 r 1?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30685174"
+        ],
+        "parent_families": [
+          "Bench Scales"
+        ],
+        "families": [
+          "Defender™ 3000 - i-D33"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30685174",
+            "source_row": 1367,
+            "fields": {
+              "Material Number": "30685174",
+              "Material Description (Global English)": "Bench Scale i-D33P15B1R1 AM",
+              "Parent Family Name": "Bench Scales",
+              "Family Name": "Defender™ 3000 - i-D33",
+              "Trade Name": "D33P15B1R1"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "model-alias-trade-name-04-30400018",
+      "category": "model_alias",
+      "subcategory": "trade_name_normalization",
+      "coverage_key": "LabJaws Clamps & Supports",
+      "query": "Which OHAUS material corresponds to the model alias clr 703?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30400018"
+        ],
+        "parent_families": [
+          "LabJaws Clamps & Supports"
+        ],
+        "families": [
+          "Rods, Frames & Supports"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30400018",
+            "source_row": 3012,
+            "fields": {
+              "Material Number": "30400018",
+              "Material Description (Global English)": "Clamp, Support, 703 Stand, CLR-703",
+              "Parent Family Name": "LabJaws Clamps & Supports",
+              "Family Name": "Rods, Frames & Supports",
+              "Trade Name": "CLR-703"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "model-alias-trade-name-05-30100605",
+      "category": "model_alias",
+      "subcategory": "trade_name_normalization",
+      "coverage_key": "Precision Balances",
+      "query": "Which OHAUS material corresponds to the model alias ax 223?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30100605"
+        ],
+        "parent_families": [
+          "Precision Balances"
+        ],
+        "families": [
+          "Adventurer™ Precision"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30100605",
+            "source_row": 3298,
+            "fields": {
+              "Material Number": "30100605",
+              "Material Description (Global English)": "Precision Balance AX223",
+              "Parent Family Name": "Precision Balances",
+              "Family Name": "Adventurer™ Precision",
+              "Trade Name": "AX223"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "model-alias-trade-name-06-30428204",
+      "category": "model_alias",
+      "subcategory": "trade_name_normalization",
+      "coverage_key": "Portable Balances",
+      "query": "Which OHAUS material corresponds to the model alias cr 221?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30428204"
+        ],
+        "parent_families": [
+          "Portable Balances"
+        ],
+        "families": [
+          "Compass™ CR"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30428204",
+            "source_row": 3218,
+            "fields": {
+              "Material Number": "30428204",
+              "Material Description (Global English)": "Portable Balance CR221",
+              "Parent Family Name": "Portable Balances",
+              "Family Name": "Compass™ CR",
+              "Trade Name": "CR221"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "model-alias-trade-name-07-30419628",
+      "category": "model_alias",
+      "subcategory": "trade_name_normalization",
+      "coverage_key": "Bench Scale Bases",
+      "query": "Which OHAUS material corresponds to the model alias d 2 wqs?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30419628"
+        ],
+        "parent_families": [
+          "Bench Scale Bases"
+        ],
+        "families": [
+          "Defender™ 5000 Stainless Steel Base"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30419628",
+            "source_row": 1345,
+            "fields": {
+              "Material Number": "30419628",
+              "Material Description (Global English)": "Base, D2WQS",
+              "Parent Family Name": "Bench Scale Bases",
+              "Family Name": "Defender™ 5000 Stainless Steel Base",
+              "Trade Name": "D2WQS"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "model-alias-trade-name-08-30073970",
+      "category": "model_alias",
+      "subcategory": "trade_name_normalization",
+      "coverage_key": "pH/Conductivity/DO Meter",
+      "query": "Which OHAUS material corresponds to the model alias st 10?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30073970"
+        ],
+        "parent_families": [
+          "pH/Conductivity/DO Meter"
+        ],
+        "families": [
+          "Starter Pen Meters"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30073970",
+            "source_row": 3197,
+            "fields": {
+              "Material Number": "30073970",
+              "Material Description (Global English)": "Pen Meter ST10",
+              "Parent Family Name": "pH/Conductivity/DO Meter",
+              "Family Name": "Starter Pen Meters",
+              "Trade Name": "ST10"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "model-alias-trade-name-09-30129559",
+      "category": "model_alias",
+      "subcategory": "trade_name_normalization",
+      "coverage_key": "Rotors",
+      "query": "Which OHAUS material corresponds to the model alias r a 8 x 2 6 m?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30129559"
+        ],
+        "parent_families": [
+          "Rotors"
+        ],
+        "families": [
+          "Frontier™ 5000 Rotors"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30129559",
+            "source_row": 3736,
+            "fields": {
+              "Material Number": "30129559",
+              "Material Description (Global English)": "Rotor 1.5/2ml x8 FC5306",
+              "Parent Family Name": "Rotors",
+              "Family Name": "Frontier™ 5000 Rotors",
+              "Trade Name": "R-A8X2/6M"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "model-alias-trade-name-10-30539390",
+      "category": "model_alias",
+      "subcategory": "trade_name_normalization",
+      "coverage_key": "Food Scales",
+      "query": "Which OHAUS material corresponds to the model alias v 12 p 3?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30539390"
+        ],
+        "parent_families": [
+          "Food Scales"
+        ],
+        "families": [
+          "Valor™ 1000 - V12P"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30539390",
+            "source_row": 2143,
+            "fields": {
+              "Material Number": "30539390",
+              "Material Description (Global English)": "Compact Scale V12P3 AM",
+              "Parent Family Name": "Food Scales",
+              "Family Name": "Valor™ 1000 - V12P",
+              "Trade Name": "V12P3"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "model-alias-trade-name-11-80000031",
+      "category": "model_alias",
+      "subcategory": "trade_name_normalization",
+      "coverage_key": "Mechanical Scales & Balances",
+      "query": "Which OHAUS material corresponds to the model alias 710 t 0?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "80000031"
+        ],
+        "parent_families": [
+          "Mechanical Scales & Balances"
+        ],
+        "families": [
+          "Triple Beam™ 700 Series"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "80000031",
+            "source_row": 3091,
+            "fields": {
+              "Material Number": "80000031",
+              "Material Description (Global English)": "Mechanical Scale, 710-T0",
+              "Parent Family Name": "Mechanical Scales & Balances",
+              "Family Name": "Triple Beam™ 700 Series",
+              "Trade Name": "710-T0"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "model-alias-trade-name-12-30680262",
+      "category": "model_alias",
+      "subcategory": "trade_name_normalization",
+      "coverage_key": "Hotplates & Stirrers",
+      "query": "Which OHAUS material corresponds to the model alias e g 21 hp 04 c?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30680262"
+        ],
+        "parent_families": [
+          "Hotplates & Stirrers"
+        ],
+        "families": [
+          "Guardian™ 2000 Hotplates & Stirrers"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30680262",
+            "source_row": 2784,
+            "fields": {
+              "Material Number": "30680262",
+              "Material Description (Global English)": "Hotplate e-G21HP04C 120V AM",
+              "Parent Family Name": "Hotplates & Stirrers",
+              "Family Name": "Guardian™ 2000 Hotplates & Stirrers",
+              "Trade Name": "E-G21HP04C"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "model-alias-trade-name-13-83033966",
+      "category": "model_alias",
+      "subcategory": "trade_name_normalization",
+      "coverage_key": "Electrodes",
+      "query": "Which OHAUS material corresponds to the model alias st 210?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "83033966"
+        ],
+        "parent_families": [
+          "Electrodes"
+        ],
+        "families": [
+          "Starter Electrodes"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "83033966",
+            "source_row": 1813,
+            "fields": {
+              "Material Number": "83033966",
+              "Material Description (Global English)": "pH Electrode ST210",
+              "Parent Family Name": "Electrodes",
+              "Family Name": "Starter Electrodes",
+              "Trade Name": "ST210"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "technical-maximum_capacity-30031707",
+      "category": "technical_field",
+      "subcategory": "maximum_capacity",
+      "coverage_key": "Maximum Capacity {metric}",
+      "query": "How much can R31P1502 weigh at most?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30031707"
+        ],
+        "parent_families": [
+          "Compact Bench Scales"
+        ],
+        "families": [
+          "Ranger™ 3000"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Maximum Capacity {metric}"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30031707",
+            "source_row": 1750,
+            "fields": {
+              "Material Number": "30031707",
+              "Material Description (Global English)": "Compact Scale, R31P1502       AM",
+              "Parent Family Name": "Compact Bench Scales",
+              "Family Name": "Ranger™ 3000",
+              "Trade Name": "R31P1502",
+              "Maximum Capacity {metric}": "1.5 kg"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "technical-readability-30031708",
+      "category": "technical_field",
+      "subcategory": "readability",
+      "coverage_key": "Readability {metric}",
+      "query": "What is the smallest displayed increment for R31P3?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30031708"
+        ],
+        "parent_families": [
+          "Compact Bench Scales"
+        ],
+        "families": [
+          "Ranger™ 3000"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Readability {metric}"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30031708",
+            "source_row": 1751,
+            "fields": {
+              "Material Number": "30031708",
+              "Material Description (Global English)": "Compact Scale, R31P3       AM",
+              "Parent Family Name": "Compact Bench Scales",
+              "Family Name": "Ranger™ 3000",
+              "Trade Name": "R31P3",
+              "Readability {metric}": "0.1 g"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "technical-stabilization_time-30035439",
+      "category": "technical_field",
+      "subcategory": "stabilization_time",
+      "coverage_key": "Stabilization Time",
+      "query": "How quickly does V22XWE1501T stabilize?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30035439"
+        ],
+        "parent_families": [
+          "Food Scales"
+        ],
+        "families": [
+          "Valor™ 2000"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Stabilization Time"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30035439",
+            "source_row": 2151,
+            "fields": {
+              "Material Number": "30035439",
+              "Material Description (Global English)": "Compact Scale, V22XWE1501T AM",
+              "Parent Family Name": "Food Scales",
+              "Family Name": "Valor™ 2000",
+              "Trade Name": "V22XWE1501T",
+              "Stabilization Time": "0.5 s"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "technical-battery_life-30031655",
+      "category": "technical_field",
+      "subcategory": "battery_life",
+      "coverage_key": "Battery Life",
+      "query": "How long is the listed battery life for ST300D-F?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30031655"
+        ],
+        "parent_families": [
+          "pH/Conductivity/DO Meter"
+        ],
+        "families": [
+          "Starter 300D DO Portable"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Battery Life"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30031655",
+            "source_row": 3183,
+            "fields": {
+              "Material Number": "30031655",
+              "Material Description (Global English)": "DO Meter, ST300D",
+              "Parent Family Name": "pH/Conductivity/DO Meter",
+              "Family Name": "Starter 300D DO Portable",
+              "Trade Name": "ST300D-F",
+              "Battery Life": "250 Hours with Disposable Batteries"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "technical-power-30031656",
+      "category": "technical_field",
+      "subcategory": "power",
+      "coverage_key": "Power",
+      "query": "What power source does ST300D-B use?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30031656"
+        ],
+        "parent_families": [
+          "pH/Conductivity/DO Meter"
+        ],
+        "families": [
+          "Starter 300D DO Portable"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Power"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30031656",
+            "source_row": 3184,
+            "fields": {
+              "Material Number": "30031656",
+              "Material Description (Global English)": "DO meter ST300D-B",
+              "Parent Family Name": "pH/Conductivity/DO Meter",
+              "Family Name": "Starter 300D DO Portable",
+              "Trade Name": "ST300D-B",
+              "Power": "4 AAA (LR03) Batteries (Included)"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "technical-legal_for_trade-30031709",
+      "category": "technical_field",
+      "subcategory": "legal_for_trade",
+      "coverage_key": "Legal for Trade",
+      "query": "Is R31P6 listed as legal for trade?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30031709"
+        ],
+        "parent_families": [
+          "Compact Bench Scales"
+        ],
+        "families": [
+          "Ranger™ 3000"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Legal for Trade"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30031709",
+            "source_row": 1752,
+            "fields": {
+              "Material Number": "30031709",
+              "Material Description (Global English)": "Compact Scale, R31P6       AM",
+              "Parent Family Name": "Compact Bench Scales",
+              "Family Name": "Ranger™ 3000",
+              "Trade Name": "R31P6",
+              "Legal for Trade": "Measurement Canada Approved;NTEP Certified"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "technical-ip_rating-30586763",
+      "category": "technical_field",
+      "subcategory": "ip_rating",
+      "coverage_key": "IP Rating",
+      "query": "What ingress-protection rating is specified for E-A51ST020?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30586763"
+        ],
+        "parent_families": [
+          "Overhead Stirrers"
+        ],
+        "families": [
+          "Achiever™ 5000"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "IP Rating"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30586763",
+            "source_row": 3160,
+            "fields": {
+              "Material Number": "30586763",
+              "Material Description (Global English)": "Overhead Stirrer e-A51ST020",
+              "Parent Family Name": "Overhead Stirrers",
+              "Family Name": "Achiever™ 5000",
+              "Trade Name": "E-A51ST020",
+              "IP Rating": "IP54"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "technical-maximum_speed-30129559",
+      "category": "technical_field",
+      "subcategory": "maximum_speed",
+      "coverage_key": "Maximum Speed",
+      "query": "What is the maximum operating speed of R-A8X2/6M?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30129559"
+        ],
+        "parent_families": [
+          "Rotors"
+        ],
+        "families": [
+          "Frontier™ 5000 Rotors"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Maximum Speed"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30129559",
+            "source_row": 3736,
+            "fields": {
+              "Material Number": "30129559",
+              "Material Description (Global English)": "Rotor 1.5/2ml x8 FC5306",
+              "Parent Family Name": "Rotors",
+              "Family Name": "Frontier™ 5000 Rotors",
+              "Trade Name": "R-A8X2/6M",
+              "Maximum Speed": "6000 rpm"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "technical-speed_range-30130866",
+      "category": "technical_field",
+      "subcategory": "speed_range",
+      "coverage_key": "Speed Range",
+      "query": "What speed range is specified for FC5515 230V?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30130866"
+        ],
+        "parent_families": [
+          "Micro Centrifuges"
+        ],
+        "families": [
+          "Frontier™ 5000 Series Micro"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Speed Range"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30130866",
+            "source_row": 3095,
+            "fields": {
+              "Material Number": "30130866",
+              "Material Description (Global English)": "Centrifuge Micro 230V FC5515",
+              "Parent Family Name": "Micro Centrifuges",
+              "Family Name": "Frontier™ 5000 Series Micro",
+              "Trade Name": "FC5515 230V",
+              "Speed Range": "200 rpm – 15200 rpm"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "technical-temperature_range-30031639",
+      "category": "technical_field",
+      "subcategory": "temperature_range",
+      "coverage_key": "Temperature Range {metric}",
+      "query": "What metric temperature range is listed for STDO11?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30031639"
+        ],
+        "parent_families": [
+          "Electrodes"
+        ],
+        "families": [
+          "Starter Electrodes"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Temperature Range {metric}"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30031639",
+            "source_row": 1789,
+            "fields": {
+              "Material Number": "30031639",
+              "Material Description (Global English)": "DO Electrode, STDO11",
+              "Parent Family Name": "Electrodes",
+              "Family Name": "Starter Electrodes",
+              "Trade Name": "STDO11",
+              "Temperature Range {metric}": "0E-1 °C – 50 °C"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "technical-measurement_range-30038553",
+      "category": "technical_field",
+      "subcategory": "measurement_range",
+      "coverage_key": "Measurement Range",
+      "query": "What measurement range does STORP2 cover?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30038553"
+        ],
+        "parent_families": [
+          "Electrodes"
+        ],
+        "families": [
+          "Starter Electrodes"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Measurement Range"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30038553",
+            "source_row": 1790,
+            "fields": {
+              "Material Number": "30038553",
+              "Material Description (Global English)": "ORP electrode STORP2",
+              "Parent Family Name": "Electrodes",
+              "Family Name": "Starter Electrodes",
+              "Trade Name": "STORP2",
+              "Measurement Range": "-1000 – 1000 mV"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "technical-ph_range-30073970",
+      "category": "technical_field",
+      "subcategory": "ph_range",
+      "coverage_key": "pH measuring range",
+      "query": "Across what pH range can ST10 measure?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30073970"
+        ],
+        "parent_families": [
+          "pH/Conductivity/DO Meter"
+        ],
+        "families": [
+          "Starter Pen Meters"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "pH measuring range"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30073970",
+            "source_row": 3197,
+            "fields": {
+              "Material Number": "30073970",
+              "Material Description (Global English)": "Pen Meter ST10",
+              "Parent Family Name": "pH/Conductivity/DO Meter",
+              "Family Name": "Starter Pen Meters",
+              "Trade Name": "ST10",
+              "pH measuring range": "0E-1  – 14"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "technical-conductivity_range-30073972",
+      "category": "technical_field",
+      "subcategory": "conductivity_range",
+      "coverage_key": "Conductivity measuring range",
+      "query": "What conductivity range is listed for ST10C-A?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30073972"
+        ],
+        "parent_families": [
+          "pH/Conductivity/DO Meter"
+        ],
+        "families": [
+          "Starter Pen Meters"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Conductivity measuring range"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30073972",
+            "source_row": 3199,
+            "fields": {
+              "Material Number": "30073972",
+              "Material Description (Global English)": "Pen Meter ST10C-A",
+              "Parent Family Name": "pH/Conductivity/DO Meter",
+              "Family Name": "Starter Pen Meters",
+              "Trade Name": "ST10C-A",
+              "Conductivity measuring range": "0.0 – 199.9 µS/cm"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "technical-accuracy-30073971",
+      "category": "technical_field",
+      "subcategory": "accuracy",
+      "coverage_key": "Accuracy",
+      "query": "What accuracy is specified for ST20?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30073971"
+        ],
+        "parent_families": [
+          "pH/Conductivity/DO Meter"
+        ],
+        "families": [
+          "Starter Pen Meters"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Accuracy"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30073971",
+            "source_row": 3198,
+            "fields": {
+              "Material Number": "30073971",
+              "Material Description (Global English)": "Pen Meter ST20",
+              "Parent Family Name": "pH/Conductivity/DO Meter",
+              "Family Name": "Starter Pen Meters",
+              "Trade Name": "ST20",
+              "Accuracy": "± 0.05 pH / ± 0.5 °C"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "technical-calibration_certificate-30390001",
+      "category": "technical_field",
+      "subcategory": "calibration_certificate",
+      "coverage_key": "Calibration Certificate",
+      "query": "What calibration certificate is listed for CalPak ASTM 5kg,200g,20g CL1 Accrd TR?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30390001"
+        ],
+        "parent_families": [
+          "Balance Calibration Weights"
+        ],
+        "families": [
+          "ASTM Calibration Weight Sets"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Calibration Certificate"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30390001",
+            "source_row": 343,
+            "fields": {
+              "Material Number": "30390001",
+              "Material Description (Global English)": "CalPak ASTM 5kg,200g,20g CL1 Accrd TR",
+              "Parent Family Name": "Balance Calibration Weights",
+              "Family Name": "ASTM Calibration Weight Sets",
+              "Calibration Certificate": "ISO/IEC 17025 Accredited Certificate"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "technical-weight_tolerance-30390172",
+      "category": "technical_field",
+      "subcategory": "weight_tolerance",
+      "coverage_key": "Weight Tolerance",
+      "query": "What weight tolerance is specified for Weight 1P ASTM 1mg UC No Cert TR?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30390172"
+        ],
+        "parent_families": [
+          "Reference Weights and Mass Standards"
+        ],
+        "families": [
+          "ASTM Individual Reference Calibration Weights"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Weight Tolerance"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30390172",
+            "source_row": 3432,
+            "fields": {
+              "Material Number": "30390172",
+              "Material Description (Global English)": "Weight 1P ASTM 1mg UC No Cert TR",
+              "Parent Family Name": "Reference Weights and Mass Standards",
+              "Family Name": "ASTM Individual Reference Calibration Weights",
+              "Weight Tolerance": "0.005 mg"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "technical-ntep_approval-61037237",
+      "category": "technical_field",
+      "subcategory": "ntep_approval",
+      "coverage_key": "NTEP Approval",
+      "query": "What does the catalog say about NTEP approval for TB601019-020?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "61037237"
+        ],
+        "parent_families": [
+          "Spare Parts"
+        ],
+        "families": [
+          "Miscellaneous"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "NTEP Approval"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "61037237",
+            "source_row": 6012,
+            "fields": {
+              "Material Number": "61037237",
+              "Material Description (Global English)": "Load Cell 793 500LB 20FT",
+              "Parent Family Name": "Spare Parts",
+              "Family Name": "Miscellaneous",
+              "Trade Name": "TB601019-020",
+              "NTEP Approval": "92-108"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "technical-pan_width_metric-30057099",
+      "category": "technical_field",
+      "subcategory": "pan_width_metric",
+      "coverage_key": "Pan Size {Width} {metric}",
+      "query": "What is the metric pan width for EX12001?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30057099"
+        ],
+        "parent_families": [
+          "Precision Balances"
+        ],
+        "families": [
+          "Explorer™ Precision High Capacity"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Pan Size {Width} {metric}"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30057099",
+            "source_row": 3386,
+            "fields": {
+              "Material Number": "30057099",
+              "Material Description (Global English)": "Precision Balance EX12001 AM",
+              "Parent Family Name": "Precision Balances",
+              "Family Name": "Explorer™ Precision High Capacity",
+              "Trade Name": "EX12001",
+              "Pan Size {Width} {metric}": "311 mm"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "technical-platform_length_metric-30031710",
+      "category": "technical_field",
+      "subcategory": "platform_length_metric",
+      "coverage_key": "Platform Size {Length} {metric}",
+      "query": "What is the metric platform length for R31P15?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30031710"
+        ],
+        "parent_families": [
+          "Compact Bench Scales"
+        ],
+        "families": [
+          "Ranger™ 3000"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Platform Size {Length} {metric}"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30031710",
+            "source_row": 1753,
+            "fields": {
+              "Material Number": "30031710",
+              "Material Description (Global English)": "Compact Scale, R31P15       AM",
+              "Parent Family Name": "Compact Bench Scales",
+              "Family Name": "Ranger™ 3000",
+              "Trade Name": "R31P15",
+              "Platform Size {Length} {metric}": "225 mm"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "technical-working_environment-30031711",
+      "category": "technical_field",
+      "subcategory": "working_environment",
+      "coverage_key": "Working Environment {metric}",
+      "query": "What metric working environment is specified for R31P30?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30031711"
+        ],
+        "parent_families": [
+          "Compact Bench Scales"
+        ],
+        "families": [
+          "Ranger™ 3000"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Working Environment {metric}"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30031711",
+            "source_row": 1754,
+            "fields": {
+              "Material Number": "30031711",
+              "Material Description (Global English)": "Compact Scale, R31P30       AM",
+              "Parent Family Name": "Compact Bench Scales",
+              "Family Name": "Ranger™ 3000",
+              "Trade Name": "R31P30",
+              "Working Environment {metric}": "-10°C – 40°C, 85%RH, non-condensing"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "relationship-accessories-30073972",
+      "category": "relationship",
+      "subcategory": "accessories",
+      "coverage_key": "Relationship / Accessories",
+      "query": "Which accessory material numbers are listed for ST10C-A?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30073972"
+        ],
+        "parent_families": [
+          "pH/Conductivity/DO Meter"
+        ],
+        "families": [
+          "Starter Pen Meters"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Relationship / Accessories"
+        ],
+        "related_material_numbers": [
+          "30087994"
+        ],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30073972",
+            "source_row": 3199,
+            "fields": {
+              "Material Number": "30073972",
+              "Material Description (Global English)": "Pen Meter ST10C-A",
+              "Parent Family Name": "pH/Conductivity/DO Meter",
+              "Family Name": "Starter Pen Meters",
+              "Trade Name": "ST10C-A",
+              "Relationship / Accessories": "30087994"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "relationship-cross_selling-30390007",
+      "category": "relationship",
+      "subcategory": "cross_selling",
+      "coverage_key": "Relationship / Cross Selling",
+      "query": "Which cross-sell material numbers are listed for CalPak ASTM 50g-200mg CL1 Accrd TR?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30390007"
+        ],
+        "parent_families": [
+          "Balance Calibration Weights"
+        ],
+        "families": [
+          "ASTM Calibration Weight Sets"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Relationship / Cross Selling"
+        ],
+        "related_material_numbers": [
+          "80864162"
+        ],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30390007",
+            "source_row": 346,
+            "fields": {
+              "Material Number": "30390007",
+              "Material Description (Global English)": "CalPak ASTM 50g-200mg CL1 Accrd TR",
+              "Parent Family Name": "Balance Calibration Weights",
+              "Family Name": "ASTM Calibration Weight Sets",
+              "Relationship / Cross Selling": "80864162"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "relationship-services-62031509",
+      "category": "relationship",
+      "subcategory": "services",
+      "coverage_key": "Relationship / Services",
+      "query": "Which service codes are linked to Load Cell 0785-22kg 0.18m C3?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "62031509"
+        ],
+        "parent_families": [
+          "Spare Parts"
+        ],
+        "families": [
+          "Miscellaneous"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Relationship / Services"
+        ],
+        "related_material_numbers": [
+          "B39910002",
+          "B39910003",
+          "B39920001",
+          "B39920002",
+          "B39920003",
+          "B39950001",
+          "S39905028",
+          "S39905038",
+          "S39905081",
+          "S39905084",
+          "S39905086",
+          "S39905098",
+          "S39905099",
+          "S39905104",
+          "S39905133",
+          "S39905300",
+          "S39905301"
+        ],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "62031509",
+            "source_row": 6016,
+            "fields": {
+              "Material Number": "62031509",
+              "Material Description (Global English)": "Load Cell 0785-22kg 0.18m C3",
+              "Parent Family Name": "Spare Parts",
+              "Family Name": "Miscellaneous",
+              "Relationship / Services": "B39910002; B39910003; B39920001; B39920002; B39920003; B39950001; S39905028; S39905038; S39905081; S39905084; S39905086; S39905098; S39905099; S39905104; S39905133; S39905300; S39905301"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "relationship-spare_parts-30130872",
+      "category": "relationship",
+      "subcategory": "spare_parts",
+      "coverage_key": "Relationship / Spare Parts",
+      "query": "Which spare-part material numbers are listed for R-A30X2/13MS?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30130872"
+        ],
+        "parent_families": [
+          "Rotors"
+        ],
+        "families": [
+          "Frontier™ 5000 Rotors"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Relationship / Spare Parts"
+        ],
+        "related_material_numbers": [
+          "30304365"
+        ],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30130872",
+            "source_row": 3738,
+            "fields": {
+              "Material Number": "30130872",
+              "Material Description (Global English)": "Rotor Angle 30x1.5/2.0ml",
+              "Parent Family Name": "Rotors",
+              "Family Name": "Frontier™ 5000 Rotors",
+              "Trade Name": "R-A30X2/13MS",
+              "Relationship / Spare Parts": "30304365"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "relationship-upsellings-30390012",
+      "category": "relationship",
+      "subcategory": "upsellings",
+      "coverage_key": "Relationship / Upsellings",
+      "query": "Which upsell material numbers are listed for Weight Set ASTM (2)200g-1mg UC NonAd TR?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30390012"
+        ],
+        "parent_families": [
+          "Reference Weights and Mass Standards"
+        ],
+        "families": [
+          "ASTM Reference Calibration Weight Sets"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Relationship / Upsellings"
+        ],
+        "related_material_numbers": [
+          "30390016"
+        ],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30390012",
+            "source_row": 3621,
+            "fields": {
+              "Material Number": "30390012",
+              "Material Description (Global English)": "Weight Set ASTM (2)200g-1mg UC NonAd TR",
+              "Parent Family Name": "Reference Weights and Mass Standards",
+              "Family Name": "ASTM Reference Calibration Weight Sets",
+              "Relationship / Upsellings": "30390016"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "relationship-replacements-30057099",
+      "category": "relationship",
+      "subcategory": "replacements",
+      "coverage_key": "Relationship / Replacements",
+      "query": "Which replacement material numbers are listed for EX12001?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30057099"
+        ],
+        "parent_families": [
+          "Precision Balances"
+        ],
+        "families": [
+          "Explorer™ Precision High Capacity"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Relationship / Replacements"
+        ],
+        "related_material_numbers": [
+          "31059200"
+        ],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30057099",
+            "source_row": 3386,
+            "fields": {
+              "Material Number": "30057099",
+              "Material Description (Global English)": "Precision Balance EX12001 AM",
+              "Parent Family Name": "Precision Balances",
+              "Family Name": "Explorer™ Precision High Capacity",
+              "Trade Name": "EX12001",
+              "Relationship / Replacements": "31059200"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "relationship-compatible_models-30304361",
+      "category": "relationship",
+      "subcategory": "compatible_models",
+      "coverage_key": "Compatible Models",
+      "query": "Which models are listed as compatible with R-A24X2/20MIB?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30304361"
+        ],
+        "parent_families": [
+          "Rotors"
+        ],
+        "families": [
+          "Frontier™ 5000 Rotors"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Compatible Models"
+        ],
+        "related_material_numbers": [],
+        "related_values": [
+          "FC5720R"
+        ],
+        "evidence": [
+          {
+            "material_number": "30304361",
+            "source_row": 3745,
+            "fields": {
+              "Material Number": "30304361",
+              "Material Description (Global English)": "Rotor Angle 24x1.5/2.0ml ID BIOSEALS",
+              "Parent Family Name": "Rotors",
+              "Family Name": "Frontier™ 5000 Rotors",
+              "Trade Name": "R-A24X2/20MIB",
+              "Compatible Models": "FC5720R"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "relationship-rotor_compatibility-30393189",
+      "category": "relationship",
+      "subcategory": "rotor_compatibility",
+      "coverage_key": "Rotor Compatibility",
+      "query": "Which rotors are listed as compatible with FC5707+R05?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30393189"
+        ],
+        "parent_families": [
+          "Multi Centrifuges"
+        ],
+        "families": [
+          "Frontier™ 5000 Series Multi"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Rotor Compatibility"
+        ],
+        "related_material_numbers": [],
+        "related_values": [
+          "Angle 8X15ml"
+        ],
+        "evidence": [
+          {
+            "material_number": "30393189",
+            "source_row": 3112,
+            "fields": {
+              "Material Number": "30393189",
+              "Material Description (Global English)": "Centrifuge Multi 100-230V FC5707+R05",
+              "Parent Family Name": "Multi Centrifuges",
+              "Family Name": "Frontier™ 5000 Series Multi",
+              "Trade Name": "FC5707+R05",
+              "Rotor Compatibility": "Angle 8X15ml"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "relationship-included_accessories-83041315",
+      "category": "relationship",
+      "subcategory": "included_accessories",
+      "coverage_key": "Accessories Included",
+      "query": "Which accessories are included with V2A (SI-A536US)?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "83041315"
+        ],
+        "parent_families": [
+          "Laboratory Vortex Mixers"
+        ],
+        "families": [
+          "Vortex-Genie™"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Accessories Included"
+        ],
+        "related_material_numbers": [],
+        "related_values": [
+          "Applied Biosystem's 96/384-Well Microplate Adaptor"
+        ],
+        "evidence": [
+          {
+            "material_number": "83041315",
+            "source_row": 3054,
+            "fields": {
+              "Material Number": "83041315",
+              "Material Description (Global English)": "Digital Vortex-Genie 2, 120V, 60Hz (ABI)",
+              "Parent Family Name": "Laboratory Vortex Mixers",
+              "Family Name": "Vortex-Genie™",
+              "Trade Name": "V2A (SI-A536US)",
+              "Accessories Included": "Applied Biosystem's 96/384-Well Microplate Adaptor"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "relationship-sample_vial_compatibility-30853395",
+      "category": "relationship",
+      "subcategory": "sample_vial_compatibility",
+      "coverage_key": "Sample Vials Compatibility",
+      "query": "Which sample-vial format is compatible with A-AP30TURL-F?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30853395"
+        ],
+        "parent_families": [
+          "Turbidimeters"
+        ],
+        "families": [
+          "AP30TURL Portable Turbidimeters"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Sample Vials Compatibility"
+        ],
+        "related_material_numbers": [],
+        "related_values": [
+          "Round Ø25mm"
+        ],
+        "evidence": [
+          {
+            "material_number": "30853395",
+            "source_row": 6392,
+            "fields": {
+              "Material Number": "30853395",
+              "Material Description (Global English)": "Turbidimeter a-AP30TURL-F",
+              "Parent Family Name": "Turbidimeters",
+              "Family Name": "AP30TURL Portable Turbidimeters",
+              "Trade Name": "A-AP30TURL-F",
+              "Sample Vials Compatibility": "Round Ø25mm"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "document-en-data-sheets-1-30031639",
+      "category": "document_link",
+      "subcategory": "specific_document_field",
+      "coverage_key": "EN Data Sheets 1",
+      "query": "What data sheets link is listed for STDO11?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30031639"
+        ],
+        "parent_families": [
+          "Electrodes"
+        ],
+        "families": [
+          "Starter Electrodes"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "EN Data Sheets 1"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30031639",
+            "source_row": 1789,
+            "fields": {
+              "Material Number": "30031639",
+              "Material Description (Global English)": "DO Electrode, STDO11",
+              "Parent Family Name": "Electrodes",
+              "Family Name": "Starter Electrodes",
+              "Trade Name": "STDO11",
+              "EN Data Sheets 1": "https://dmx.ohaus.com/WorkArea/showcontent.aspx?id=34016"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "document-en-data-sheets-2-30031639",
+      "category": "document_link",
+      "subcategory": "specific_document_field",
+      "coverage_key": "EN Data Sheets 2",
+      "query": "What data sheets link is listed for STDO11?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30031639"
+        ],
+        "parent_families": [
+          "Electrodes"
+        ],
+        "families": [
+          "Starter Electrodes"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "EN Data Sheets 2"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30031639",
+            "source_row": 1789,
+            "fields": {
+              "Material Number": "30031639",
+              "Material Description (Global English)": "DO Electrode, STDO11",
+              "Parent Family Name": "Electrodes",
+              "Family Name": "Starter Electrodes",
+              "Trade Name": "STDO11",
+              "EN Data Sheets 2": "https://us.ohaus.com/caprop65"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "document-en-data-sheets-3-30057099",
+      "category": "document_link",
+      "subcategory": "specific_document_field",
+      "coverage_key": "EN Data Sheets 3",
+      "query": "What data sheets link is listed for EX12001?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30057099"
+        ],
+        "parent_families": [
+          "Precision Balances"
+        ],
+        "families": [
+          "Explorer™ Precision High Capacity"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "EN Data Sheets 3"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30057099",
+            "source_row": 3386,
+            "fields": {
+              "Material Number": "30057099",
+              "Material Description (Global English)": "Precision Balance EX12001 AM",
+              "Parent Family Name": "Precision Balances",
+              "Family Name": "Explorer™ Precision High Capacity",
+              "Trade Name": "EX12001",
+              "EN Data Sheets 3": "https://us.ohaus.com/caprop65"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "document-en-user-guide-1-30129559",
+      "category": "document_link",
+      "subcategory": "specific_document_field",
+      "coverage_key": "EN User Guide 1",
+      "query": "What user guide link is listed for R-A8X2/6M?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30129559"
+        ],
+        "parent_families": [
+          "Rotors"
+        ],
+        "families": [
+          "Frontier™ 5000 Rotors"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "EN User Guide 1"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30129559",
+            "source_row": 3736,
+            "fields": {
+              "Material Number": "30129559",
+              "Material Description (Global English)": "Rotor 1.5/2ml x8 FC5306",
+              "Parent Family Name": "Rotors",
+              "Family Name": "Frontier™ 5000 Rotors",
+              "Trade Name": "R-A8X2/6M",
+              "EN User Guide 1": "https://dmx.ohaus.com/WorkArea/showcontent.aspx?id=4294996152"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "document-en-user-guide-2-30314813",
+      "category": "document_link",
+      "subcategory": "specific_document_field",
+      "coverage_key": "EN User Guide 2",
+      "query": "What user guide link is listed for FC5718 120V?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30314813"
+        ],
+        "parent_families": [
+          "Multi Pro Centrifuges"
+        ],
+        "families": [
+          "Frontier™ 5000 Series Multi Pro"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "EN User Guide 2"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30314813",
+            "source_row": 3121,
+            "fields": {
+              "Material Number": "30314813",
+              "Material Description (Global English)": "Centrifuge Multi 120V FC5718",
+              "Parent Family Name": "Multi Pro Centrifuges",
+              "Family Name": "Frontier™ 5000 Series Multi Pro",
+              "Trade Name": "FC5718 120V",
+              "EN User Guide 2": "https://dmx.ohaus.com/WorkArea/showcontent.aspx?id=4294996152"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "document-en-manuals-1-11113857",
+      "category": "document_link",
+      "subcategory": "specific_document_field",
+      "coverage_key": "EN Manuals 1",
+      "query": "What manuals link is listed for HA-TC TEMPJUST?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "11113857"
+        ],
+        "parent_families": [
+          "Accessories"
+        ],
+        "families": [
+          "Moisture Analyzer Accessories"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "EN Manuals 1"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "11113857",
+            "source_row": 189,
+            "fields": {
+              "Material Number": "11113857",
+              "Material Description (Global English)": "Temp. calibration kit MB Series",
+              "Parent Family Name": "Accessories",
+              "Family Name": "Moisture Analyzer Accessories",
+              "Trade Name": "HA-TC TEMPJUST",
+              "EN Manuals 1": "https://dmx.ohaus.com/WorkArea/showcontent.aspx?id=3554"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "document-en-manuals-2-30073972",
+      "category": "document_link",
+      "subcategory": "specific_document_field",
+      "coverage_key": "EN Manuals 2",
+      "query": "What manuals link is listed for ST10C-A?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30073972"
+        ],
+        "parent_families": [
+          "pH/Conductivity/DO Meter"
+        ],
+        "families": [
+          "Starter Pen Meters"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "EN Manuals 2"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30073972",
+            "source_row": 3199,
+            "fields": {
+              "Material Number": "30073972",
+              "Material Description (Global English)": "Pen Meter ST10C-A",
+              "Parent Family Name": "pH/Conductivity/DO Meter",
+              "Family Name": "Starter Pen Meters",
+              "Trade Name": "ST10C-A",
+              "EN Manuals 2": "https://dmx.ohaus.com/WorkArea/showcontent.aspx?id=34494"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "document-all-english-30130869",
+      "category": "document_link",
+      "subcategory": "all_english_documents",
+      "coverage_key": "all_english_documents",
+      "query": "Which English data sheets, user guides, and manuals are listed for FC5515R 120V?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30130869"
+        ],
+        "parent_families": [
+          "Micro Centrifuges"
+        ],
+        "families": [
+          "Frontier™ 5000 Series Micro"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "EN Data Sheets 1",
+          "EN Data Sheets 2",
+          "EN Data Sheets 3",
+          "EN User Guide 1",
+          "EN Manuals 1",
+          "EN Manuals 2"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30130869",
+            "source_row": 3097,
+            "fields": {
+              "Material Number": "30130869",
+              "Material Description (Global English)": "Centrifuge Micro 120V FC5515R",
+              "Parent Family Name": "Micro Centrifuges",
+              "Family Name": "Frontier™ 5000 Series Micro",
+              "Trade Name": "FC5515R 120V",
+              "EN Data Sheets 1": "https://dmx.ohaus.com/WorkArea/showcontent.aspx?id=4294970480",
+              "EN Data Sheets 2": "https://dmx.ohaus.com/WorkArea/showcontent.aspx?id=4294996583",
+              "EN Data Sheets 3": "https://us.ohaus.com/caprop65",
+              "EN User Guide 1": "https://dmx.ohaus.com/WorkArea/showcontent.aspx?id=4294996152",
+              "EN Manuals 1": "http://dmx.ohaus.com/WorkArea/showcontent.aspx?id=4294971682",
+              "EN Manuals 2": "https://dmx.ohaus.com/WorkArea/showcontent.aspx?id=4294971681"
+            }
+          }
+        ],
+        "result_assertions": {}
+      }
+    },
+    {
+      "id": "semantic-discovery-cell-lysis-soil-biosafety-cabinet-83041308",
+      "category": "semantic_discovery",
+      "subcategory": "cell-lysis-soil-biosafety-cabinet",
+      "coverage_key": "83041308",
+      "query": "What product would help me break open cells and homogenize soil samples inside a cramped biosafety cabinet?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "83041308"
+        ],
+        "parent_families": [
+          "Bead Mill Homogenizers"
+        ],
+        "families": [
+          "Bead Genie™"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Application",
+          "Benefit Text 1"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "83041308",
+            "source_row": 1303,
+            "fields": {
+              "Material Number": "83041308",
+              "Material Description (Global English)": "Bead Genie, 120V",
+              "Parent Family Name": "Bead Mill Homogenizers",
+              "Family Name": "Bead Genie™",
+              "Trade Name": "BH3 (SI-B100US)",
+              "Application": "Cell Lysis, Tissue Homogenization, DNA/RNA Extraction, Protein Extraction, Microbial Disruption, Yeast Cell Lysis, Bacterial Cell Disruption, Bacterial and Fungal Cell Lysis, Sample Processing, Plant Tissue Grinding, Soil Sample Homogenization",
+              "Benefit Text 1": "Efficient DC motor and solid metal build enable aggressive 19mm vertical agitation without shifting, while the compact design fits easily into tight lab spaces like biosafety cabinets and cold rooms."
+            }
+          }
+        ],
+        "result_assertions": {
+          "semantic_material_numbers": [
+            "83041308"
+          ]
+        }
+      }
+    },
+    {
+      "id": "semantic-discovery-quiet-safe-mini-centrifuge-30134157",
+      "category": "semantic_discovery",
+      "subcategory": "quiet-safe-mini-centrifuge",
+      "coverage_key": "30134157",
+      "query": "I need a quiet mini centrifuge with imbalance protection that stops the rotor if the lid opens. What fits?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30134157"
+        ],
+        "parent_families": [
+          "Mini Centrifuges"
+        ],
+        "families": [
+          "Frontier™ 5000 Series Mini"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Benefit Text 1",
+          "Benefit Text 2"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30134157",
+            "source_row": 3105,
+            "fields": {
+              "Material Number": "30134157",
+              "Material Description (Global English)": "Centrifuge, Mini, FC5306, AM",
+              "Parent Family Name": "Mini Centrifuges",
+              "Family Name": "Frontier™ 5000 Series Mini",
+              "Trade Name": "FC5306",
+              "Benefit Text 1": "With a low voltage power input, quiet brushless motor and a rubber base that absorbs vibrations, Frontier 5306 minimizes operational noise and reduces disruptions in the laboratory.",
+              "Benefit Text 2": "Frontier 5306 is designed with operator safety in mind, and includes a rotor imbalance sensor and two safety switches which immediately stop the rotors should the lid open during use."
+            }
+          }
+        ],
+        "result_assertions": {
+          "semantic_material_numbers": [
+            "30134157"
+          ]
+        }
+      }
+    },
+    {
+      "id": "semantic-discovery-automatic-moisture-method-30241165",
+      "category": "semantic_discovery",
+      "subcategory": "automatic-moisture-method",
+      "coverage_key": "30241165",
+      "query": "Which moisture tester can analyze a sample and automatically create the drying method for me?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30241165"
+        ],
+        "parent_families": [
+          "Moisture Analyzers"
+        ],
+        "families": [
+          "MB120"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Application",
+          "Benefit Text 1"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30241165",
+            "source_row": 3106,
+            "fields": {
+              "Material Number": "30241165",
+              "Material Description (Global English)": "Moisture Analyzer, MB120       AM",
+              "Parent Family Name": "Moisture Analyzers",
+              "Family Name": "MB120",
+              "Trade Name": "MB120",
+              "Application": "Percent Moisture Determination, Percent Moisture Regain Determination, Percent Solid Determination, Weighing",
+              "Benefit Text 1": "Get started quickly with SmartGuide™. This revolutionary feature automatically analyzes a sample and creates a method, thereby removing the guesswork from the initial setup."
+            }
+          }
+        ],
+        "result_assertions": {
+          "semantic_material_numbers": [
+            "30241165"
+          ]
+        }
+      }
+    },
+    {
+      "id": "category-family-compass-cr",
+      "category": "category_filter",
+      "subcategory": "complete_family_listing",
+      "coverage_key": "Compass™ CR",
+      "query": "Show every Compass CR model in the catalog.",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30428204",
+          "30428205",
+          "30428206",
+          "30428207"
+        ],
+        "parent_families": [
+          "Portable Balances"
+        ],
+        "families": [
+          "Compass™ CR"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30428204",
+            "source_row": 3218,
+            "fields": {
+              "Material Number": "30428204",
+              "Material Description (Global English)": "Portable Balance CR221",
+              "Parent Family Name": "Portable Balances",
+              "Family Name": "Compass™ CR",
+              "Trade Name": "CR221"
+            }
+          },
+          {
+            "material_number": "30428205",
+            "source_row": 3219,
+            "fields": {
+              "Material Number": "30428205",
+              "Material Description (Global English)": "Portable Balance CR621",
+              "Parent Family Name": "Portable Balances",
+              "Family Name": "Compass™ CR",
+              "Trade Name": "CR621"
+            }
+          },
+          {
+            "material_number": "30428206",
+            "source_row": 3220,
+            "fields": {
+              "Material Number": "30428206",
+              "Material Description (Global English)": "Portable Balance CR2200",
+              "Parent Family Name": "Portable Balances",
+              "Family Name": "Compass™ CR",
+              "Trade Name": "CR2200"
+            }
+          },
+          {
+            "material_number": "30428207",
+            "source_row": 3221,
+            "fields": {
+              "Material Number": "30428207",
+              "Material Description (Global English)": "Portable Balance CR5200",
+              "Parent Family Name": "Portable Balances",
+              "Family Name": "Compass™ CR",
+              "Trade Name": "CR5200"
+            }
+          }
+        ],
+        "result_assertions": {
+          "catalog_listing_kind": "materials_by_category",
+          "category_level": "family",
+          "category_name": "Compass™ CR",
+          "exact_listing_material_numbers": [
+            "30428204",
+            "30428205",
+            "30428206",
+            "30428207"
+          ],
+          "numeric_constraints": []
+        }
+      }
+    },
+    {
+      "id": "numeric-compass-capacity-exact-620g",
+      "category": "numeric_filter",
+      "subcategory": "exact",
+      "coverage_key": "Compass™ CR",
+      "query": "Which Compass CR models have a maximum capacity of exactly 620 g?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30428205"
+        ],
+        "parent_families": [
+          "Portable Balances"
+        ],
+        "families": [
+          "Compass™ CR"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Maximum Capacity {metric}"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30428205",
+            "source_row": 3219,
+            "fields": {
+              "Material Number": "30428205",
+              "Material Description (Global English)": "Portable Balance CR621",
+              "Parent Family Name": "Portable Balances",
+              "Family Name": "Compass™ CR",
+              "Trade Name": "CR621",
+              "Maximum Capacity {metric}": "620 g"
+            }
+          }
+        ],
+        "result_assertions": {
+          "catalog_listing_kind": "materials_by_category",
+          "category_level": "family",
+          "category_name": "Compass™ CR",
+          "exact_listing_material_numbers": [
+            "30428205"
+          ],
+          "numeric_constraints": [
+            {
+              "field": "capacity",
+              "comparator": "exact",
+              "value": 620,
+              "unit": "g"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "numeric-scout-capacity-range-400g-700g",
+      "category": "numeric_filter",
+      "subcategory": "range",
+      "coverage_key": "Scout™ STX",
+      "query": "Which Scout STX models have a maximum capacity between 400 g and 700 g?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30253008",
+          "30253009",
+          "30253012",
+          "30253013"
+        ],
+        "parent_families": [
+          "Portable Balances"
+        ],
+        "families": [
+          "Scout™ STX"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Maximum Capacity {metric}"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30253008",
+            "source_row": 3289,
+            "fields": {
+              "Material Number": "30253008",
+              "Material Description (Global English)": "Portable Balance STX422 AM",
+              "Parent Family Name": "Portable Balances",
+              "Family Name": "Scout™ STX",
+              "Trade Name": "STX422",
+              "Maximum Capacity {metric}": "420 g"
+            }
+          },
+          {
+            "material_number": "30253009",
+            "source_row": 3290,
+            "fields": {
+              "Material Number": "30253009",
+              "Material Description (Global English)": "Portable Balance STX622 AM",
+              "Parent Family Name": "Portable Balances",
+              "Family Name": "Scout™ STX",
+              "Trade Name": "STX622",
+              "Maximum Capacity {metric}": "620 g"
+            }
+          },
+          {
+            "material_number": "30253012",
+            "source_row": 3293,
+            "fields": {
+              "Material Number": "30253012",
+              "Material Description (Global English)": "Portable Balance STX421 AM",
+              "Parent Family Name": "Portable Balances",
+              "Family Name": "Scout™ STX",
+              "Trade Name": "STX421",
+              "Maximum Capacity {metric}": "420 g"
+            }
+          },
+          {
+            "material_number": "30253013",
+            "source_row": 3294,
+            "fields": {
+              "Material Number": "30253013",
+              "Material Description (Global English)": "Portable Balance STX621 AM",
+              "Parent Family Name": "Portable Balances",
+              "Family Name": "Scout™ STX",
+              "Trade Name": "STX621",
+              "Maximum Capacity {metric}": "620 g"
+            }
+          }
+        ],
+        "result_assertions": {
+          "catalog_listing_kind": "materials_by_category",
+          "category_level": "family",
+          "category_name": "Scout™ STX",
+          "exact_listing_material_numbers": [
+            "30253008",
+            "30253009",
+            "30253012",
+            "30253013"
+          ],
+          "numeric_constraints": [
+            {
+              "field": "capacity",
+              "comparator": "at_least",
+              "value": 400,
+              "unit": "g"
+            },
+            {
+              "field": "capacity",
+              "comparator": "at_most",
+              "value": 700,
+              "unit": "g"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "numeric-scout-capacity-and-readability",
+      "category": "numeric_filter",
+      "subcategory": "range",
+      "coverage_key": "Scout™ STX",
+      "query": "Which Scout STX models have capacity between 100 g and 250 g and readability of exactly 0.001 g?",
+      "expected": {
+        "answerability": "grounded",
+        "material_numbers": [
+          "30253005",
+          "30253006"
+        ],
+        "parent_families": [
+          "Portable Balances"
+        ],
+        "families": [
+          "Scout™ STX"
+        ],
+        "source_fields": [
+          "Material Number",
+          "Material Description (Global English)",
+          "Parent Family Name",
+          "Family Name",
+          "Trade Name",
+          "Maximum Capacity {metric}",
+          "Readability {metric}"
+        ],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [
+          {
+            "material_number": "30253005",
+            "source_row": 3286,
+            "fields": {
+              "Material Number": "30253005",
+              "Material Description (Global English)": "Portable Precision Balance STX123 AM",
+              "Parent Family Name": "Portable Balances",
+              "Family Name": "Scout™ STX",
+              "Trade Name": "STX123",
+              "Maximum Capacity {metric}": "120 g",
+              "Readability {metric}": "0.001 g"
+            }
+          },
+          {
+            "material_number": "30253006",
+            "source_row": 3287,
+            "fields": {
+              "Material Number": "30253006",
+              "Material Description (Global English)": "Portable Precision Balance STX223 AM",
+              "Parent Family Name": "Portable Balances",
+              "Family Name": "Scout™ STX",
+              "Trade Name": "STX223",
+              "Maximum Capacity {metric}": "220 g",
+              "Readability {metric}": "0.001 g"
+            }
+          }
+        ],
+        "result_assertions": {
+          "catalog_listing_kind": "materials_by_category",
+          "category_level": "family",
+          "category_name": "Scout™ STX",
+          "exact_listing_material_numbers": [
+            "30253005",
+            "30253006"
+          ],
+          "numeric_constraints": [
+            {
+              "field": "capacity",
+              "comparator": "at_least",
+              "value": 100,
+              "unit": "g"
+            },
+            {
+              "field": "capacity",
+              "comparator": "at_most",
+              "value": 250,
+              "unit": "g"
+            },
+            {
+              "field": "readability",
+              "comparator": "exact",
+              "value": 0.001,
+              "unit": "g"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "no-results-compass-capacity-range-700g-800g",
+      "category": "no_results",
+      "subcategory": "empty_category_numeric_range",
+      "coverage_key": "Compass™ CR",
+      "query": "Which Compass CR models have a maximum capacity between 700 g and 800 g?",
+      "expected": {
+        "answerability": "no_results",
+        "material_numbers": [],
+        "parent_families": [
+          "Portable Balances"
+        ],
+        "families": [
+          "Compass™ CR"
+        ],
+        "source_fields": [],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [],
+        "required_behavior": "Return an empty filtered family listing; do not substitute non-matching products.",
+        "result_assertions": {
+          "catalog_listing_kind": "materials_by_category",
+          "category_level": "family",
+          "category_name": "Compass™ CR",
+          "exact_listing_material_numbers": [],
+          "numeric_constraints": [
+            {
+              "field": "capacity",
+              "comparator": "at_least",
+              "value": 700,
+              "unit": "g"
+            },
+            {
+              "field": "capacity",
+              "comparator": "at_most",
+              "value": 800,
+              "unit": "g"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "unsupported-live_price-11113857",
+      "category": "unsupported_live_data",
+      "subcategory": "live_price",
+      "coverage_key": "live_price",
+      "query": "What is today's price for material 11113857?",
+      "anchor_material_number": "11113857",
+      "expected": {
+        "answerability": "unsupported_live_data",
+        "material_numbers": [],
+        "parent_families": [],
+        "families": [],
+        "source_fields": [],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [],
+        "result_assertions": {},
+        "required_behavior": "State that the static master workbook does not provide the requested live value and do not invent one."
+      }
+    },
+    {
+      "id": "unsupported-inventory_quantity-30100600",
+      "category": "unsupported_live_data",
+      "subcategory": "inventory_quantity",
+      "coverage_key": "inventory_quantity",
+      "query": "How many units of material 30100600 are in stock right now?",
+      "anchor_material_number": "30100600",
+      "expected": {
+        "answerability": "unsupported_live_data",
+        "material_numbers": [],
+        "parent_families": [],
+        "families": [],
+        "source_fields": [],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [],
+        "result_assertions": {},
+        "required_behavior": "State that the static master workbook does not provide the requested live value and do not invent one."
+      }
+    },
+    {
+      "id": "unsupported-live_lead_time-30390001",
+      "category": "unsupported_live_data",
+      "subcategory": "live_lead_time",
+      "coverage_key": "live_lead_time",
+      "query": "What is the current ship date and lead time for material 30390001?",
+      "anchor_material_number": "30390001",
+      "expected": {
+        "answerability": "unsupported_live_data",
+        "material_numbers": [],
+        "parent_families": [],
+        "families": [],
+        "source_fields": [],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [],
+        "result_assertions": {},
+        "required_behavior": "State that the static master workbook does not provide the requested live value and do not invent one."
+      }
+    },
+    {
+      "id": "unsupported-current_discount-30391393",
+      "category": "unsupported_live_data",
+      "subcategory": "current_discount",
+      "coverage_key": "current_discount",
+      "query": "What live discount can we offer on material 30391393 today?",
+      "anchor_material_number": "30391393",
+      "expected": {
+        "answerability": "unsupported_live_data",
+        "material_numbers": [],
+        "parent_families": [],
+        "families": [],
+        "source_fields": [],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [],
+        "result_assertions": {},
+        "required_behavior": "State that the static master workbook does not provide the requested live value and do not invent one."
+      }
+    },
+    {
+      "id": "unsupported-order_status-61038662",
+      "category": "unsupported_live_data",
+      "subcategory": "order_status",
+      "coverage_key": "order_status",
+      "query": "Has the latest customer order for material 61038662 shipped yet?",
+      "anchor_material_number": "61038662",
+      "expected": {
+        "answerability": "unsupported_live_data",
+        "material_numbers": [],
+        "parent_families": [],
+        "families": [],
+        "source_fields": [],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [],
+        "result_assertions": {},
+        "required_behavior": "State that the static master workbook does not provide the requested live value and do not invent one."
+      }
+    },
+    {
+      "id": "unsupported-future_restock-30379439",
+      "category": "unsupported_live_data",
+      "subcategory": "future_restock",
+      "coverage_key": "future_restock",
+      "query": "When will material 30379439 be back in inventory?",
+      "anchor_material_number": "30379439",
+      "expected": {
+        "answerability": "unsupported_live_data",
+        "material_numbers": [],
+        "parent_families": [],
+        "families": [],
+        "source_fields": [],
+        "related_material_numbers": [],
+        "related_values": [],
+        "evidence": [],
+        "result_assertions": {},
+        "required_behavior": "State that the static master workbook does not provide the requested live value and do not invent one."
+      }
+    }
+  ]
+}

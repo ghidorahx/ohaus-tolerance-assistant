@@ -34,7 +34,7 @@ test("uses the requested neutral glass presentation", () => {
   assert.match(styles, /object-fit:\s*contain/);
 });
 
-test("provides a workbook-grounded Ask assistant with extended verified context", () => {
+test("provides a workbook-grounded Ask assistant with focused verified context", () => {
   assert.match(page, /<SalesAssistant/);
   assert.match(salesAssistant, /new URL\("api\/sales"/);
   assert.match(salesAssistant, /buildContext/);
@@ -45,7 +45,9 @@ test("provides a workbook-grounded Ask assistant with extended verified context"
   assert.match(salesAssistant, /Ask pilot owner · T\. Delacruz/);
   assert.match(page, /isSalesMode \? "Ask"/);
   assert.match(page, /className="mode-icon" aria-hidden="true">\?<\/span>\s+Ask/);
-  assert.match(salesAssistant, /generated knowledge documents/);
+  assert.match(salesAssistant, /focused knowledge chunks/);
+  assert.match(salesAssistant, /max_verified_turns \?\? 12/);
+  assert.match(salesAssistant, /max_retrieval_documents \?\? 16/);
   assert.match(styles, /\.sales-evidence-grid/);
   assert.match(styles, /\.sales-conversation/);
 });
@@ -67,10 +69,23 @@ test("keeps Sales reasoning fixed at medium without a customer-facing slider", (
   assert.doesNotMatch(styles, /\.sales-reasoning-control\s*\{/);
 });
 
-test("reports Cloudflare Vectorize only inside the supporting details", () => {
-  assert.match(salesAssistant, /Vectorize semantic retrieval/);
-  assert.match(salesAssistant, /Vectorize \+ catalog/);
+test("reports hybrid master-catalog retrieval only inside the supporting details", () => {
+  assert.match(salesAssistant, /Hybrid semantic \+ lexical \+ exact retrieval/);
+  assert.match(salesAssistant, /Semantic \+ exact catalog/);
   assert.match(salesAssistant, /health\?\.vectorize\?\.configured/);
+});
+
+test("uses the complete master-catalog defaults and gates readiness on retrieval", () => {
+  assert.match(salesAssistant, /6_407/);
+  assert.match(salesAssistant, /46/);
+  assert.match(salesAssistant, /203_589/);
+  assert.match(salesAssistant, /5_775/);
+  assert.match(salesAssistant, /45_167/);
+  assert.match(salesAssistant, /catalog\.retrieval_status === "ready"/);
+  assert.match(salesAssistant, /Catalog not ready/);
+  assert.match(salesAssistant, /access_code_configured/);
+  assert.match(salesAssistant, /Team access not configured/);
+  assert.match(salesAssistant, /\^fields\\\./);
 });
 
 test("renders clean Sales answer formatting with restrained OHAUS-red emphasis", () => {

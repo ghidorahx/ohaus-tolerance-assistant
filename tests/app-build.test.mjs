@@ -46,7 +46,7 @@ test("packages the structured knowledge base", async () => {
   assert.equal(knowledge.current.length + knowledge.legacy.length, 746);
 });
 
-test("packages the workbook-grounded AI sales endpoint and extended context policy", async () => {
+test("packages the workbook-grounded Ask endpoint and focused context policy", async () => {
   const response = await fetchBuiltWorker("/api/sales");
   assert.equal(response.status, 200);
   const payload = await response.json();
@@ -56,12 +56,12 @@ test("packages the workbook-grounded AI sales endpoint and extended context poli
   assert.equal(payload.reasoning_mode, "standard");
   assert.equal(payload.default_reasoning_profile, undefined);
   assert.equal(payload.reasoning_profiles, undefined);
-  assert.equal(payload.context.max_verified_turns, 120);
-  assert.equal(payload.context.approximate_character_budget, 966_000);
-  assert.equal(payload.context.max_retrieval_documents, 8);
-  assert.equal(payload.context.max_total_request_tokens, 450_000);
-  assert.equal(payload.context.max_input_tokens, 322_000);
-  assert.equal(payload.context.max_output_tokens, 128_000);
+  assert.equal(payload.context.max_verified_turns, 12);
+  assert.equal(payload.context.approximate_character_budget, 162_000);
+  assert.equal(payload.context.max_retrieval_documents, 16);
+  assert.equal(payload.context.max_total_request_tokens, 60_000);
+  assert.equal(payload.context.max_input_tokens, 54_000);
+  assert.equal(payload.context.max_output_tokens, 6_000);
   assert.equal(payload.catalog.portable_products, 80);
   assert.equal(payload.catalog.api_records, 171);
   assert.equal(payload.catalog.retrieval_documents, 87);
@@ -70,4 +70,12 @@ test("packages the workbook-grounded AI sales endpoint and extended context poli
   assert.equal(payload.vectorize.index, "ohaus-sales-catalog-v1");
   assert.equal(payload.vectorize.source_documents, 87);
   assert.ok(payload.vectorize.vector_records > payload.vectorize.source_documents);
+});
+
+test("deploys the built Worker and its matching hashed assets together", async () => {
+  const config = await readFile(new URL("../wrangler.deploy.jsonc", import.meta.url), "utf8");
+  assert.match(config, /"main":\s*"\.\/dist\/server\/index\.js"/);
+  assert.match(config, /"directory":\s*"\.\/dist\/client"/);
+  assert.match(config, /"binding":\s*"ASSETS"/);
+  assert.doesNotMatch(config, /worker-wrapper\.js/);
 });

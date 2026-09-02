@@ -1,0 +1,262 @@
+{
+  "manifest_version": "1.1.0",
+  "catalog_schema_version": "master-catalog-v1",
+  "generator": {
+    "name": "scripts/import-master-catalog.py",
+    "version": "1.1.0",
+    "alias_strategy": "source-plus-compact-alpha-digit-spaced"
+  },
+  "version_id": "mcv_f3213eb213a5f28d58e5f3ab",
+  "status": "staged",
+  "generated_at": "2026-09-02T14:44:11Z",
+  "source": {
+    "file": "MMMDF_EN_US_20260605_AI_Organized 2.xlsx",
+    "sheet": "Product_Catalog_AI",
+    "sha256": "5651c886837bf7b6817d829273d3c9a608658cd107798a9d206d01ad404950bb",
+    "bytes": 3853648,
+    "rows": 6407,
+    "columns": 428
+  },
+  "counts": {
+    "materials": 6407,
+    "aliases": 15800,
+    "attributes": 323389,
+    "numeric_attributes": 94754,
+    "canonical_attributes": 74400,
+    "relationships": 203589,
+    "resolved_relationships": 46119,
+    "unresolved_relationships": 157470,
+    "documents": 5775,
+    "chunks": 45167,
+    "categories": 47,
+    "families": 216,
+    "named_parent_families": 46,
+    "named_families": 215
+  },
+  "chunking": {
+    "maximum_characters": 1450,
+    "maximum_observed_characters": 1450,
+    "vector_namespace": "master-mcv_f3213eb213a5f28d58e5f3ab",
+    "deterministic_id_maximum": 43
+  },
+  "sql": {
+    "shards": 25,
+    "conservative_statement_limit_bytes": 81920,
+    "maximum_observed_statement_bytes": 81910
+  },
+  "quality": {
+    "status": "review_required",
+    "errors": 0,
+    "warnings": 4,
+    "duplicate_header_groups": 8,
+    "missing_material_rows": 0
+  },
+  "migration": "migrations/0001_master_catalog.sql",
+  "outputs": [
+    {
+      "path": "master-catalog-stage-0001.sql",
+      "bytes": 8379209,
+      "sha256": "c621e8d0bbc46e0ff3915c7699cbb4cc8690bd55caa40e5dfda37c926b59da51"
+    },
+    {
+      "path": "master-catalog-stage-0002.sql",
+      "bytes": 8340075,
+      "sha256": "b37d37b10541564db254ddb52a757fc8f054badc46646fec255edc16cdaf4362"
+    },
+    {
+      "path": "master-catalog-stage-0003.sql",
+      "bytes": 8373845,
+      "sha256": "88623e0a63dc0481074e74c0dce1dabb3b10c38b6313f8632eac3f0b488b44ef"
+    },
+    {
+      "path": "master-catalog-stage-0004.sql",
+      "bytes": 8381141,
+      "sha256": "02e5daf583bc420635331c0e3131aa802fb0af10a185cc5356a90a0c85041d3a"
+    },
+    {
+      "path": "master-catalog-stage-0005.sql",
+      "bytes": 8381470,
+      "sha256": "3d9c005d3130ae6803b06b8f670e28f62851c29ea0ac45bfce8392bbb734e2e8"
+    },
+    {
+      "path": "master-catalog-stage-0006.sql",
+      "bytes": 8367741,
+      "sha256": "d1208684b859f7eb6d3c40f49848b1be7bb3d739b4b9b69244ddf753824fbd21"
+    },
+    {
+      "path": "master-catalog-stage-0007.sql",
+      "bytes": 8363468,
+      "sha256": "4f3c5ddf78ac688195597e4d6af8dbc0760debb2a4dc9b20d7cdd89b7dc34b8f"
+    },
+    {
+      "path": "master-catalog-stage-0008.sql",
+      "bytes": 8367200,
+      "sha256": "8c5bfc0f03db00f475f44cb34f326feb64bb426144385d503159b244efb98827"
+    },
+    {
+      "path": "master-catalog-stage-0009.sql",
+      "bytes": 8387935,
+      "sha256": "2663445d91c85da3474c2bd3e38b6dbd11b3fcbdd82f6b3f1d4ec69b7c8ee7dc"
+    },
+    {
+      "path": "master-catalog-stage-0010.sql",
+      "bytes": 8364180,
+      "sha256": "84d5c23a335d43b1dcd31ad66bb08bd785828644f36c280b0cad28bc93ada1ba"
+    },
+    {
+      "path": "master-catalog-stage-0011.sql",
+      "bytes": 8388021,
+      "sha256": "775a251ff66cdc6dbc12e5b9f60051e0e03788cd575b46d55d54ab16ec76d4ae"
+    },
+    {
+      "path": "master-catalog-stage-0012.sql",
+      "bytes": 8366602,
+      "sha256": "ab5cc55efd1d20c7535926a07e7f0c70103ec4f5faea9e23767e6fc1b94bd383"
+    },
+    {
+      "path": "master-catalog-stage-0013.sql",
+      "bytes": 8373200,
+      "sha256": "10709d26911a0262024b2acc5bdf95eb16ba5e7c23914ef1297530e8aa2f8c3c"
+    },
+    {
+      "path": "master-catalog-stage-0014.sql",
+      "bytes": 8375304,
+      "sha256": "a9d9f0f65db68490962e72a031dfcc0469366eea4d0e3948d96dd55f9e07a00c"
+    },
+    {
+      "path": "master-catalog-stage-0015.sql",
+      "bytes": 8373913,
+      "sha256": "acfca65b873518dff8c2c6f1fdcd141a44ccb94a0d128ac592f36653ca4ef36e"
+    },
+    {
+      "path": "master-catalog-stage-0016.sql",
+      "bytes": 8365535,
+      "sha256": "547050cba1f9911f057af52bc8fc6c3f1d0174ae09134e40be06c6792f86f5d2"
+    },
+    {
+      "path": "master-catalog-stage-0017.sql",
+      "bytes": 8382423,
+      "sha256": "9e225e8c45e29078c4b762bd5b31d3ece169d216f3346ed10ab5edb13ff170e5"
+    },
+    {
+      "path": "master-catalog-stage-0018.sql",
+      "bytes": 8337747,
+      "sha256": "32aab7890a6ac384064602bd2737949a50a2533f3381db17aea3ddf03ec20f31"
+    },
+    {
+      "path": "master-catalog-stage-0019.sql",
+      "bytes": 8350887,
+      "sha256": "15ef216fffc1de158613ba953b3ab8910345791c9dc05d98f71001b08b90551f"
+    },
+    {
+      "path": "master-catalog-stage-0020.sql",
+      "bytes": 8308881,
+      "sha256": "4d1f07063bbce00d7d9baa893b3393ee72542f4284fcbb2b553917de299b034a"
+    },
+    {
+      "path": "master-catalog-stage-0021.sql",
+      "bytes": 8322336,
+      "sha256": "29539ff8b7630d8fb81bed62189abe12b105ef40d6e1af6578415a604ba85772"
+    },
+    {
+      "path": "master-catalog-stage-0022.sql",
+      "bytes": 8387191,
+      "sha256": "0a076c5d957f406a2d96555b06e9ef813379dc68c7534c77f16f4f147a822c48"
+    },
+    {
+      "path": "master-catalog-stage-0023.sql",
+      "bytes": 8379138,
+      "sha256": "61e08bc7241921757ea8ed024711ab6b8a040d87fb68b47c8d967d72338b9149"
+    },
+    {
+      "path": "master-catalog-stage-0024.sql",
+      "bytes": 8384104,
+      "sha256": "c3749bec32885354adeee505d790d513ff812d00744ccfd66403ea4d539ff00a"
+    },
+    {
+      "path": "master-catalog-stage-0025.sql",
+      "bytes": 462788,
+      "sha256": "fe19e019bc9047240cb9f163b32c168d1a88f8e2dede51354c41b831fe9de839"
+    },
+    {
+      "path": "master-catalog-activate.sql",
+      "bytes": 792,
+      "sha256": "507f5afd693c9c8f9783224d31b0d9502483f944eaf0d12ffd89873f1d18e0cb"
+    },
+    {
+      "path": "master-catalog-qa.json",
+      "bytes": 4821,
+      "sha256": "1c99a916ec30e382e2c76c312a1bb44865c767b654a5e232af349e7c6fee6ead"
+    },
+    {
+      "path": "master-catalog-field-dictionary.json",
+      "bytes": 61209,
+      "sha256": "9ff7ddc9228e0ca72bdb9e26e67ceb791e126f0fbb64b48f5b76e864631c1340"
+    },
+    {
+      "path": "master-catalog-records.ndjson",
+      "bytes": 23813379,
+      "sha256": "f31bc7274574b403723dd42d162c15c7faa2bb2d0bae6e5630b50d88ccb989b3"
+    },
+    {
+      "path": "master-catalog-chunks.ndjson",
+      "bytes": 60931472,
+      "sha256": "09ceee4e0b92ae4bcae3a3a2272fce4ae63c3dacd8061df8473f6789a14d4055"
+    },
+    {
+      "path": "master-catalog-vector-seed.ndjson",
+      "bytes": 41989315,
+      "sha256": "2e0692f009d99d64bac1ee895c752db38094231bea78686af8d4c613dd097352"
+    }
+  ],
+  "chunk_samples": [
+    {
+      "chunk_id": "mc_617af1a8b18f4170b3e12ce56378315e83e9155b",
+      "material_number": "30104371",
+      "chunk_kind": "identity",
+      "characters": 390
+    },
+    {
+      "chunk_id": "mc_07332b8d9905e229373b15013f992d84316d0ef5",
+      "material_number": "30104371",
+      "chunk_kind": "discovery",
+      "characters": 401
+    },
+    {
+      "chunk_id": "mc_0af10dfce60ed66973a64ba50764f1fee38508ab",
+      "material_number": "30104371",
+      "chunk_kind": "commercial",
+      "characters": 204
+    },
+    {
+      "chunk_id": "mc_92a442280dde1ffbab47a0f6b702c787c9e68233",
+      "material_number": "30104371",
+      "chunk_kind": "physical",
+      "characters": 193
+    },
+    {
+      "chunk_id": "mc_bd9c1a8f5d09b41f964fb121dd40efd3ec10d597",
+      "material_number": "30104371",
+      "chunk_kind": "additional",
+      "characters": 213
+    },
+    {
+      "chunk_id": "mc_6d6cb05e07bc51cd753a4d46ce67f5417e6239e5",
+      "material_number": "30388316",
+      "chunk_kind": "identity",
+      "characters": 367
+    },
+    {
+      "chunk_id": "mc_70f8c27b2ba75b53ec017db5672aa638b74c3e6c",
+      "material_number": "30388316",
+      "chunk_kind": "discovery",
+      "characters": 359
+    },
+    {
+      "chunk_id": "mc_4a61fce4bb8565c9c058ccb130c5ea8a3dc41471",
+      "material_number": "30388316",
+      "chunk_kind": "commercial",
+      "characters": 194
+    }
+  ]
+}

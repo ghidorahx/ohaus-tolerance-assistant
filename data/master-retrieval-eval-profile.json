@@ -1,0 +1,52 @@
+{
+  "profile_version": "2.0.0",
+  "fingerprint_schema_version": "1.0.0",
+  "fixture_file": "master-retrieval-eval.json",
+  "fixture_sha256": "2f8d19be8a98b0748db006e879c8ec8c9234a49b0770ff5e7fc6327b21684809",
+  "fixture_schema_version": "2.0.0",
+  "source_sha256": "5651c886837bf7b6817d829273d3c9a608658cd107798a9d206d01ad404950bb",
+  "fixture_case_count": 109,
+  "raw_fixture_case_count": 115,
+  "unsupported_case_count": 6,
+  "retrieval_build": {
+    "retrieval_code_sha256": "43257f0da3f8c1b93990229b47ec1cf7c215e892779b149774854fb10081819d",
+    "code_files": [
+      {
+        "path": "lib/master-catalog-rag.mjs",
+        "sha256": "db0713129f70d5145cba12ebe2a8a8c7172fce35fa9901d4c7be72fc63da795d"
+      },
+      {
+        "path": "app/api/sales/route.ts",
+        "sha256": "7e727117b9f20797a790c1c8a2ce51b851910476e79cdf80cfadacd610e293c7"
+      },
+      {
+        "path": "scripts/evaluate-master-retrieval.mjs",
+        "sha256": "dc163a7bd4df9dfb7ca3a3021ae5f11ab340e7e47ff7349dbc29ae94c86a94a7"
+      },
+      {
+        "path": "scripts/verify-master-retrieval-profile.mjs",
+        "sha256": "af8832216b08bd226705ca626239e50655af20e200d401008354c1b49ab1b05a"
+      },
+      {
+        "path": "scripts/build-master-retrieval-eval.py",
+        "sha256": "e5f1338ec4b6bd37b90f36ee51585a8b0b573dc276fc5415ca1584db51187e49"
+      }
+    ],
+    "bundle_version": "master-catalog-rag-v1",
+    "default_top_k": 30,
+    "default_chunk_limit": 8,
+    "semantic_score_threshold": 0.45,
+    "embedding": {
+      "model": "@cf/baai/bge-small-en-v1.5",
+      "pooling": "cls",
+      "dimensions": 384
+    },
+    "vectorize": {
+      "binding": "CATALOG_VECTORIZE",
+      "index_name": "ohaus-master-catalog-fast-v1",
+      "dimensions": 384,
+      "metric": "cosine"
+    }
+  },
+  "retrieval_profile_sha256": "d8763094b222958850e174043068f837c0487abd77ba625499881c5811f45f28"
+}

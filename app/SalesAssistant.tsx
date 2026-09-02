@@ -58,6 +58,7 @@ type Exchange = {
 type Health = {
   api_configured: boolean;
   access_code_required: boolean;
+  access_code_configured?: boolean;
   model: string;
   fallback_model: string;
   reasoning_effort: string;
@@ -79,12 +80,17 @@ type Health = {
     max_output_tokens: number;
   };
   catalog: {
-    portable_products: number;
-    portable_families: number;
-    api_records: number;
-    resolved_related_items: number;
+    materials?: number;
+    parent_families?: number;
+    families?: number;
+    relationship_edges?: number;
+    chunks?: number;
+    portable_products?: number;
+    portable_families?: number;
+    api_records?: number;
+    resolved_related_items?: number;
     document_links: number;
-    retrieval_documents: number;
+    retrieval_documents?: number;
     retrieval_status: string;
     source_file: string;
   };
@@ -99,7 +105,7 @@ type AskApiResponse = {
 
 const suggestions = [
   "What are the capacity, readability, power, and battery life of CR221?",
-  "Compare CR221 and CR5200 for capacity, readability, power, and dimensions.",
+  "Which products are designed for high-speed centrifugation?",
   "Which balances support at least 5 kg capacity and battery operation?",
   "Which accessories are listed for STX123?",
 ];
@@ -130,7 +136,7 @@ function statusLabel(status: SalesAnswer["status"]) {
 
 function prettyField(field: string) {
   return field
-    .replace(/^sales_content\.|^specifications\.|^additional_attributes\./, "")
+    .replace(/^fields\.|^sales_content\.|^specifications\.|^additional_attributes\./, "")
     .replaceAll("_", " ")
     .replaceAll(".", " › ");
 }
@@ -288,7 +294,7 @@ export default function SalesAssistant() {
       .then((payload) => {
         setAccessCode(savedCode);
         setHealth(payload);
-        setNeedsCode(Boolean(payload.access_code_required && !savedCode));
+        setNeedsCode(Boolean(payload.access_code_required && payload.access_code_configured !== false && !savedCode));
       })
       .catch(() => setError("The local product knowledge service is unavailable."));
     return () => window.clearTimeout(preferenceTimer);
@@ -313,7 +319,7 @@ export default function SalesAssistant() {
   }, [messages]);
 
   const context = useMemo(
-    () => buildContext(messages, health?.context.max_verified_turns ?? 120),
+    () => buildContext(messages, health?.context.max_verified_turns ?? 12),
     [health, messages],
   );
   const activeMaterials = useMemo(
@@ -406,11 +412,13 @@ export default function SalesAssistant() {
     });
   }
 
-  const ready = Boolean(health?.api_configured);
+  const catalogReady = health?.catalog.retrieval_status === "ready";
+  const accessReady = health?.access_code_configured !== false || !health?.access_code_required;
+  const ready = Boolean(health?.api_configured && catalogReady && accessReady);
   const coolingDown = rateLimitSeconds > 0;
-  const totalRequestTokens = Math.round((health?.context.max_total_request_tokens ?? 450_000) / 1_000);
-  const inputTokens = Math.round((health?.context.max_input_tokens ?? 322_000) / 1_000);
-  const outputTokens = Math.round((health?.context.max_output_tokens ?? 128_000) / 1_000);
+  const totalRequestTokens = Math.round((health?.context.max_total_request_tokens ?? 60_000) / 1_000);
+  const inputTokens = Math.round((health?.context.max_input_tokens ?? 54_000) / 1_000);
+  const outputTokens = Math.round((health?.context.max_output_tokens ?? 6_000) / 1_000);
 
   return (
     <section className={`sales-workspace ${productKnowledgeCollapsed ? "sales-rail-collapsed" : ""}`} aria-label="Ask assistant">
@@ -438,27 +446,27 @@ export default function SalesAssistant() {
           </div>
 
           <div className="sales-stat-grid">
-            <div><strong>{health?.catalog.portable_products ?? 80}</strong><span>portable balances</span></div>
-            <div><strong>{health?.catalog.portable_families ?? 7}</strong><span>product families</span></div>
-            <div><strong>{health?.catalog.resolved_related_items ?? 91}</strong><span>linked items</span></div>
-            <div><strong>{health?.catalog.document_links ?? 226}</strong><span>document links</span></div>
+            <div><strong>{health?.catalog.materials ?? health?.catalog.portable_products ?? 6_407}</strong><span>catalog materials</span></div>
+            <div><strong>{health?.catalog.parent_families ?? health?.catalog.portable_families ?? 46}</strong><span>parent families</span></div>
+            <div><strong>{health?.catalog.relationship_edges ?? health?.catalog.resolved_related_items ?? 203_589}</strong><span>relationship links</span></div>
+            <div><strong>{health?.catalog.document_links ?? 5_775}</strong><span>document links</span></div>
           </div>
 
           <div className="sales-coverage-card">
             <span>Reasoning configuration</span>
             <strong>GPT‑5.6 Sol · Medium · {titleCase(health?.reasoning_mode, "standard")}</strong>
-            <small>Fixed medium reasoning · Terra fallback · {health?.catalog.retrieval_documents ?? 87} generated knowledge documents</small>
+            <small>Fixed medium reasoning · Terra fallback · {health?.catalog.chunks ?? health?.catalog.retrieval_documents ?? 45_167} focused knowledge chunks</small>
           </div>
 
           <div className="sales-memory-card">
-            <span>Extended context</span>
-            <strong>{health?.context.max_verified_turns ?? 120} verified turns</strong>
+            <span>Focused context</span>
+            <strong>{health?.context.max_verified_turns ?? 12} verified turns</strong>
             <small>
-              {totalRequestTokens}K total request budget · {inputTokens}K input reserve · {outputTokens}K output cap · up to {health?.context.max_retrieval_documents ?? 8} knowledge documents
+              {totalRequestTokens}K total request budget · {inputTokens}K input reserve · {outputTokens}K output cap · up to {health?.context.max_retrieval_documents ?? 16} knowledge documents
             </small>
           </div>
 
-          <footer>{health?.vectorize?.configured ? "Vectorize semantic retrieval" : "Local retrieval fallback"} · Ask pilot owner · T. Delacruz</footer>
+          <footer>{health?.vectorize?.configured ? "Hybrid semantic + lexical + exact retrieval" : "Exact + lexical catalog retrieval"} · Ask pilot owner · T. Delacruz</footer>
         </div>
       </aside>
 
@@ -470,7 +478,17 @@ export default function SalesAssistant() {
             {messages.length > 0 && <button type="button" onClick={clearConversation}>Clear conversation</button>}
             <span className={`sales-ready ${!ready || coolingDown ? "waiting" : ""}`}>
               <i aria-hidden="true" />
-              {coolingDown ? `Ready in ${rateLimitSeconds}s` : health ? ready ? "AI + catalog ready" : "API key needed" : "Checking connection"}
+              {coolingDown
+                ? `Ready in ${rateLimitSeconds}s`
+                : !health
+                  ? "Checking connection"
+                  : !health.api_configured
+                    ? "API key needed"
+                    : !accessReady
+                      ? "Team access not configured"
+                    : catalogReady
+                      ? "AI + catalog ready"
+                      : "Catalog not ready"}
             </span>
             </div>
           </div>
@@ -492,7 +510,7 @@ export default function SalesAssistant() {
               value={input}
               onChange={(event) => setInput(event.target.value)}
               onKeyDown={onComposerKeyDown}
-              placeholder="Example: Which portable balance has at least 5 kg capacity, 1 g readability, and battery power?"
+              placeholder="Example: Which OHAUS products meet my capacity, accuracy, and power requirements?"
               rows={3}
               maxLength={1_600}
               disabled={thinking || !ready || coolingDown}
@@ -659,7 +677,7 @@ function SalesExchange({
 
               <div className="sales-answer-foot">
                 <span>{answer.model}{answer.fallback_used ? " fallback" : ""} · {answer.reasoning_effort} reasoning · {answer.reasoning_mode} mode</span>
-                <span>{answer.retrieval_strategy === "vectorize_hybrid" ? "Vectorize + catalog" : "Catalog retrieval"} · {answer.retrieval_documents_sent ?? 0} document{answer.retrieval_documents_sent === 1 ? "" : "s"}</span>
+                <span>{answer.retrieval_strategy.includes("hybrid") ? "Semantic + exact catalog" : "Catalog retrieval"} · {answer.retrieval_documents_sent ?? 0} source chunk{answer.retrieval_documents_sent === 1 ? "" : "s"}</span>
                 <span>{answer.catalog_checks} catalog check{answer.catalog_checks === 1 ? "" : "s"}</span>
               </div>
             </div>
