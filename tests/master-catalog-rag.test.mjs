@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import test from "node:test";
 import {
   activateMasterCatalogVersion,
+  boundedEmbeddingText,
   CatalogAdminError,
   getMasterCatalogStatus,
   MASTER_CATALOG_TABLES,
@@ -975,6 +976,49 @@ test("compact evidence protects operational fields unless explicitly requested b
   };
   assert.equal(selectCompactEvidence(args).some((item) => item.field === "fields.procurement_type"), false);
   assert.equal(selectCompactEvidence({ ...args, includeInternalFields: true }).some((item) => item.field === "fields.procurement_type"), true);
+});
+
+test("compacts only the standard embedding prefix while preserving every value", () => {
+  const text = boundedEmbeddingText([
+    "Category: Balances & Scales",
+    "Family: Compass CR",
+    "Material number: 30428204",
+    "Product: CR221 Portable Balance",
+    "Section: Performance Specifications",
+    "Maximum Capacity (g): 220 g",
+    "Product: this body label must remain",
+  ].join("\n"));
+
+  assert.equal(
+    text,
+    "Balances & Scales Family: Compass CR 30428204 CR221 Portable Balance "
+      + "Performance Specifications Maximum Capacity (g): 220 g Product: this body label must remain",
+  );
+  for (const value of [
+    "Balances & Scales",
+    "Compass CR",
+    "30428204",
+    "CR221 Portable Balance",
+    "Performance Specifications",
+  ]) {
+    assert.match(text, new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  }
+  assert.doesNotMatch(text, /Category:|Material number:/);
+  assert.match(text, /Family: Compass CR/);
+});
+
+test("bounds compacted embedding input by words and characters", () => {
+  const prefix = [
+    "Category: Balances & Scales",
+    "Family: Compass CR",
+    "Material number: 30428204",
+    "Product: CR221 Portable Balance",
+    "Section: Performance Specifications",
+  ].join("\n");
+  const text = boundedEmbeddingText(`${prefix}\n${Array.from({ length: 600 }, (_, index) => `field${index}`).join(" ")}`);
+
+  assert.ok(text.split(/\s+/).length <= 420);
+  assert.ok(text.length <= 1_800);
 });
 
 test("seeds the pending progress queue idempotently in a deterministic namespace", async () => {

@@ -9,11 +9,11 @@
   "raw_fixture_case_count": 115,
   "unsupported_case_count": 6,
   "retrieval_build": {
-    "retrieval_code_sha256": "7afca0d34d0792a830f99732d00fe44cc5a1340432c9a81a5e17fa53b170d2dd",
+    "retrieval_code_sha256": "71f11bf19bd3d656cccc7b69117686653159a319bf1dd0bdc3f408d321ce7846",
     "code_files": [
       {
         "path": "lib/master-catalog-rag.mjs",
-        "sha256": "a5c8c449dc9832bb8e3e7851e909f5b553d8a7aaa4de6bc325f4d332c0033832"
+        "sha256": "97f7669db130d9ac68a33fe1338a5807b90e726247df84084f0e12e2b7a664c8"
       },
       {
         "path": "app/api/sales/route.ts",
@@ -48,5 +48,5 @@
       "metric": "cosine"
     }
   },
-  "retrieval_profile_sha256": "fafc445f8ab460071252652f1ac9022f97735017d932770bf5a1d03d61bea3d8"
+  "retrieval_profile_sha256": "10239493d00ba84453344c981bba6ae355a6bd102a694bfb04fc47b0f58f7e33"
 }
