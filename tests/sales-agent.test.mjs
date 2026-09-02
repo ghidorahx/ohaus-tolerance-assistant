@@ -6,16 +6,18 @@ import {
   DEFAULT_MODEL,
   DEFAULT_REASONING_EFFORT,
   DEFAULT_REASONING_MODE,
+  DEFAULT_SERVICE_TIER,
   outputTokenLimitForQuestion,
 } from "../lib/sales-agent.mjs";
 
-test("uses one medium-reasoning GPT-5.6 Responses call with comprehensive workbook grounding", async () => {
+test("uses one high-reasoning GPT-5.6 Fast mode Responses call with comprehensive workbook grounding", async () => {
   const requests = [];
   const fetchImpl = async (_url, init) => {
     const body = JSON.parse(init.body);
     requests.push(body);
     return Response.json({
       id: "resp-final",
+      service_tier: "priority",
       output_text: JSON.stringify({
         answer: "CR221 (30428204) has a maximum capacity of 220 g and readability of 0.1 g.",
         answer_items: [{ identifier: "30428204", label: "CR221", description: "220 g capacity with 0.1 g readability" }],
@@ -45,11 +47,13 @@ test("uses one medium-reasoning GPT-5.6 Responses call with comprehensive workbo
 
   assert.equal(DEFAULT_MODEL, "gpt-5.6-sol");
   assert.equal(DEFAULT_FALLBACK_MODEL, "gpt-5.6-terra");
-  assert.equal(DEFAULT_REASONING_EFFORT, "medium");
+  assert.equal(DEFAULT_REASONING_EFFORT, "high");
   assert.equal(DEFAULT_REASONING_MODE, "standard");
+  assert.equal(DEFAULT_SERVICE_TIER, "fast");
   assert.equal(requests.length, 1);
   assert.equal(requests[0].model, "gpt-5.6-sol");
-  assert.deepEqual(requests[0].reasoning, { effort: "medium", mode: "standard", context: "current_turn" });
+  assert.deepEqual(requests[0].reasoning, { effort: "high", mode: "standard", context: "current_turn" });
+  assert.equal(requests[0].service_tier, "fast");
   assert.equal(requests[0].max_output_tokens, 2_400);
   assert.equal(requests[0].store, false);
   assert.equal(requests[0].prompt_cache_key, "ohaus-ask-master-catalog-v1");
@@ -71,6 +75,8 @@ test("uses one medium-reasoning GPT-5.6 Responses call with comprehensive workbo
   assert.equal(result.catalog_checks, 1);
   assert.equal(result.grounding_products, 80);
   assert.equal(result.fallback_used, false);
+  assert.equal(result.service_tier, "priority");
+  assert.equal(result.service_tier_requested, "fast");
   assert.equal(result.output_token_cap, 2_400);
   assert.equal(result.output_cap_reduced, true);
   assert.equal(result.retrieval_strategy, "local_fallback");
@@ -150,6 +156,7 @@ test("falls back to GPT-5.6 Terra only when the Sol request is rate limited", as
     }
     return Response.json({
       id: "resp-terra",
+      service_tier: "priority",
       output_text: JSON.stringify({
         answer: "Live price is not available in the loaded catalog.",
         answer_items: [],
@@ -174,10 +181,13 @@ test("falls back to GPT-5.6 Terra only when the Sol request is rate limited", as
   });
 
   assert.deepEqual(requests.map((request) => request.model), ["gpt-5.6-sol", "gpt-5.6-terra"]);
+  assert.deepEqual(requests.map((request) => request.service_tier), ["fast", "fast"]);
   assert.deepEqual(requests.map((request) => request.max_output_tokens), [2_400, 2_400]);
   assert.equal(result.model, "gpt-5.6-terra");
   assert.equal(result.primary_model, "gpt-5.6-sol");
   assert.equal(result.fallback_used, true);
+  assert.equal(result.service_tier, "priority");
+  assert.equal(result.service_tier_requested, "fast");
   assert.equal(result.output_token_cap, 2_400);
   assert.equal(result.output_cap_reduced, true);
 

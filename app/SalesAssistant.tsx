@@ -32,6 +32,8 @@ type SalesAnswer = {
   model: string;
   primary_model: string;
   fallback_used: boolean;
+  service_tier?: string;
+  service_tier_requested?: string;
   reasoning_effort: string;
   reasoning_mode: string;
   output_token_cap: number;
@@ -63,6 +65,7 @@ type Health = {
   fallback_model: string;
   reasoning_effort: string;
   reasoning_mode: string;
+  service_tier: string;
   vectorize: {
     configured: boolean;
     index: string;
@@ -454,8 +457,8 @@ export default function SalesAssistant() {
 
           <div className="sales-coverage-card">
             <span>Reasoning configuration</span>
-            <strong>GPT‑5.6 Sol · Medium · {titleCase(health?.reasoning_mode, "standard")}</strong>
-            <small>Fixed medium reasoning · Terra fallback · {health?.catalog.chunks ?? health?.catalog.retrieval_documents ?? 45_167} focused knowledge chunks</small>
+            <strong>GPT‑5.6 Sol · {titleCase(health?.reasoning_effort, "high")} · {titleCase(health?.service_tier, "fast")}</strong>
+            <small>Fixed high reasoning · OpenAI Fast mode · Terra fallback · {health?.catalog.chunks ?? health?.catalog.retrieval_documents ?? 45_167} focused knowledge chunks</small>
           </div>
 
           <div className="sales-memory-card">
@@ -676,7 +679,7 @@ function SalesExchange({
               )}
 
               <div className="sales-answer-foot">
-                <span>{answer.model}{answer.fallback_used ? " fallback" : ""} · {answer.reasoning_effort} reasoning · {answer.reasoning_mode} mode</span>
+                <span>{answer.model}{answer.fallback_used ? " fallback" : ""} · {answer.reasoning_effort} reasoning · {answer.reasoning_mode} mode{answer.service_tier ? ` · ${answer.service_tier === "priority" ? "fast" : answer.service_tier} service` : ""}</span>
                 <span>{answer.retrieval_strategy.includes("hybrid") ? "Semantic + exact catalog" : "Catalog retrieval"} · {answer.retrieval_documents_sent ?? 0} source chunk{answer.retrieval_documents_sent === 1 ? "" : "s"}</span>
                 <span>{answer.catalog_checks} catalog check{answer.catalog_checks === 1 ? "" : "s"}</span>
               </div>

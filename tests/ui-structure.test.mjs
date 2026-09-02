@@ -60,9 +60,9 @@ test("keeps the Sales surface concise and supports answer-specific follow-ups", 
   assert.match(styles, /\.sales-inline-follow-up/);
 });
 
-test("keeps Sales reasoning fixed at medium without a customer-facing slider", () => {
-  assert.match(salesAssistant, /GPT‑5\.6 Sol · Medium/);
-  assert.match(salesAssistant, /Fixed medium reasoning/);
+test("keeps Sales on fixed high reasoning and Fast mode without a customer-facing slider", () => {
+  assert.match(salesAssistant, /GPT‑5\.6 Sol · \{titleCase\(health\?\.reasoning_effort, "high"\)\} · \{titleCase\(health\?\.service_tier, "fast"\)\}/);
+  assert.match(salesAssistant, /Fixed high reasoning · OpenAI Fast mode/);
   assert.doesNotMatch(salesAssistant, /type="range"/);
   assert.doesNotMatch(salesAssistant, /reasoning_profile/);
   assert.doesNotMatch(salesAssistant, /sales-reasoning/);

@@ -52,8 +52,9 @@ test("packages the workbook-grounded Ask endpoint and focused context policy", a
   const payload = await response.json();
   assert.equal(payload.model, "gpt-5.6-sol");
   assert.equal(payload.fallback_model, "gpt-5.6-terra");
-  assert.equal(payload.reasoning_effort, "medium");
+  assert.equal(payload.reasoning_effort, "high");
   assert.equal(payload.reasoning_mode, "standard");
+  assert.equal(payload.service_tier, "fast");
   assert.equal(payload.default_reasoning_profile, undefined);
   assert.equal(payload.reasoning_profiles, undefined);
   assert.equal(payload.context.max_verified_turns, 12);
