@@ -60,18 +60,19 @@ test("keeps the Sales surface concise and supports answer-specific follow-ups", 
   assert.match(styles, /\.sales-inline-follow-up/);
 });
 
-test("keeps Sales on fixed high reasoning and Fast mode without a customer-facing slider", () => {
-  assert.match(salesAssistant, /GPT‑5\.6 Sol · \{titleCase\(health\?\.reasoning_effort, "high"\)\} · \{titleCase\(health\?\.service_tier, "fast"\)\}/);
-  assert.match(salesAssistant, /Fixed high reasoning · OpenAI Fast mode/);
+test("keeps Ask on medium reasoning and Fast fallback without a customer-facing slider", () => {
+  assert.match(salesAssistant, /Direct lookup first · GPT‑5\.6 Sol \{titleCase\(health\?\.reasoning_effort, "medium"\)\}/);
+  assert.match(salesAssistant, /Phrase-aware Excel lookup · OpenAI Fast mode for AI fallback/);
   assert.doesNotMatch(salesAssistant, /type="range"/);
   assert.doesNotMatch(salesAssistant, /reasoning_profile/);
   assert.doesNotMatch(salesAssistant, /sales-reasoning/);
   assert.doesNotMatch(styles, /\.sales-reasoning-control\s*\{/);
 });
 
-test("reports hybrid master-catalog retrieval only inside the supporting details", () => {
-  assert.match(salesAssistant, /Hybrid semantic \+ lexical \+ exact retrieval/);
+test("reports direct-first retrieval with semantic details kept in supporting information", () => {
+  assert.match(salesAssistant, /Direct \+ semantic \+ lexical retrieval/);
   assert.match(salesAssistant, /Semantic \+ exact catalog/);
+  assert.match(salesAssistant, /Direct Excel lookup · no generative AI/);
   assert.match(salesAssistant, /health\?\.vectorize\?\.configured/);
 });
 

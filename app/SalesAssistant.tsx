@@ -29,6 +29,8 @@ type SalesAnswer = {
   follow_up_suggestions: string[];
   context_summary: string;
   escalation_reason: string | null;
+  answer_engine?: "catalog_fast_lane" | "ai";
+  ai_used?: boolean;
   model: string;
   primary_model: string;
   fallback_used: boolean;
@@ -66,6 +68,11 @@ type Health = {
   reasoning_effort: string;
   reasoning_mode: string;
   service_tier: string;
+  answer_routing?: {
+    deterministic_fast_lane: boolean;
+    phrase_normalization: boolean;
+    ai_fallback: boolean;
+  };
   vectorize: {
     configured: boolean;
     index: string;
@@ -457,8 +464,8 @@ export default function SalesAssistant() {
 
           <div className="sales-coverage-card">
             <span>Reasoning configuration</span>
-            <strong>GPT‑5.6 Sol · {titleCase(health?.reasoning_effort, "high")} · {titleCase(health?.service_tier, "fast")}</strong>
-            <small>Fixed high reasoning · OpenAI Fast mode · Terra fallback · {health?.catalog.chunks ?? health?.catalog.retrieval_documents ?? 45_167} focused knowledge chunks</small>
+            <strong>Direct lookup first · GPT‑5.6 Sol {titleCase(health?.reasoning_effort, "medium")}</strong>
+            <small>Phrase-aware Excel lookup · OpenAI Fast mode for AI fallback · Terra fallback · {health?.catalog.chunks ?? health?.catalog.retrieval_documents ?? 45_167} focused knowledge chunks</small>
           </div>
 
           <div className="sales-memory-card">
@@ -469,7 +476,7 @@ export default function SalesAssistant() {
             </small>
           </div>
 
-          <footer>{health?.vectorize?.configured ? "Hybrid semantic + lexical + exact retrieval" : "Exact + lexical catalog retrieval"} · Ask pilot owner · T. Delacruz</footer>
+          <footer>{health?.vectorize?.configured ? "Direct + semantic + lexical retrieval" : "Direct + lexical catalog retrieval"} · Ask pilot owner · T. Delacruz</footer>
         </div>
       </aside>
 
@@ -490,7 +497,7 @@ export default function SalesAssistant() {
                     : !accessReady
                       ? "Team access not configured"
                     : catalogReady
-                      ? "AI + catalog ready"
+                      ? "Catalog lookup ready"
                       : "Catalog not ready"}
             </span>
             </div>
@@ -533,7 +540,7 @@ export default function SalesAssistant() {
           {thinking && (
             <div className="sales-thinking" role="status">
               <span aria-hidden="true" />
-              Retrieving the relevant workbook records and verifying the answer…
+              Searching the relevant workbook records and verifying the answer…
             </div>
           )}
 
@@ -679,7 +686,9 @@ function SalesExchange({
               )}
 
               <div className="sales-answer-foot">
-                <span>{answer.model}{answer.fallback_used ? " fallback" : ""} · {answer.reasoning_effort} reasoning · {answer.reasoning_mode} mode{answer.service_tier ? ` · ${answer.service_tier === "priority" ? "fast" : answer.service_tier} service` : ""}</span>
+                <span>{answer.ai_used === false
+                  ? "Direct Excel lookup · no generative AI"
+                  : `${answer.model}${answer.fallback_used ? " fallback" : ""} · ${answer.reasoning_effort} reasoning · ${answer.reasoning_mode} mode${answer.service_tier ? ` · ${answer.service_tier === "priority" ? "fast" : answer.service_tier} service` : ""}`}</span>
                 <span>{answer.retrieval_strategy.includes("hybrid") ? "Semantic + exact catalog" : "Catalog retrieval"} · {answer.retrieval_documents_sent ?? 0} source chunk{answer.retrieval_documents_sent === 1 ? "" : "s"}</span>
                 <span>{answer.catalog_checks} catalog check{answer.catalog_checks === 1 ? "" : "s"}</span>
               </div>

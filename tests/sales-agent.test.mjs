@@ -10,7 +10,7 @@ import {
   outputTokenLimitForQuestion,
 } from "../lib/sales-agent.mjs";
 
-test("uses one high-reasoning GPT-5.6 Fast mode Responses call with comprehensive workbook grounding", async () => {
+test("uses one medium-reasoning GPT-5.6 Fast mode Responses call with comprehensive workbook grounding", async () => {
   const requests = [];
   const fetchImpl = async (_url, init) => {
     const body = JSON.parse(init.body);
@@ -47,12 +47,12 @@ test("uses one high-reasoning GPT-5.6 Fast mode Responses call with comprehensiv
 
   assert.equal(DEFAULT_MODEL, "gpt-5.6-sol");
   assert.equal(DEFAULT_FALLBACK_MODEL, "gpt-5.6-terra");
-  assert.equal(DEFAULT_REASONING_EFFORT, "high");
+  assert.equal(DEFAULT_REASONING_EFFORT, "medium");
   assert.equal(DEFAULT_REASONING_MODE, "standard");
   assert.equal(DEFAULT_SERVICE_TIER, "fast");
   assert.equal(requests.length, 1);
   assert.equal(requests[0].model, "gpt-5.6-sol");
-  assert.deepEqual(requests[0].reasoning, { effort: "high", mode: "standard", context: "current_turn" });
+  assert.deepEqual(requests[0].reasoning, { effort: "medium", mode: "standard", context: "current_turn" });
   assert.equal(requests[0].service_tier, "fast");
   assert.equal(requests[0].max_output_tokens, 2_400);
   assert.equal(requests[0].store, false);
@@ -73,6 +73,8 @@ test("uses one high-reasoning GPT-5.6 Fast mode Responses call with comprehensiv
   assert.equal(result.evidence[0].value, "220 g");
   assert.deepEqual(result.answer_items, [{ identifier: "30428204", label: "CR221", description: "220 g capacity with 0.1 g readability" }]);
   assert.equal(result.catalog_checks, 1);
+  assert.equal(result.answer_engine, "ai");
+  assert.equal(result.ai_used, true);
   assert.equal(result.grounding_products, 80);
   assert.equal(result.fallback_used, false);
   assert.equal(result.service_tier, "priority");

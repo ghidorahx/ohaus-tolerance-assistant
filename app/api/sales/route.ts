@@ -10,7 +10,16 @@ import {
   MAX_TOTAL_REQUEST_TOKENS,
   MAX_VERIFIED_CONTEXT_TURNS,
 } from "@/lib/sales-agent.mjs";
-import { getSalesCatalogStatus, MAX_RETRIEVAL_DOCUMENTS } from "@/lib/sales-catalog.mjs";
+import {
+  buildGroundingBundle,
+  getSalesCatalogStatus,
+  MAX_RETRIEVAL_DOCUMENTS,
+} from "@/lib/sales-catalog.mjs";
+import {
+  answerLegacyCatalogFastLane,
+  answerMasterCatalogFastLane,
+  interpretCatalogQuestion,
+} from "@/lib/catalog-fast-lane.mjs";
 import {
   getSalesVectorizeStatus,
   querySalesVectorize,
@@ -352,6 +361,11 @@ export async function GET(request: Request) {
     reasoning_effort: DEFAULT_REASONING_EFFORT,
     reasoning_mode: process.env.OPENAI_REASONING_MODE ?? DEFAULT_REASONING_MODE,
     service_tier: DEFAULT_SERVICE_TIER,
+    answer_routing: {
+      deterministic_fast_lane: true,
+      phrase_normalization: true,
+      ai_fallback: true,
+    },
     api_configured: Boolean(process.env.OPENAI_API_KEY),
     access_code_required: accessPolicy.required,
     access_code_configured: accessPolicy.configured,
@@ -401,28 +415,38 @@ export async function POST(request: Request) {
   if (question.length < 2 || question.length > 1_600) {
     return json({ error: "Ask a product question between 2 and 1,600 characters." }, 400);
   }
-  if (!process.env.OPENAI_API_KEY) {
-    return json({ error: "The OpenAI connection is not configured yet.", code: "ai_not_configured" }, 503);
-  }
-
   try {
     const requestStarted = performance.now();
     const context = boundedContext(body.context);
     const bindings = await cloudflareBindings();
     const contextMaterials = [...new Set(context.flatMap((turn) => turn.materials.map(String)))];
+    const primaryModel = process.env.OPENAI_MODEL ?? DEFAULT_MODEL;
+    const interpretation = interpretCatalogQuestion(question);
+    const latestContextMaterials = [...context]
+      .reverse()
+      .find((turn) => turn.materials.length > 0)?.materials.map(String) ?? [];
+    const directContextIsUnambiguous = !interpretation.uses_context_reference || latestContextMaterials.length === 1;
+    const directRetrievalContext = interpretation.uses_context_reference
+      ? directContextIsUnambiguous ? latestContextMaterials : []
+      : contextMaterials;
+    const retrievalQuestion = interpretation.expanded_query || question;
     let groundingBundle: Record<string, unknown> | null = null;
+    let usingMasterGrounding = false;
     let masterRetrieval: Awaited<ReturnType<typeof retrieveMasterCatalog>> | null = null;
     let retrievalMilliseconds = 0;
+    let legacyFastGrounding: ReturnType<typeof buildGroundingBundle> | null = null;
 
     if (bindings.CATALOG_DB) {
       try {
         const retrievalStarted = performance.now();
         masterRetrieval = await retrieveMasterCatalog({
-          question,
-          contextMaterials,
+          question: retrievalQuestion,
+          contextMaterials: interpretation.fast_lane_candidate ? directRetrievalContext : contextMaterials,
           db: bindings.CATALOG_DB,
-          ai: bindings.AI,
-          index: bindings.CATALOG_VECTORIZE,
+          // High-confidence direct lookups deliberately skip embeddings. The
+          // existing semantic path remains intact for every fallback request.
+          ai: interpretation.fast_lane_candidate ? null : bindings.AI,
+          index: interpretation.fast_lane_candidate ? null : bindings.CATALOG_VECTORIZE,
           ...masterRetrievalOptions(question),
         });
         retrievalMilliseconds = performance.now() - retrievalStarted;
@@ -431,6 +455,7 @@ export async function POST(request: Request) {
             masterRetrieval,
             manifestScopeForVersion(masterRetrieval.version),
           );
+          usingMasterGrounding = true;
         }
       } catch (error) {
         console.error(JSON.stringify({
@@ -440,12 +465,87 @@ export async function POST(request: Request) {
       }
     }
 
+    if (interpretation.fast_lane_candidate) {
+      let directAnswer = answerMasterCatalogFastLane({
+        question,
+        interpretation,
+        retrieval: masterRetrieval,
+        primaryModel,
+      });
+      if (directContextIsUnambiguous && !directAnswer && (!masterRetrieval?.version || !["ready", "no_results"].includes(masterRetrieval.status))) {
+        legacyFastGrounding = buildGroundingBundle({
+          question: retrievalQuestion,
+          sessionContext: interpretation.uses_context_reference
+            ? context.filter((turn) => turn.materials.some((material) => latestContextMaterials.includes(String(material)))).slice(-1)
+            : context,
+          semanticRetrieval: null,
+        });
+        directAnswer = answerLegacyCatalogFastLane({
+          question,
+          interpretation,
+          grounding: legacyFastGrounding,
+          primaryModel,
+        });
+      }
+      if (directAnswer) {
+        const masterCatalog = masterCatalogHealthForVersion(masterRetrieval?.version ?? null);
+        return json({
+          answer: {
+            ...directAnswer,
+            timing: {
+              retrieval_ms: Math.round(performance.now() - requestStarted),
+              generation_ms: 0,
+              total_ms: Math.round(performance.now() - requestStarted),
+            },
+          },
+          context_used: context.length,
+          catalog: masterCatalog ?? getSalesCatalogStatus(),
+        });
+      }
+
+      // A direct candidate can still decline—for example, when the wording
+      // looks structured but no unique record or safe field was found. Re-run
+      // master retrieval with the semantic channel before asking GPT so the
+      // fallback keeps the same retrieval quality as any other AI question.
+      if (masterRetrieval?.version && bindings.AI && bindings.CATALOG_VECTORIZE) {
+        try {
+          const semanticRetrievalStarted = performance.now();
+          const semanticMasterRetrieval = await retrieveMasterCatalog({
+            question: retrievalQuestion,
+            contextMaterials,
+            db: bindings.CATALOG_DB,
+            ai: bindings.AI,
+            index: bindings.CATALOG_VECTORIZE,
+            ...masterRetrievalOptions(question),
+          });
+          retrievalMilliseconds += performance.now() - semanticRetrievalStarted;
+          masterRetrieval = semanticMasterRetrieval;
+          if (semanticMasterRetrieval.version && ["ready", "no_results"].includes(semanticMasterRetrieval.status)) {
+            groundingBundle = buildMasterGroundingBundle(
+              semanticMasterRetrieval,
+              manifestScopeForVersion(semanticMasterRetrieval.version),
+            );
+            usingMasterGrounding = true;
+          }
+        } catch (error) {
+          console.error(JSON.stringify({
+            message: "Master catalog semantic retry failed; using exact grounding",
+            error: error instanceof Error ? error.message : String(error),
+          }));
+        }
+      }
+    }
+
+    if (!process.env.OPENAI_API_KEY) {
+      return json({ error: "The OpenAI connection is not configured for this question.", code: "ai_not_configured" }, 503);
+    }
+
     let semanticRetrieval = { status: "not_configured", matches: [] };
     if (!groundingBundle && bindings.AI && bindings.SALES_VECTORIZE) {
       const retrievalStarted = performance.now();
       try {
         semanticRetrieval = await querySalesVectorize({
-          question,
+          question: retrievalQuestion,
           ai: bindings.AI,
           index: bindings.SALES_VECTORIZE,
         });
@@ -459,18 +559,26 @@ export async function POST(request: Request) {
       retrievalMilliseconds = performance.now() - retrievalStarted;
     }
 
+    if (!groundingBundle) {
+      groundingBundle = buildGroundingBundle({
+        question: retrievalQuestion,
+        sessionContext: context,
+        semanticRetrieval,
+      });
+    }
+
     const generationStarted = performance.now();
     const answer = await answerSalesQuestionWithAI({
       question,
       sessionContext: context,
       apiKey: process.env.OPENAI_API_KEY,
-      model: process.env.OPENAI_MODEL ?? DEFAULT_MODEL,
+      model: primaryModel,
       fallbackModel: process.env.OPENAI_FALLBACK_MODEL ?? DEFAULT_FALLBACK_MODEL,
       reasoningEffort: DEFAULT_REASONING_EFFORT,
       reasoningMode: process.env.OPENAI_REASONING_MODE ?? DEFAULT_REASONING_MODE,
       semanticRetrieval,
       groundingBundle,
-      evidenceHydrator: groundingBundle ? hydrateMasterEvidenceItems : undefined,
+      evidenceHydrator: usingMasterGrounding ? hydrateMasterEvidenceItems : undefined,
     });
     const generationMilliseconds = performance.now() - generationStarted;
     const masterCatalog = masterCatalogHealthForVersion(masterRetrieval?.version ?? null);

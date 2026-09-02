@@ -813,6 +813,110 @@ test("lists materials in a named parent family with item numbers and determinist
   assert.equal(result.prompt_context.catalog_listing.items[0].description, "Portable Balance STX123");
 });
 
+test("matches trademarked family names when customers omit the trademark symbol", async () => {
+  const db = createDb((sql, parameters, method) => {
+    const version = versionHandler(sql, parameters, method);
+    if (version !== undefined) return version;
+    if (sql.includes("GROUP BY m.parent_family")) return [
+      { name: "Portable Balances", material_count: 47, total_count: 46 },
+    ];
+    if (sql.includes("GROUP BY m.family")) return [
+      { name: "Compass™ CR", material_count: 4, total_count: 215 },
+    ];
+    if (sql.includes("m.family = ?")) {
+      assert.equal(parameters[1], "Compass™ CR");
+      return [
+        { material_number: "30428204", trade_name: "CR221", product_name: "Portable Balance CR221", parent_family: "Portable Balances", family: "Compass™ CR", total_count: 2 },
+        { material_number: "30428205", trade_name: "CR621", product_name: "Portable Balance CR621", parent_family: "Portable Balances", family: "Compass™ CR", total_count: 2 },
+      ];
+    }
+    if (sql.includes("FROM master_chunks_fts")) return [];
+    return [];
+  });
+
+  const result = await retrieveMasterCatalog({ question: "Show every Compass CR model in the catalog.", db });
+  assert.equal(result.retrieval.strategy, "catalog_scope");
+  assert.deepEqual(result.catalog_listing.category, { level: "family", name: "Compass™ CR" });
+  assert.deepEqual(result.catalog_listing.items.map((item) => item.material_number), ["30428204", "30428205"]);
+});
+
+test("resolves short numeric alternative models only when the question labels the identifier", async () => {
+  const alternatives = ["30000001", "30000002", "30000003"].map((materialNumber) => ({
+    material_number: materialNumber,
+    trade_name: `MODEL-${materialNumber.at(-1)}`,
+    product_name: `Product ${materialNumber.at(-1)}`,
+    record_json: JSON.stringify({ material_number: materialNumber, fields: { alternative_model: "9123" } }),
+    source_file: activeVersion.source_file,
+    source_sheet: activeVersion.source_sheet,
+  }));
+  const db = createDb((sql, parameters, method) => {
+    const version = versionHandler(sql, parameters, method);
+    if (version !== undefined) return version;
+    if (sql.includes("m.material_number = ?")) return [];
+    if (sql.includes("FROM master_aliases AS a")) return [];
+    if (sql.includes("FROM master_attributes AS a") && sql.includes("alternative model")) {
+      assert.equal(parameters[1], "9123");
+      return alternatives;
+    }
+    if (sql.includes("FROM master_chunks_fts")) return [];
+    return [];
+  });
+
+  const result = await retrieveMasterCatalog({ question: "What is the capacity of alternative model number 9123?", db });
+  assert.equal(result.exact_matches.length, 1);
+  assert.equal(result.exact_matches[0].status, "ambiguous");
+  assert.deepEqual(result.exact_matches[0].candidates.map((item) => item.material_number), alternatives.map((item) => item.material_number));
+});
+
+test("does not mistake a six-digit measured capacity for a material number", async () => {
+  const db = createDb((sql, parameters, method) => {
+    const version = versionHandler(sql, parameters, method);
+    if (version !== undefined) return version;
+    if (sql.includes("FROM master_chunks_fts")) return [];
+    return [];
+  });
+
+  await retrieveMasterCatalog({ question: "Find a balance with capacity at least 120000 g.", db });
+  assert.equal(db.calls.some((call) => call.sql?.includes("m.material_number = ?")), false);
+  assert.equal(db.calls.some((call) => call.sql?.includes("FROM master_aliases AS a")), false);
+  assert.equal(db.calls.some((call) => call.sql?.includes("alternative model")), false);
+});
+
+test("does not mistake spaced domain specifications for model aliases and preserves prior-item context", async () => {
+  const record = {
+    material_number: "30428204",
+    trade_name: "CR221",
+    product_name: "Portable Balance CR221",
+    parent_family: "Portable Balances",
+    family: "Compass CR",
+    record_json: JSON.stringify({ material_number: "30428204", fields: { ip_rating: "Not Applicable" } }),
+    source_file: activeVersion.source_file,
+    source_sheet: activeVersion.source_sheet,
+  };
+  const db = createDb((sql, parameters, method) => {
+    const version = versionHandler(sql, parameters, method);
+    if (version !== undefined) return version;
+    if (sql.includes("m.material_number = ?")) {
+      assert.equal(parameters[1], "30428204");
+      return [record];
+    }
+    if (sql.includes("FROM master_chunks") && sql.includes("material_number IN")) return [];
+    if (sql.includes("FROM master_chunks_fts")) return [];
+    return [];
+  });
+
+  for (const question of [
+    "What is its IP 65 rating?",
+    "Does it have RS 232?",
+    "Is it Class 1?",
+    "Can it measure pH 7?",
+  ]) {
+    const result = await retrieveMasterCatalog({ question, contextMaterials: ["30428204"], db });
+    assert.deepEqual(result.exact_matches.map((item) => item.identifier), ["30428204"], question);
+  }
+  assert.equal(db.calls.some((call) => call.parameters?.includes("ip 65") || call.parameters?.includes("rs 232")), false);
+});
+
 test("filters numeric-qualified category listings and prompt candidates to eligible materials", async () => {
   const eligible = { material_number: "30428204", trade_name: "CR221", product_name: "Portable Balance CR221", parent_family: "Portable Balances", family: "Compass CR", record_json: JSON.stringify({ material_number: "30428204", fields: {} }) };
   const ineligible = { material_number: "30253005", trade_name: "STX123", product_name: "Portable Balance STX123", parent_family: "Portable Balances", family: "Scout STX", record_json: JSON.stringify({ material_number: "30253005", fields: {} }) };
