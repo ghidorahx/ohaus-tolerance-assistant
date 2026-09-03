@@ -79,6 +79,7 @@ test("only authenticated administration opts into seed-progress status", () => {
 
 test("authenticated retrieval diagnostics derive semantic materials from selected semantic chunks", () => {
   const adminPut = salesRoute.slice(salesRoute.indexOf("export async function PUT"));
+  assert.match(adminPut, /catalog_retrieval_unavailable[\s\S]*?d1_health:[\s\S]*?warnings:/);
   assert.match(adminPut, /evaluation_diagnostics:\s*\{/);
   assert.match(adminPut, /semantic_material_numbers:[\s\S]*?result\.chunks[\s\S]*?retrieval\?\.sources\?\.includes\("semantic"\)/);
   assert.match(adminPut, /retrievalProfileSha256:\s*body\.retrieval_profile_sha256/);
