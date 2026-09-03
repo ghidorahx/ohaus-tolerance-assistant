@@ -698,7 +698,19 @@ export async function PUT(request: Request) {
         ...masterRetrievalOptions(question),
       });
       if (!("prompt_context" in result)) {
-        return json({ error: "The catalog retrieval result is unavailable.", code: "catalog_retrieval_unavailable" }, 409);
+        return json({
+          error: "The catalog retrieval result is unavailable.",
+          code: "catalog_retrieval_unavailable",
+          retrieval_status: result.status,
+          reason: result.reason ?? null,
+          evaluation_diagnostics: {
+            d1_health: result.retrieval?.d1_health ?? null,
+            lexical_status: result.retrieval?.lexical?.status ?? "unavailable",
+            numeric_status: result.retrieval?.numeric?.status ?? "unavailable",
+            semantic_status: result.retrieval?.semantic?.status ?? "unavailable",
+            warnings: (result.warnings ?? []).slice(0, 8),
+          },
+        }, 409);
       }
       return json({
         status: result.status,
