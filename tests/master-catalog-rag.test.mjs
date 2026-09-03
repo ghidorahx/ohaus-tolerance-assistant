@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   activateMasterCatalogVersion,
   boundedEmbeddingText,
+  buildMasterCatalogPromptContext,
   CatalogAdminError,
   getMasterCatalogStatus,
   MASTER_CATALOG_TABLES,
@@ -1049,6 +1050,103 @@ test("uses the reverse relationship index to find products that reference an acc
   assert.equal(result.relationships[0].related_material_number, "30253005");
   assert.equal(result.prompt_context.relationships[0].direction, "inbound");
   assert.equal(result.prompt_context.relationships[0].source_product_name, "Portable Balance STX123");
+});
+
+test("reserves the relationship row budget for an exact material instead of lexical neighbors", async () => {
+  const requestedMaterial = "30268982";
+  const noisyNeighbor = "10000000";
+  const accessory = {
+    material_number: requestedMaterial,
+    trade_name: "RS232 Interface, Scout",
+    product_name: "Scout RS232 accessory",
+    record_json: JSON.stringify({ material_number: requestedMaterial, fields: {} }),
+  };
+  const neighbor = {
+    material_number: noisyNeighbor,
+    trade_name: "RS232 Cable",
+    product_name: "Semantically similar cable",
+    record_json: JSON.stringify({ material_number: noisyNeighbor, fields: {} }),
+  };
+  const neighborChunk = {
+    chunk_id: "mc_noisy_rs232_neighbor",
+    material_number: noisyNeighbor,
+    chunk_kind: "connectivity",
+    chunk_ordinal: 1,
+    title: "RS232 Cable",
+    content: "RS232 interface cable accessory",
+    field_keys_json: "[]",
+    metadata_json: "{}",
+  };
+  const relationshipRowsFor = (targetMaterial, sourceStart) => Array.from({ length: 80 }, (_, index) => ({
+    source_material_number: String(sourceStart + index),
+    relationship_type: "accessories",
+    target_material_number: targetMaterial,
+    target_resolved: 1,
+    source_model: `MODEL-${index + 1}`,
+    source_product_name: `Compatible model ${index + 1}`,
+    target_model: targetMaterial === requestedMaterial ? accessory.trade_name : neighbor.trade_name,
+  }));
+  const exactRelationships = relationshipRowsFor(requestedMaterial, 92000000);
+  const noisyRelationships = relationshipRowsFor(noisyNeighbor, 11000000);
+
+  const db = createDb((sql, parameters, method) => {
+    const version = versionHandler(sql, parameters, method);
+    if (version !== undefined) return version;
+    if (sql.includes("m.material_number = ?")) return parameters[1] === requestedMaterial ? [accessory] : [];
+    if (sql.includes("FROM master_chunks_fts")) {
+      return [{ chunk_id: neighborChunk.chunk_id, material_number: noisyNeighbor, bm25_score: -12 }];
+    }
+    if (sql.includes("FROM master_chunks") && sql.includes("chunk_id IN")) return [neighborChunk];
+    if (sql.includes("WITH material_chunks AS")) return [];
+    if (sql.includes("FROM master_materials AS m") && sql.includes("material_number IN")) return [accessory, neighbor];
+    if (sql.includes("FROM master_relationships")) {
+      const requestedTargets = [requestedMaterial, noisyNeighbor].filter((material) => parameters.includes(material));
+      return [...noisyRelationships, ...exactRelationships]
+        .filter((row) => requestedTargets.includes(row.target_material_number))
+        .sort((left, right) => left.source_material_number.localeCompare(right.source_material_number))
+        .slice(0, Number(parameters.at(-1)));
+    }
+    return [];
+  });
+
+  const result = await retrieveMasterCatalog({
+    question: `Which models are compatible with ${requestedMaterial}?`,
+    db,
+    relationshipLimit: 80,
+  });
+
+  const relationshipCall = db.calls.find((call) => call.sql?.includes("FROM master_relationships"));
+  assert.ok(relationshipCall);
+  assert.ok(relationshipCall.parameters.includes(requestedMaterial));
+  assert.equal(relationshipCall.parameters.includes(noisyNeighbor), false);
+  assert.equal(result.relationships.length, 80);
+  assert.ok(result.relationships.every((row) => row.matched_material_number === requestedMaterial));
+  assert.equal(result.relationships_truncated, false);
+});
+
+test("keeps up to eighty relationships in model grounding context", () => {
+  const relationships = Array.from({ length: 90 }, (_, index) => ({
+    direction: "inbound",
+    matched_material_number: "30268982",
+    related_material_number: String(92000000 + index),
+    source_material_number: String(92000000 + index),
+    relationship_type: "accessories",
+    target_material_number: "30268982",
+    target_resolved: 1,
+  }));
+  const prompt = buildMasterCatalogPromptContext({
+    version: { version_id: "test-version" },
+    retrieval: { strategy: "exact", numeric: { constraints: [], matches: [] } },
+    exact_matches: [],
+    materials: [],
+    chunks: [],
+    evidence: [],
+    relationships,
+    documents: [],
+    warnings: [],
+  });
+  assert.equal(prompt.relationships.length, 80);
+  assert.equal(prompt.relationships[79].related_material_number, "92000079");
 });
 
 test("keeps successful optional enrichments when another enrichment fails", async () => {

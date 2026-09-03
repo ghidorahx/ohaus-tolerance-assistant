@@ -206,7 +206,179 @@ test("falls back to GPT-5.6 Terra only when the Sol request is rate limited", as
 test("uses intent-sized output budgets", () => {
   assert.equal(outputTokenLimitForQuestion("What is CR221's capacity?"), 2_400);
   assert.equal(outputTokenLimitForQuestion("Compare CR221 and CR5200"), 4_000);
-  assert.equal(outputTokenLimitForQuestion("Give me every detail in the complete record"), 6_000);
+  assert.equal(outputTokenLimitForQuestion("Which models are compatible with this accessory?"), 8_000);
+  assert.equal(outputTokenLimitForQuestion("Which models fit this part?"), 8_000);
+  assert.equal(outputTokenLimitForQuestion("What models work with this part?"), 8_000);
+  assert.equal(outputTokenLimitForQuestion("Give me every detail in the complete record"), 12_000);
+});
+
+test("retries a truncated compatibility list at the expanded ceiling and preserves every grounded item", async () => {
+  const requests = [];
+  const identifiers = Array.from({ length: 47 }, (_, index) => String(91000000 + index));
+  const answerItems = identifiers.map((identifier, index) => ({
+    identifier,
+    label: `MODEL${index + 1}`,
+    description: "Compatible model listed in the Excel catalog",
+  }));
+  const fetchImpl = async (_url, init) => {
+    requests.push(JSON.parse(init.body));
+    if (requests.length === 1) {
+      return Response.json({
+        id: "resp-incomplete",
+        status: "incomplete",
+        incomplete_details: { reason: "max_output_tokens" },
+        output: [],
+      });
+    }
+    return Response.json({
+      id: "resp-complete",
+      status: "completed",
+      output_text: JSON.stringify({
+        answer: "47 compatible models are listed.",
+        answer_items: answerItems,
+        status: "answered",
+        confidence: "high",
+        intent: "relationship",
+        materials: identifiers,
+        evidence: [],
+        unresolved_items: [],
+        follow_up_suggestions: [],
+        context_summary: "The compatible-model list contains 47 grounded materials.",
+        escalation_reason: null,
+      }),
+      output: [],
+    });
+  };
+
+  const result = await answerSalesQuestionWithAI({
+    question: "What models work with this accessory?",
+    apiKey: "test-key",
+    model: "gpt-5.6-terra",
+    fallbackModel: "gpt-5.6-terra",
+    groundingBundle: {
+      catalog_scope: { materials: 47 },
+      allowed_material_numbers: identifiers,
+    },
+    fetchImpl,
+  });
+
+  assert.deepEqual(requests.map((request) => request.max_output_tokens), [8_000, 12_000]);
+  assert.equal(requests[0].text.format.schema.properties.answer_items.maxItems, 80);
+  assert.equal(requests[0].text.format.schema.properties.materials.maxItems, 96);
+  assert.equal(result.answer_items.length, 47);
+  assert.equal(result.materials.length, 47);
+  assert.equal(result.output_token_cap, 12_000);
+  assert.equal(result.output_cap_reduced, false);
+});
+
+test("fills a completed legacy AI response with every grounded compatible model", async () => {
+  const sourceMaterial = "30268982";
+  const identifiers = Array.from({ length: 47 }, (_, index) => String(92000000 + index));
+  const relationships = identifiers.map((identifier, index) => ({
+    direction: "inbound",
+    relationship_type: "accessories",
+    related_material_number: identifier,
+    resolution_status: "resolved",
+    related_item: { model: `MODEL${index + 1}` },
+  }));
+  let requestCount = 0;
+  const fetchImpl = async () => {
+    requestCount += 1;
+    return Response.json({
+      id: "resp-partial-legacy",
+      status: "completed",
+      output_text: JSON.stringify({
+        answer: "Here are 24 compatible models.",
+        answer_items: identifiers.slice(0, 24).map((identifier, index) => ({
+          identifier,
+          label: `MODEL${index + 1}`,
+          description: "Compatible model listed in the Excel catalog",
+        })),
+        status: "answered",
+        confidence: "high",
+        intent: "relationship",
+        materials: [sourceMaterial, ...identifiers.slice(0, 24)],
+        evidence: [],
+        unresolved_items: [],
+        follow_up_suggestions: [],
+        context_summary: "The response summarized compatible models.",
+        escalation_reason: null,
+      }),
+      output: [],
+    });
+  };
+
+  const result = await answerSalesQuestionWithAI({
+    question: `Which models are compatible with ${sourceMaterial}?`,
+    apiKey: "test-key",
+    model: "gpt-5.6-terra",
+    fallbackModel: "gpt-5.6-terra",
+    groundingBundle: {
+      catalog_scope: { materials: 47 },
+      allowed_material_numbers: [sourceMaterial, ...identifiers],
+      exact_identifier_matches: [{ status: "found", record: { material_number: sourceMaterial } }],
+      relationship_results: [{
+        status: "found",
+        source: { material_number: sourceMaterial, product_name: "RS232 Interface, Scout" },
+        relationship_count: relationships.length,
+        relationships,
+      }],
+    },
+    fetchImpl,
+  });
+
+  assert.equal(requestCount, 1);
+  assert.equal(result.answer_items.length, 47);
+  assert.equal(new Set(result.answer_items.map((item) => item.identifier)).size, 47);
+  assert.equal(result.answer_items.at(-1).identifier, identifiers.at(-1));
+  assert.match(result.answer, /^47 compatible models are listed/);
+  assert.deepEqual(result.unresolved_items, []);
+  assert.equal(result.materials.includes(sourceMaterial), true);
+});
+
+test("fills exact master relationships, excludes noisy rows, and reports truncation", async () => {
+  const ids = ["93000001", "93000002", "93000003"];
+  const rows = ids.map((identifier, index) => ({
+    direction: "inbound", matched_material_number: "30268982", related_material_number: identifier,
+    source_material_number: identifier, source_model: `MODEL${index + 1}`, relationship_type: "accessories",
+    target_material_number: "30268982", target_resolved: 1,
+  }));
+  rows.push({ direction: "inbound", matched_material_number: "99999999", related_material_number: "99990001", source_material_number: "99990001", source_model: "NOISE", relationship_type: "accessories", target_material_number: "99999999", target_resolved: 1 });
+  const fetchImpl = async () => Response.json({ id: "resp-master-partial", status: "completed", output_text: JSON.stringify({
+    answer: "One model is available.", answer_items: [{ identifier: ids[0], label: "MODEL1", description: "Compatible model" }],
+    status: "answered", confidence: "high", intent: "relationship", materials: ["30268982", ids[0]], evidence: [],
+    unresolved_items: [], follow_up_suggestions: [], context_summary: "Partial list.", escalation_reason: null,
+  }), output: [] });
+  const result = await answerSalesQuestionWithAI({
+    question: "Show all compatible models for 30268982.", apiKey: "test-key", model: "gpt-5.6-terra", fallbackModel: "gpt-5.6-terra",
+    groundingBundle: {
+      catalog_scope: { materials: 6_407 }, allowed_material_numbers: ["30268982", ...ids, "99990001"],
+      exact_matches: [{ status: "found", material: { material_number: "30268982" } }], relationships: rows,
+      truncated: { relationships: true },
+    }, fetchImpl,
+  });
+  assert.deepEqual(result.answer_items.map((item) => item.identifier), ids);
+  assert.equal(result.confidence, "medium");
+  assert.match(result.answer, /Showing 3 verified compatible models/);
+  assert.match(result.unresolved_items.join(" "), /Additional catalog relationships are not shown/);
+});
+
+test("does not fill an intentionally limited compatibility recommendation", async () => {
+  const ids = ["94000001", "94000002", "94000003", "94000004"];
+  const fetchImpl = async () => Response.json({ id: "resp-top-three", status: "completed", output_text: JSON.stringify({
+    answer: "Here are the top three.", answer_items: ids.slice(0, 3).map((identifier) => ({ identifier, label: identifier, description: "Recommended option" })),
+    status: "answered", confidence: "high", intent: "selection", materials: ids.slice(0, 3), evidence: [], unresolved_items: [],
+    follow_up_suggestions: [], context_summary: "Three recommendations.", escalation_reason: null,
+  }), output: [] });
+  const result = await answerSalesQuestionWithAI({
+    question: "Recommend the best three models compatible with 30268982.", apiKey: "test-key", model: "gpt-5.6-terra", fallbackModel: "gpt-5.6-terra",
+    groundingBundle: { catalog_scope: { materials: 4 }, allowed_material_numbers: ids, relationship_results: [{
+      source: { material_number: "30268982" }, relationship_count: 4,
+      relationships: ids.map((identifier) => ({ direction: "inbound", relationship_type: "accessories", related_material_number: identifier, resolution_status: "resolved", related_item: { model: identifier } })),
+    }] }, fetchImpl,
+  });
+  assert.deepEqual(result.answer_items.map((item) => item.identifier), ids.slice(0, 3));
+  assert.equal(result.answer, "Here are the top three.");
 });
 
 test("accepts a pre-retrieved grounding bundle and custom evidence hydrator", async () => {

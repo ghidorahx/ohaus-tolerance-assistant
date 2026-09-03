@@ -117,6 +117,28 @@ test("keeps unresolved relationship items visible for review", () => {
   assert.ok(result.relationships.some((relationship) => relationship.resolution_status === "needs_source"));
 });
 
+test("reverse-maps related items to every compatible portable-balance material", () => {
+  const result = getRelationships({ material_number: "30268982", relationship_type: "accessories" });
+  assert.equal(result.status, "found");
+  assert.equal(result.source.material_number, "30268982");
+  assert.equal(result.relationship_count, 44);
+  assert.ok(result.relationships.every((relationship) => relationship.direction === "inbound"));
+  assert.ok(result.relationships.every((relationship) => relationship.related_item?.model));
+  assert.equal(new Set(result.relationships.map((relationship) => relationship.related_material_number)).size, 44);
+});
+
+test("retrieves legacy relationships for fit and work-with compatibility wording", () => {
+  for (const question of [
+    "Which models fit 30268982?",
+    "What models work with 30268982?",
+  ]) {
+    const bundle = buildGroundingBundle({ question });
+    assert.equal(bundle.relationship_results.length, 1, question);
+    assert.equal(bundle.relationship_results[0].relationship_count, 44, question);
+    assert.ok(bundle.relationship_results[0].relationships.every((relationship) => relationship.direction === "inbound"), question);
+  }
+});
+
 test("hydrates model evidence from authoritative record values", () => {
   const evidence = hydrateEvidenceItems([
     { material_number: "30428204", field: "capacity" },

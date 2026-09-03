@@ -331,10 +331,12 @@ function publicMasterAdminStatus(masterStatus: Awaited<ReturnType<typeof getMast
 
 function masterRetrievalOptions(question: string) {
   const expansive = /\b(?:all|every|complete|compare|comparison|list|which products?|which models?)\b/i.test(question);
+  const relationshipList = /\b(?:compatible|compatibility|fit|fits|accessories|spare parts?|replacement parts?|related items?|relationships?)\b|\bworks?\s+with\b/i.test(question);
   return {
     topK: expansive ? 48 : 30,
     chunkLimit: expansive ? MASTER_MAX_RETRIEVAL_CHUNKS : MASTER_DEFAULT_CHUNK_LIMIT,
     evidenceLimit: expansive ? 32 : 20,
+    relationshipLimit: relationshipList ? 80 : 40,
   };
 }
 
@@ -610,6 +612,12 @@ export async function POST(request: Request) {
         code: "ai_rate_limited",
         retry_after_seconds: retryAfterSeconds,
       }, 429, { "Retry-After": String(retryAfterSeconds) });
+    }
+    if (upstream.code === "answer_too_long") {
+      return json({
+        error: "That complete result is larger than the current answer limit. Narrow the requested list and try again.",
+        code: "answer_too_long",
+      }, 422);
     }
     return json({ error: "The product assistant could not complete this request. Please try again.", code: "ai_request_failed" }, 502);
   }

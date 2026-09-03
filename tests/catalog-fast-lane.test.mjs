@@ -6,6 +6,7 @@ import {
   answerMasterCatalogFastLane,
   interpretCatalogQuestion,
 } from "../lib/catalog-fast-lane.mjs";
+import { requestedMasterRelationshipTypes } from "../lib/master-catalog-rag.mjs";
 
 function legacyAnswer(question, context = []) {
   const interpretation = interpretCatalogQuestion(question);
@@ -77,6 +78,80 @@ test("returns every relationship item on its own line and labels it as catalog-l
   assert.ok(answer.answer_items.every((item) => /^\d{8}$/.test(item.identifier)));
   assert.ok(answer.answer_items.every((item) => /listed in the Excel catalog/.test(item.description)));
   assert.equal(new Set(answer.answer_items.map((item) => item.identifier)).size, answer.answer_items.length);
+});
+
+test("reverse-maps a legacy accessory to every compatible model without AI", () => {
+  for (const question of [
+    "Which models are compatible with 30268982?",
+    "Which models fit 30268982?",
+    "What models work with 30268982?",
+    "What balances does 30268982 fit?",
+  ]) {
+    const answer = legacyAnswer(question);
+    assert.equal(answer.answer_engine, "catalog_fast_lane", question);
+    assert.equal(answer.ai_used, false, question);
+    assert.equal(answer.answer_items.length, 44, question);
+    assert.equal(answer.materials.length, 45, question);
+    assert.match(answer.answer, /44 compatible models/, question);
+    assert.equal(answer.confidence, "high", question);
+    assert.deepEqual(answer.unresolved_items, [], question);
+    assert.ok(answer.answer_items.every((item) => /compatible model listed in the Excel catalog/.test(item.description)), question);
+    assert.equal(new Set(answer.answer_items.map((item) => item.identifier)).size, 44, question);
+  }
+});
+
+test("searches every relationship type for generic compatibility wording and honors explicit types", () => {
+  for (const question of [
+    "Which models are compatible with 30268982?",
+    "Which models fit 30268982?",
+    "What models work with 30268982?",
+    "What balances does 30268982 fit?",
+  ]) {
+    const interpretation = interpretCatalogQuestion(question);
+    assert.equal(interpretation.relationship_type, "all", question);
+    assert.deepEqual(interpretation.relationship_types, ["all"], question);
+    assert.deepEqual(requestedMasterRelationshipTypes(question), ["all"], question);
+  }
+
+  assert.deepEqual(interpretCatalogQuestion("Which accessories fit 30268982?").relationship_types, ["accessories"]);
+  assert.deepEqual(requestedMasterRelationshipTypes("Which accessories fit 30268982?"), ["accessories"]);
+  assert.deepEqual(interpretCatalogQuestion("Which spare parts work with 30268982?").relationship_types, ["spare_parts"]);
+  assert.deepEqual(requestedMasterRelationshipTypes("Which spare parts work with 30268982?"), ["spare_parts"]);
+});
+
+test("returns every master-catalog compatible model when the inbound list is below eighty", () => {
+  const record = {
+    material_number: "30268982",
+    trade_name: "RS232 Interface, Scout",
+    product_name: "RS232 Interface, Scout",
+    fields: {},
+    source: { file: "MMMDF.xlsx" },
+  };
+  const relationships = Array.from({ length: 47 }, (_, index) => ({
+    direction: "inbound",
+    matched_material_number: "30268982",
+    source_material_number: String(92000000 + index),
+    source_model: `SCOUT${index + 1}`,
+    source_product_name: `Portable Balance SCOUT${index + 1}`,
+    relationship_type: "accessories",
+    target_material_number: "30268982",
+    related_material_number: String(92000000 + index),
+    target_resolved: 1,
+  }));
+  const answer = answerMasterCatalogFastLane({
+    question: "Which models are compatible with 30268982?",
+    retrieval: masterRetrieval({
+      exact_matches: [{ identifier: "30268982", status: "found", record }],
+      relationships,
+    }),
+  });
+
+  assert.equal(answer.answer_items.length, 47);
+  assert.equal(answer.materials.length, 48);
+  assert.match(answer.answer, /47 compatible models/);
+  assert.doesNotMatch(answer.answer, /showing the first/);
+  assert.ok(answer.answer_items.every((item) => /compatible model listed/.test(item.description)));
+  assert.equal(answer.confidence, "high");
 });
 
 test("answers unsupported live commercial data immediately and keeps recommendations on AI", () => {
@@ -297,6 +372,26 @@ test("answers advanced master fields and scalar compatibility from exact workboo
   assert.equal(compatibility.evidence[0].field, "fields.compatible_models");
 });
 
+test("preserves every compatible model from a multi-value master workbook cell", () => {
+  const compatibleModels = "FC5714;FC5718;FC5718R;FC5720R;FC5816;FC5816R;FC5830R;FC5916;FC5916R";
+  const rotor = {
+    material_number: "30314824",
+    trade_name: "R-A6X50MI",
+    product_name: "Rotor Angle 6x50ml ID",
+    fields: { compatible_models: compatibleModels },
+    source: { file: "MMMDF_EN_US_20260605_AI_Organized 2.xlsx" },
+  };
+  const answer = answerMasterCatalogFastLane({
+    question: "Which models are compatible with material 30314824?",
+    retrieval: masterRetrieval({ exact_matches: [{ identifier: "30314824", status: "found", record: rotor }] }),
+  });
+
+  assert.equal(answer.ai_used, false);
+  assert.equal(answer.answer_items.length, 1);
+  assert.match(answer.answer_items[0].description, new RegExp(`Compatible models: ${compatibleModels}$`));
+  assert.equal(answer.evidence[0].value, compatibleModels);
+});
+
 test("never selects the first ambiguous alias", () => {
   const question = "What is the capacity of SKX222?";
   const answer = answerMasterCatalogFastLane({
@@ -429,7 +524,7 @@ test("declines direct document or relationship answers when enrichment was unava
   assert.equal(partialRelationship, null);
 });
 
-test("reports when a direct relationship result is longer than the visible item limit", () => {
+test("returns all direct relationship results below the expanded visible item limit", () => {
   const record = { material_number: "30428204", trade_name: "CR221", fields: {} };
   const relationships = Array.from({ length: 30 }, (_, index) => ({
     direction: "outbound",
@@ -447,8 +542,34 @@ test("reports when a direct relationship result is longer than the visible item 
       relationships,
     }),
   });
-  assert.equal(answer.answer_items.length, 24);
-  assert.match(answer.answer, /30 accessories.*showing the first 24/);
+  assert.equal(answer.answer_items.length, 30);
+  assert.match(answer.answer, /30 accessories/);
+  assert.doesNotMatch(answer.answer, /showing the first/);
+  assert.equal(answer.confidence, "high");
+  assert.equal(answer.unresolved_items.length, 0);
+});
+
+test("reports when a direct relationship result exceeds eighty visible items", () => {
+  const record = { material_number: "30428204", trade_name: "CR221", fields: {} };
+  const relationships = Array.from({ length: 90 }, (_, index) => ({
+    direction: "outbound",
+    matched_material_number: "30428204",
+    source_material_number: "30428204",
+    relationship_type: "accessories",
+    target_material_number: String(90000000 + index),
+    related_material_number: String(90000000 + index),
+    target_resolved: 0,
+  }));
+  const answer = answerMasterCatalogFastLane({
+    question: "Which accessories fit CR221?",
+    retrieval: masterRetrieval({
+      exact_matches: [{ identifier: "CR221", status: "found", record }],
+      relationships,
+    }),
+  });
+  assert.equal(answer.answer_items.length, 80);
+  assert.equal(answer.materials.length, 81);
+  assert.match(answer.answer, /90 accessories.*showing the first 80/);
   assert.equal(answer.confidence, "medium");
   assert.equal(answer.unresolved_items.length, 1);
 });

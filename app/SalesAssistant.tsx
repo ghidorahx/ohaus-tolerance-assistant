@@ -426,9 +426,9 @@ export default function SalesAssistant() {
   const accessReady = health?.access_code_configured !== false || !health?.access_code_required;
   const ready = Boolean(health?.api_configured && catalogReady && accessReady);
   const coolingDown = rateLimitSeconds > 0;
-  const totalRequestTokens = Math.round((health?.context.max_total_request_tokens ?? 60_000) / 1_000);
+  const totalRequestTokens = Math.round((health?.context.max_total_request_tokens ?? 66_000) / 1_000);
   const inputTokens = Math.round((health?.context.max_input_tokens ?? 54_000) / 1_000);
-  const outputTokens = Math.round((health?.context.max_output_tokens ?? 6_000) / 1_000);
+  const outputTokens = Math.round((health?.context.max_output_tokens ?? 12_000) / 1_000);
 
   return (
     <section className={`sales-workspace ${productKnowledgeCollapsed ? "sales-rail-collapsed" : ""}`} aria-label="Ask assistant">

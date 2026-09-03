@@ -80,9 +80,9 @@ test("packages the workbook-grounded Ask endpoint and focused context policy", a
   assert.equal(payload.context.max_verified_turns, 12);
   assert.equal(payload.context.approximate_character_budget, 162_000);
   assert.equal(payload.context.max_retrieval_documents, 16);
-  assert.equal(payload.context.max_total_request_tokens, 60_000);
+  assert.equal(payload.context.max_total_request_tokens, 66_000);
   assert.equal(payload.context.max_input_tokens, 54_000);
-  assert.equal(payload.context.max_output_tokens, 6_000);
+  assert.equal(payload.context.max_output_tokens, 12_000);
   assert.equal(payload.catalog.portable_products, 80);
   assert.equal(payload.catalog.api_records, 171);
   assert.equal(payload.catalog.retrieval_documents, 87);
