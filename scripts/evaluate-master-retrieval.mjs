@@ -312,12 +312,14 @@ function evaluateCase(evaluation, prompt, responseStatus, diagnostics) {
   const actualMaterials = returnedMaterials(prompt);
   const expectedMaterials = uniqueStrings(evaluation.expected?.material_numbers);
   const missingMaterials = expectedMaterials.filter((material) => !actualMaterials.has(material));
+  const answerability = String(evaluation.expected?.answerability ?? "");
+  const unexpectedMaterials = answerability === "no_results" ? [...actualMaterials] : [];
   const categoryMissing = categoryRequirements(evaluation, prompt, expectedMaterials, responseStatus, diagnostics);
   const missing = {
     ...(missingMaterials.length > 0 ? { missing_materials: missingMaterials } : {}),
+    ...(unexpectedMaterials.length > 0 ? { unexpected_materials: unexpectedMaterials } : {}),
     ...categoryMissing,
   };
-  const answerability = String(evaluation.expected?.answerability ?? "");
   return {
     passed: ["grounded", "no_results"].includes(answerability)
       && (answerability === "no_results" || expectedMaterials.length > 0)
@@ -456,6 +458,7 @@ export async function evaluateMasterRetrieval({
     "expected",
     "returned",
     "missing_materials",
+    "unexpected_materials",
     "missing_source_fields",
     "missing_related_material_numbers",
     "missing_related_values",

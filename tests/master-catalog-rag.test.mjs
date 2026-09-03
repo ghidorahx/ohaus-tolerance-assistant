@@ -22,6 +22,7 @@ import {
   parseMasterNumericConstraints,
   recordMasterCatalogEvaluation,
   reciprocalRankFuse,
+  requestedMasterRelationshipTypes,
   resetFailedMasterVectorSeed,
   resolveMasterIdentifier,
   retrieveMasterCatalog,
@@ -255,6 +256,58 @@ test("preserves strict numeric comparators, inclusive ranges, and percent units"
   assert.deepEqual(percent.map(({ field, comparator, value, unit }) => ({ field, comparator, value, unit })), [
     { field: "moisture", comparator: "less_than", value: 80, unit: "%" },
   ]);
+});
+
+test("does not turn relationship product names or hyphenated model text into numeric requirements", () => {
+  assert.deepEqual(
+    parseMasterNumericConstraints("Which service codes are linked to Load Cell 0785-22kg 0.18m C3?"),
+    [],
+  );
+  assert.deepEqual(
+    parseMasterNumericConstraints("Which upsell material numbers are listed for Weight Set ASTM (2)200g-1mg UC NonAd TR?"),
+    [],
+  );
+  assert.deepEqual(
+    parseMasterNumericConstraints("Find temperature below -10 °C.")
+      .map(({ field, comparator, value, unit }) => ({ field, comparator, value, unit })),
+    [{ field: "temperature", comparator: "less_than", value: -10, unit: "c" }],
+  );
+  assert.deepEqual(
+    parseMasterNumericConstraints("Which accessories work with balances with 220 g capacity?")
+      .map(({ field, comparator, value, unit }) => ({ field, comparator, value, unit })),
+    [{ field: "capacity", comparator: "exact", value: 220, unit: "g" }],
+  );
+});
+
+test("requires both numeric range bounds to match the same strict maximum-capacity attribute", async () => {
+  let eligibility = null;
+  const db = createDb((sql, parameters, method) => {
+    const version = versionHandler(sql, parameters, method);
+    if (version !== undefined) return version;
+    if (sql.includes("SELECT m.material_number") && sql.includes("master_attributes AS numeric_0")) {
+      eligibility = { sql, parameters };
+      return [];
+    }
+    if (sql.includes("GROUP BY m.parent_family")) return [];
+    if (sql.includes("GROUP BY m.family")) return [{ name: "Compass™ CR", material_count: 4, total_count: 1 }];
+    if (sql.includes("m.family = ?")) return [];
+    if (sql.includes("FROM master_chunks_fts")) return [];
+    return [];
+  });
+
+  await retrieveMasterCatalog({
+    question: "Which Compass CR models have a maximum capacity between 700 g and 800 g?",
+    db,
+  });
+
+  assert.ok(eligibility);
+  assert.match(eligibility.sql, /master_attributes AS numeric_0/);
+  assert.doesNotMatch(eligibility.sql, /master_attributes AS numeric_1/);
+  assert.match(eligibility.sql, /numeric_0\.canonical_number >= \?/);
+  assert.match(eligibility.sql, /numeric_0\.canonical_number <= \?/);
+  const serializedFieldSets = eligibility.parameters.filter((value) => typeof value === "string" && value.startsWith("["));
+  assert.ok(serializedFieldSets.some((value) => value.includes("maximum_capacity_metric")));
+  assert.equal(serializedFieldSets.some((value) => value.includes("maximum_loading_weight") || value.includes("weigh_beam_capacity")), false);
 });
 
 test("uses strict SQL operators for strict numeric filters", async () => {
@@ -760,6 +813,53 @@ test("drops unrelated semantic neighbors below the configured score threshold", 
   assert.equal(result.retrieval.semantic.discarded_below_threshold, 1);
 });
 
+test("adds narrow morphology and intent terms to lexical and semantic discovery", async () => {
+  const target = {
+    material_number: "83041308",
+    trade_name: "BH3",
+    product_name: "Bead Genie",
+    parent_family: "Bead Mill Homogenizers",
+    family: "Bead Genie™",
+    record_json: JSON.stringify({ material_number: "83041308", fields: { application: "Cell Lysis; Soil Sample Homogenization" } }),
+  };
+  const chunk = {
+    chunk_id: "bead_genie_applications",
+    material_number: target.material_number,
+    chunk_kind: "applications",
+    chunk_ordinal: 1,
+    title: "BH3 — Applications",
+    content: "Cell Lysis; Soil Sample Homogenization; compact enough for tight biosafety cabinets",
+    field_keys_json: JSON.stringify(["application"]),
+    metadata_json: "{}",
+  };
+  let lexicalQuery = "";
+  let semanticText = "";
+  const db = createDb((sql, parameters, method) => {
+    const version = versionHandler(sql, parameters, method);
+    if (version !== undefined) return version;
+    if (sql.includes("FROM master_chunks_fts")) {
+      lexicalQuery = String(parameters[1]);
+      return [{ chunk_id: chunk.chunk_id, material_number: target.material_number, bm25_score: -20 }];
+    }
+    if (sql.includes("FROM master_chunks") && sql.includes("chunk_id IN")) return [chunk];
+    if (sql.includes("FROM master_materials AS m") && sql.includes("material_number IN")) return [target];
+    return [];
+  });
+  const result = await retrieveMasterCatalog({
+    question: "What product would help me break open cells and homogenize soil samples inside a cramped biosafety cabinet?",
+    db,
+    ai: { async run(_model, input) { semanticText = input.text[0]; return { data: [vector()] }; } },
+    index: { async query() { return { matches: [{ id: chunk.chunk_id, score: 0.92 }] }; } },
+  });
+
+  for (const term of ["lysis", "homogenization", "sample", "compact", "tight", "cabinets"]) {
+    assert.match(lexicalQuery, new RegExp(`"${term}"`));
+    assert.match(semanticText, new RegExp(`\\b${term}\\b`, "i"));
+  }
+  assert.equal(result.chunks[0].material_number, target.material_number);
+  assert.ok(result.chunks[0].retrieval.sources.includes("semantic"));
+});
+
 test("answers parent-family inventory questions from indexed catalog rows with explicit counts", async () => {
   const db = createDb((sql, parameters, method) => {
     const version = versionHandler(sql, parameters, method);
@@ -918,6 +1018,95 @@ test("does not mistake spaced domain specifications for model aliases and preser
   assert.equal(db.calls.some((call) => call.parameters?.includes("ip 65") || call.parameters?.includes("rs 232")), false);
 });
 
+test("reconstructs explicitly labeled spaced model aliases before lexical retrieval", async () => {
+  const aliases = [
+    ["d 33 p 15 b 1 r 1", "30685174", "D33P15B1R1"],
+    ["d 2 wqs", "30419628", "D2WQS"],
+    ["r a 8 x 2 6 m", "30129559", "R-A8X2/6M"],
+    ["v 12 p 3", "30539390", "V12P3"],
+    ["e g 21 hp 04 c", "30680262", "E-G21HP04C"],
+  ];
+  const byCompactAlias = new Map(aliases.map(([alias, materialNumber, tradeName]) => [
+    alias.replace(/[^a-z0-9]/gi, "").toLowerCase(),
+    {
+      material_number: materialNumber,
+      trade_name: tradeName,
+      product_name: `Product ${tradeName}`,
+      record_json: JSON.stringify({ material_number: materialNumber, fields: {} }),
+    },
+  ]));
+  const db = createDb((sql, parameters, method) => {
+    const version = versionHandler(sql, parameters, method);
+    if (version !== undefined) return version;
+    if (sql.includes("m.material_number = ?")) return [];
+    if (sql.includes("FROM master_aliases AS a")) {
+      const match = parameters.map(String).map((value) => value.replaceAll(" ", "")).find((value) => byCompactAlias.has(value));
+      return match ? [byCompactAlias.get(match)] : [];
+    }
+    if (sql.includes("FROM master_chunks_fts")) return [];
+    if (sql.includes("WITH material_chunks AS")) return [];
+    if (sql.includes("FROM master_materials AS m") && sql.includes("material_number IN")) {
+      return [...byCompactAlias.values()].filter((row) => parameters.includes(row.material_number));
+    }
+    return [];
+  });
+
+  for (const [alias, materialNumber] of aliases) {
+    const result = await retrieveMasterCatalog({
+      question: `Which OHAUS material corresponds to the model alias ${alias}?`,
+      db,
+    });
+    assert.equal(result.exact_matches[0]?.status, "found", alias);
+    assert.equal(result.exact_matches[0]?.record.material_number, materialNumber, alias);
+  }
+});
+
+test("ranks paraphrased technical intent ahead of generic application chunks", async () => {
+  const row = {
+    material_number: "30031707",
+    trade_name: "R31P1502",
+    product_name: "Compact Scale R31P1502",
+    record_json: JSON.stringify({
+      material_number: "30031707",
+      fields: {
+        display: "LCD",
+        maximum_capacity_metric: "1.5 kg",
+        readability_metric: "0.05 g",
+        stabilization_time: "0.5 s",
+      },
+    }),
+  };
+  const chunks = [
+    { chunk_id: "technical_identity", material_number: row.material_number, chunk_kind: "identity", chunk_ordinal: 1, title: "R31P1502 — Identity", content: "Compact Scale R31P1502", field_keys_json: "[]", metadata_json: "{}" },
+    { chunk_id: "technical_applications", material_number: row.material_number, chunk_kind: "applications", chunk_ordinal: 1, title: "R31P1502 — Applications", content: "Basic weighing and counting", field_keys_json: JSON.stringify(["application"]), metadata_json: "{}" },
+    { chunk_id: "technical_performance", material_number: row.material_number, chunk_kind: "performance", chunk_ordinal: 1, title: "R31P1502 — Performance", content: "Maximum Capacity: 1.5 kg; Readability: 0.05 g; Stabilization Time: 0.5 s", field_keys_json: JSON.stringify(["maximum_capacity_metric", "readability_metric", "stabilization_time"]), metadata_json: "{}" },
+  ];
+  const db = createDb((sql, parameters, method) => {
+    const version = versionHandler(sql, parameters, method);
+    if (version !== undefined) return version;
+    if (sql.includes("m.material_number = ?")) return [];
+    if (sql.includes("FROM master_aliases AS a")) return [row];
+    if (sql.includes("FROM master_chunks_fts")) return [];
+    if (sql.includes("WITH material_chunks AS")) return chunks;
+    if (sql.includes("FROM master_materials AS m") && sql.includes("material_number IN")) return [row];
+    if (sql.includes("FROM master_attributes") && sql.includes("field_key IN")) return [
+      { material_number: row.material_number, field_key: "maximum_capacity_metric", source_header: "Maximum Capacity {metric}", source_column: "GL" },
+      { material_number: row.material_number, field_key: "readability_metric", source_header: "Readability {metric}", source_column: "HD" },
+      { material_number: row.material_number, field_key: "stabilization_time", source_header: "Stabilization Time", source_column: "JT" },
+    ];
+    return [];
+  });
+
+  for (const question of [
+    "How much can R31P1502 weigh at most?",
+    "What is the smallest displayed increment for R31P1502?",
+    "How quickly does R31P1502 stabilize?",
+  ]) {
+    const result = await retrieveMasterCatalog({ question, db, chunkLimit: 2 });
+    assert.deepEqual(result.chunks.map((chunk) => chunk.chunk_kind), ["identity", "performance"], question);
+  }
+});
+
 test("filters numeric-qualified category listings and prompt candidates to eligible materials", async () => {
   const eligible = { material_number: "30428204", trade_name: "CR221", product_name: "Portable Balance CR221", parent_family: "Portable Balances", family: "Compass CR", record_json: JSON.stringify({ material_number: "30428204", fields: {} }) };
   const ineligible = { material_number: "30253005", trade_name: "STX123", product_name: "Portable Balance STX123", parent_family: "Portable Balances", family: "Scout STX", record_json: JSON.stringify({ material_number: "30253005", fields: {} }) };
@@ -986,6 +1175,91 @@ test("withholds an unfiltered category listing when numeric retrieval falls back
   assert.deepEqual(result.catalog_listing.items, []);
   assert.equal(result.catalog_listing.reason, "numeric_filter_unavailable");
   assert.match(result.warnings.join(" "), /unfiltered category candidates were withheld/i);
+});
+
+test("resolves full relationship subjects and supports hyphenated spare-part wording", async () => {
+  assert.deepEqual(requestedMasterRelationshipTypes("Which spare-part numbers are listed?"), ["spare_parts"]);
+  assert.deepEqual(requestedMasterRelationshipTypes("Which replacement-part numbers are listed?"), ["spare_parts"]);
+
+  const cases = [
+    {
+      question: "Which service codes are linked to Load Cell 0785-22kg 0.18m C3?",
+      alias: "Load Cell 0785-22kg 0.18m C3",
+      material: "62031509",
+      type: "services",
+      related: "B39910002",
+    },
+    {
+      question: "Which spare-part material numbers are listed for R-A30X2/13MS?",
+      alias: "R-A30X2/13MS",
+      material: "30130872",
+      type: "spare_parts",
+      related: "30304365",
+    },
+    {
+      question: "Which upsell material numbers are listed for Weight Set ASTM (2)200g-1mg UC NonAd TR?",
+      alias: "Weight Set ASTM (2)200g-1mg UC NonAd TR",
+      material: "30390012",
+      type: "upsellings",
+      related: "30390016",
+    },
+  ];
+  const rows = new Map(cases.map((entry) => [entry.material, {
+    material_number: entry.material,
+    trade_name: entry.alias,
+    product_name: entry.alias,
+    record_json: JSON.stringify({ material_number: entry.material, fields: {} }),
+  }]));
+  const aliases = new Map(cases.map((entry) => [normalizeCatalogIdentifier(entry.alias), rows.get(entry.material)]));
+  const db = createDb((sql, parameters, method) => {
+    const version = versionHandler(sql, parameters, method);
+    if (version !== undefined) return version;
+    if (sql.includes("m.material_number = ?")) return [];
+    if (sql.includes("FROM master_aliases AS a")) {
+      const match = parameters.map(String).find((value) => aliases.has(value));
+      return match ? [aliases.get(match)] : [];
+    }
+    if (sql.includes("FROM master_attributes AS a") && sql.includes("alternative model")) return [];
+    if (sql.includes("FROM master_chunks_fts")) return [];
+    if (sql.includes("WITH material_chunks AS")) return [];
+    if (sql.includes("FROM master_materials AS m") && sql.includes("material_number IN")) {
+      return [...rows.values()].filter((row) => parameters.includes(row.material_number));
+    }
+    if (sql.includes("FROM master_relationships")) {
+      const entry = cases.find((candidate) => parameters.includes(candidate.material));
+      assert.ok(entry);
+      assert.ok(parameters.includes(entry.type));
+      return [{
+        source_material_number: entry.material,
+        relationship_type: entry.type,
+        target_material_number: entry.related,
+        target_resolved: 1,
+      }];
+    }
+    return [];
+  });
+
+  for (const entry of cases) {
+    const result = await retrieveMasterCatalog({ question: entry.question, db });
+    assert.equal(result.exact_matches.some((match) => match.record?.material_number === entry.material), true, entry.question);
+    assert.deepEqual(result.retrieval.numeric.constraints, [], entry.question);
+    assert.equal(result.relationships[0]?.related_material_number, entry.related, entry.question);
+
+    const rawQuestion = entry.question.replace(/\?$/, "");
+    const expandedQuestion = `${rawQuestion} ${entry.type.replaceAll("_", " ")} relationship`;
+    const routeShapedResult = await retrieveMasterCatalog({
+      question: expandedQuestion,
+      rawQuestion,
+      db,
+    });
+    assert.equal(
+      routeShapedResult.exact_matches.some((match) => match.record?.material_number === entry.material),
+      true,
+      `${entry.question} through expanded public retrieval`,
+    );
+    assert.deepEqual(routeShapedResult.retrieval.numeric.constraints, [], entry.question);
+    assert.equal(routeShapedResult.relationships[0]?.related_material_number, entry.related, entry.question);
+  }
 });
 
 test("expands only requested relationships and documents using master schema columns", async () => {
@@ -1180,6 +1454,36 @@ test("compact evidence protects operational fields unless explicitly requested b
   assert.equal(selectCompactEvidence({ ...args, includeInternalFields: true }).some((item) => item.field === "fields.procurement_type"), true);
 });
 
+test("keeps sibling technical fields when a catalog fields map contains a display column", () => {
+  const evidence = selectCompactEvidence({
+    question: "What are the capacity and readability?",
+    materials: [{
+      material_number: "30428205",
+      model: "CR621",
+      fields: {
+        display: "LCD",
+        maximum_capacity_metric: "620 g",
+        readability_metric: "0.1 g",
+        wrapped_capacity: { display: "620 g", value: 620, unit: "g" },
+      },
+    }],
+    chunks: [{
+      material_number: "30428205",
+      source_fields: ["maximum_capacity_metric", "readability_metric", "wrapped_capacity"],
+    }],
+    attributes: [
+      { material_number: "30428205", field_key: "maximum_capacity_metric", source_header: "Maximum Capacity {metric}", source_column: "GL" },
+      { material_number: "30428205", field_key: "readability_metric", source_header: "Readability {metric}", source_column: "HD" },
+      { material_number: "30428205", field_key: "wrapped_capacity", source_header: "Wrapped Capacity", source_column: "ZZ" },
+    ],
+  });
+
+  assert.equal(evidence.find((item) => item.field === "fields.maximum_capacity_metric")?.value, "620 g");
+  assert.equal(evidence.find((item) => item.field === "fields.readability_metric")?.source_header, "Readability {metric}");
+  assert.equal(evidence.find((item) => item.field === "fields.wrapped_capacity")?.value, "620 g");
+  assert.equal(evidence.some((item) => item.field === "fields"), false);
+});
+
 test("compacts only the standard embedding prefix while preserving every value", () => {
   const text = boundedEmbeddingText([
     "Category: Balances & Scales",
@@ -1221,6 +1525,134 @@ test("bounds compacted embedding input by words and characters", () => {
 
   assert.ok(text.split(/\s+/).length <= 420);
   assert.ok(text.length <= 1_800);
+});
+
+test("pins evidence for each item in a small filtered numeric family listing", async () => {
+  const capacities = new Map([
+    ["30253008", "420 g"], ["30253009", "620 g"],
+    ["30253012", "420 g"], ["30253013", "620 g"],
+  ]);
+  const products = [...capacities].map(([materialNumber, capacity]) => ({
+    material_number: materialNumber,
+    trade_name: `STX-${materialNumber}`,
+    product_name: `Scout STX ${materialNumber}`,
+    parent_family: "Portable Balances",
+    family: "Scout™ STX",
+    record_json: JSON.stringify({ material_number: materialNumber, fields: { display: "LCD", maximum_capacity_metric: capacity } }),
+  }));
+  const chunks = products.flatMap((product) => [
+    { chunk_id: `${product.material_number}_identity`, material_number: product.material_number, chunk_kind: "identity", chunk_ordinal: 1, title: "Identity", content: product.product_name, field_keys_json: "[]", metadata_json: "{}" },
+    { chunk_id: `${product.material_number}_performance`, material_number: product.material_number, chunk_kind: "performance", chunk_ordinal: 1, title: "Performance", content: `Maximum Capacity: ${capacities.get(product.material_number)}`, field_keys_json: JSON.stringify(["maximum_capacity_metric"]), metadata_json: "{}" },
+  ]);
+  const db = createDb((sql, parameters, method) => {
+    const version = versionHandler(sql, parameters, method);
+    if (version !== undefined) return version;
+    if (sql.includes("SELECT m.material_number") && sql.includes("master_attributes AS numeric_0")) {
+      return products.map(({ material_number }) => ({ material_number }));
+    }
+    if (sql.includes("WITH ranked_attributes AS")) {
+      return products.slice(0, 2).map((product) => ({
+        material_number: product.material_number,
+        field_key: "maximum_capacity_metric",
+        value_number: Number.parseFloat(capacities.get(product.material_number)),
+        value_unit: "g",
+        canonical_number: Number.parseFloat(capacities.get(product.material_number)),
+        canonical_unit: "g",
+        chunk_id: `${product.material_number}_performance`,
+      }));
+    }
+    if (sql.includes("GROUP BY m.parent_family")) return [];
+    if (sql.includes("GROUP BY m.family")) return [{ name: "Scout™ STX", material_count: 4, total_count: 1 }];
+    if (sql.includes("m.family = ?") && sql.includes("json_each(?)")) {
+      const allowed = new Set(JSON.parse(parameters[2]));
+      return products.filter((product) => allowed.has(product.material_number)).map((product) => ({ ...product, total_count: allowed.size }));
+    }
+    if (sql.includes("m.family = ?")) return products.map((product) => ({ ...product, total_count: products.length }));
+    if (sql.includes("FROM master_chunks_fts")) return [];
+    if (sql.includes("FROM master_chunks") && sql.includes("chunk_id IN")) return chunks.filter((chunk) => parameters.includes(chunk.chunk_id));
+    if (sql.includes("WITH material_chunks AS")) return chunks.filter((chunk) => parameters.includes(chunk.material_number));
+    if (sql.includes("FROM master_materials AS m") && sql.includes("material_number IN")) return products.filter((product) => parameters.includes(product.material_number));
+    if (sql.includes("FROM master_attributes") && sql.includes("field_key IN")) return products.map((product) => ({
+      material_number: product.material_number,
+      field_key: "maximum_capacity_metric",
+      source_header: "Maximum Capacity {metric}",
+      source_column: "GL",
+    }));
+    return [];
+  });
+
+  const result = await retrieveMasterCatalog({
+    question: "Which Scout STX models have a maximum capacity between 400 g and 700 g?",
+    db,
+  });
+  assert.deepEqual(result.exact_matches, []);
+  assert.deepEqual(result.catalog_listing.items.map((item) => item.material_number), [...capacities.keys()]);
+  for (const [materialNumber, capacity] of capacities) {
+    const item = result.evidence.find((entry) => entry.material_number === materialNumber && entry.source_header === "Maximum Capacity {metric}");
+    assert.equal(item?.value, capacity, materialNumber);
+  }
+});
+
+test("returns proven scoped numeric emptiness without unrelated chunks", async () => {
+  const familyItems = [{ material_number: "30428205", trade_name: "CR621", product_name: "Compass CR621", family: "Compass™ CR" }];
+  const decoy = { chunk_id: "decoy", material_number: "80000003", chunk_kind: "performance", title: "Unrelated", content: "Capacity 740 g", field_keys_json: "[]", metadata_json: "{}" };
+  const db = createDb((sql, parameters, method) => {
+    const version = versionHandler(sql, parameters, method);
+    if (version !== undefined) return version;
+    if (sql.includes("SELECT m.material_number") && sql.includes("master_attributes AS numeric_0")) return [];
+    if (sql.includes("GROUP BY m.parent_family")) return [];
+    if (sql.includes("GROUP BY m.family")) return [{ name: "Compass™ CR", material_count: 1, total_count: 1 }];
+    if (sql.includes("m.family = ?") && sql.includes("json_each(?)")) return [];
+    if (sql.includes("m.family = ?")) return familyItems;
+    if (sql.includes("FROM master_chunks_fts")) return [{ chunk_id: decoy.chunk_id, material_number: decoy.material_number, bm25_score: -20 }];
+    if (sql.includes("FROM master_chunks") && sql.includes("chunk_id IN")) return [decoy];
+    return [];
+  });
+
+  const result = await retrieveMasterCatalog({
+    question: "Which Compass CR models have a maximum capacity between 700 g and 800 g?",
+    db,
+  });
+  assert.deepEqual(result.exact_matches, []);
+  assert.equal(result.status, "no_results");
+  assert.equal(result.catalog_listing.status, "no_results");
+  assert.deepEqual(result.chunks, []);
+  assert.deepEqual(result.materials, []);
+});
+
+test("does not claim no results when fallback category filtering saw only a truncated window", async () => {
+  const familyItems = Array.from({ length: 40 }, (_, index) => ({
+    material_number: String(70000000 + index),
+    trade_name: `CR${index + 1}`,
+    product_name: `Compass CR${index + 1}`,
+    family: "Compass™ CR",
+    total_count: 41,
+  }));
+  const db = createDb((sql, parameters, method) => {
+    const version = versionHandler(sql, parameters, method);
+    if (version !== undefined) return version;
+    if (sql.includes("SELECT m.material_number") && sql.includes("master_attributes AS numeric_0")) {
+      return [{ material_number: "79999999" }];
+    }
+    if (sql.includes("WITH ranked_attributes AS")) return [];
+    if (sql.includes("GROUP BY m.parent_family")) return [];
+    if (sql.includes("GROUP BY m.family")) return [{ name: "Compass™ CR", material_count: 41, total_count: 1 }];
+    if (sql.includes("m.family = ?") && sql.includes("json_each(?)")) throw new Error("temporary filtered listing failure");
+    if (sql.includes("m.family = ?")) return familyItems;
+    if (sql.includes("FROM master_chunks_fts")) return [];
+    return [];
+  });
+
+  const result = await retrieveMasterCatalog({
+    question: "Which Compass CR models have a maximum capacity between 700 g and 800 g?",
+    db,
+  });
+  assert.equal(result.status, "unavailable");
+  assert.equal(result.catalog_listing.status, "fallback");
+  assert.equal(result.catalog_listing.reason, "numeric_category_filter_incomplete");
+  assert.deepEqual(result.catalog_listing.items, []);
+  assert.equal(result.prompt_context, undefined);
+  assert.ok(result.retrieval.d1_health.failed_channels.includes("numeric_catalog_listing"));
 });
 
 test("seeds the pending progress queue idempotently in a deterministic namespace", async () => {

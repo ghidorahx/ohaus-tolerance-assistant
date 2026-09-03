@@ -117,6 +117,10 @@ test("searches every relationship type for generic compatibility wording and hon
   assert.deepEqual(requestedMasterRelationshipTypes("Which accessories fit 30268982?"), ["accessories"]);
   assert.deepEqual(interpretCatalogQuestion("Which spare parts work with 30268982?").relationship_types, ["spare_parts"]);
   assert.deepEqual(requestedMasterRelationshipTypes("Which spare parts work with 30268982?"), ["spare_parts"]);
+  const hyphenated = interpretCatalogQuestion("Which spare-part material numbers are listed for R-A30X2/13MS?");
+  assert.equal(hyphenated.asks_relationship, true);
+  assert.equal(hyphenated.relationship_type, "spare_parts");
+  assert.equal(hyphenated.fast_lane_candidate, true);
 });
 
 test("returns every master-catalog compatible model when the inbound list is below eighty", () => {
