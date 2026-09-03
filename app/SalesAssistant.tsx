@@ -44,6 +44,11 @@ type SalesAnswer = {
   retrieval_strategy: string;
   vectorize_status: string;
   retrieval_documents_sent: number;
+  timing?: {
+    retrieval_ms: number;
+    generation_ms: number;
+    total_ms: number;
+  };
 };
 
 type Message = {
@@ -60,6 +65,7 @@ type Exchange = {
 };
 
 type Health = {
+  provider?: "openai" | "gemini";
   api_configured: boolean;
   access_code_required: boolean;
   access_code_configured?: boolean;
@@ -104,6 +110,10 @@ type Health = {
     retrieval_status: string;
     source_file: string;
   };
+};
+
+type SalesAssistantProps = {
+  provider?: "openai" | "gemini";
 };
 
 type AskApiResponse = {
@@ -278,7 +288,12 @@ function SalesAnswerItems({ items, partNumbers }: { items: AnswerItem[]; partNum
   );
 }
 
-export default function SalesAssistant() {
+export default function SalesAssistant({ provider = "openai" }: SalesAssistantProps) {
+  const isGemini = provider === "gemini";
+  const apiPath = isGemini ? "api/sales?provider=gemini" : "api/sales";
+  const railDetailsId = isGemini ? "gemini-product-knowledge-details" : "sales-product-knowledge-details";
+  const questionId = isGemini ? "gemini-sales-question" : "sales-question";
+  const collapsePreferenceKey = isGemini ? "gemini-product-knowledge-collapsed" : "sales-product-knowledge-collapsed";
   const [health, setHealth] = useState<Health | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -293,9 +308,9 @@ export default function SalesAssistant() {
   useEffect(() => {
     const savedCode = window.localStorage.getItem("sales-pilot-access-code") ?? "";
     const preferenceTimer = window.setTimeout(() => {
-      setProductKnowledgeCollapsed(window.localStorage.getItem("sales-product-knowledge-collapsed") === "true");
+      setProductKnowledgeCollapsed(window.localStorage.getItem(collapsePreferenceKey) === "true");
     }, 0);
-    const url = new URL("api/sales", document.baseURI);
+    const url = new URL(apiPath, document.baseURI);
     fetch(url, { headers: { Accept: "application/json" } })
       .then(async (response) => {
         if (!response.ok) throw new Error("Product knowledge service unavailable");
@@ -308,7 +323,7 @@ export default function SalesAssistant() {
       })
       .catch(() => setError("The local product knowledge service is unavailable."));
     return () => window.clearTimeout(preferenceTimer);
-  }, []);
+  }, [apiPath, collapsePreferenceKey]);
 
   useEffect(() => {
     if (rateLimitSeconds <= 0) return;
@@ -348,14 +363,14 @@ export default function SalesAssistant() {
     setThinking(true);
 
     try {
-      const url = new URL("api/sales", document.baseURI);
+      const url = new URL(apiPath, document.baseURI);
       const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...(accessCode.trim() ? { "X-Pilot-Access-Code": accessCode.trim() } : {}),
         },
-        body: JSON.stringify({ question: trimmed, context }),
+        body: JSON.stringify({ question: trimmed, context, provider }),
       });
       const payload = await response.json().catch(() => ({})) as AskApiResponse;
       if (response.status === 401 && payload.code === "access_code_required") {
@@ -417,7 +432,7 @@ export default function SalesAssistant() {
   function toggleProductKnowledge() {
     setProductKnowledgeCollapsed((collapsed) => {
       const next = !collapsed;
-      window.localStorage.setItem("sales-product-knowledge-collapsed", String(next));
+      window.localStorage.setItem(collapsePreferenceKey, String(next));
       return next;
     });
   }
@@ -431,7 +446,7 @@ export default function SalesAssistant() {
   const outputTokens = Math.round((health?.context.max_output_tokens ?? 12_000) / 1_000);
 
   return (
-    <section className={`sales-workspace ${productKnowledgeCollapsed ? "sales-rail-collapsed" : ""}`} aria-label="Ask assistant">
+    <section className={`sales-workspace ${productKnowledgeCollapsed ? "sales-rail-collapsed" : ""}`} aria-label={isGemini ? "Gemini Lab assistant" : "Ask assistant"}>
       <aside className="sales-rail">
         <div className="sales-rail-header">
           <div className="sales-agent-badge" aria-hidden="true">AI</div>
@@ -440,7 +455,7 @@ export default function SalesAssistant() {
             type="button"
             onClick={toggleProductKnowledge}
             aria-expanded={!productKnowledgeCollapsed}
-            aria-controls="sales-product-knowledge-details"
+            aria-controls={railDetailsId}
             aria-label={`${productKnowledgeCollapsed ? "Expand" : "Collapse"} product knowledge panel`}
             title={`${productKnowledgeCollapsed ? "Expand" : "Collapse"} product knowledge`}
           >
@@ -448,7 +463,7 @@ export default function SalesAssistant() {
           </button>
         </div>
 
-        <div id="sales-product-knowledge-details" className="sales-rail-body" hidden={productKnowledgeCollapsed}>
+        <div id={railDetailsId} className="sales-rail-body" hidden={productKnowledgeCollapsed}>
           <div>
             <p className="eyebrow">Workbook-grounded</p>
             <h2>Product knowledge</h2>
@@ -464,8 +479,12 @@ export default function SalesAssistant() {
 
           <div className="sales-coverage-card">
             <span>Reasoning configuration</span>
-            <strong>Direct lookup first · GPT‑5.6 Sol {titleCase(health?.reasoning_effort, "medium")}</strong>
-            <small>Phrase-aware Excel lookup · OpenAI Fast mode for AI fallback · Terra fallback · {health?.catalog.chunks ?? health?.catalog.retrieval_documents ?? 45_167} focused knowledge chunks</small>
+            <strong>{isGemini
+              ? `Direct lookup first · Gemini 3.8 Flash ${titleCase(health?.reasoning_effort, "low")}`
+              : `Direct lookup first · GPT‑5.6 Sol ${titleCase(health?.reasoning_effort, "medium")}`}</strong>
+            <small>{isGemini
+              ? `Phrase-aware Excel utilities · Gemini low thinking · ${health?.catalog.chunks ?? health?.catalog.retrieval_documents ?? 45_167} focused knowledge chunks`
+              : `Phrase-aware Excel lookup · OpenAI Fast mode for AI fallback · Terra fallback · ${health?.catalog.chunks ?? health?.catalog.retrieval_documents ?? 45_167} focused knowledge chunks`}</small>
           </div>
 
           <div className="sales-memory-card">
@@ -476,14 +495,14 @@ export default function SalesAssistant() {
             </small>
           </div>
 
-          <footer>{health?.vectorize?.configured ? "Direct + semantic + lexical retrieval" : "Direct + lexical catalog retrieval"} · Ask pilot owner · T. Delacruz</footer>
+          <footer>{health?.vectorize?.configured ? "Direct + semantic + lexical retrieval" : "Direct + lexical catalog retrieval"} · {isGemini ? "Gemini experiment" : "Ask pilot owner · T. Delacruz"}</footer>
         </div>
       </aside>
 
       <section className="sales-chat-panel" aria-label="Product questions">
         <form className="sales-composer" onSubmit={onSubmit}>
           <div className="sales-composer-heading">
-            <label htmlFor="sales-question">Product question</label>
+            <label htmlFor={questionId}>Product question</label>
             <div className="sales-heading-actions">
             {messages.length > 0 && <button type="button" onClick={clearConversation}>Clear conversation</button>}
             <span className={`sales-ready ${!ready || coolingDown ? "waiting" : ""}`}>
@@ -516,7 +535,7 @@ export default function SalesAssistant() {
           <div className="sales-composer-row">
             <textarea
               ref={inputRef}
-              id="sales-question"
+              id={questionId}
               value={input}
               onChange={(event) => setInput(event.target.value)}
               onKeyDown={onComposerKeyDown}
@@ -540,7 +559,7 @@ export default function SalesAssistant() {
           {thinking && (
             <div className="sales-thinking" role="status">
               <span aria-hidden="true" />
-              Searching the relevant workbook records and verifying the answer…
+              Searching the relevant workbook records and verifying the answer with {isGemini ? "Gemini" : "Ask"}…
             </div>
           )}
 
@@ -549,7 +568,7 @@ export default function SalesAssistant() {
               <div className="sales-welcome">
                 <span className="sales-message-avatar" aria-hidden="true">AI</span>
                 <div>
-                  <strong>Product assistant</strong>
+                  <strong>{isGemini ? "Gemini product assistant" : "Product assistant"}</strong>
                   <p>I’ll identify the relevant records, verify the requested fields, and show exactly which catalog data supports the answer.</p>
                 </div>
               </div>
@@ -691,6 +710,7 @@ function SalesExchange({
                   : `${answer.model}${answer.fallback_used ? " fallback" : ""} · ${answer.reasoning_effort} reasoning · ${answer.reasoning_mode} mode${answer.service_tier ? ` · ${answer.service_tier === "priority" ? "fast" : answer.service_tier} service` : ""}`}</span>
                 <span>{answer.retrieval_strategy.includes("hybrid") ? "Semantic + exact catalog" : "Catalog retrieval"} · {answer.retrieval_documents_sent ?? 0} source chunk{answer.retrieval_documents_sent === 1 ? "" : "s"}</span>
                 <span>{answer.catalog_checks} catalog check{answer.catalog_checks === 1 ? "" : "s"}</span>
+                {answer.timing && <span>{answer.timing.total_ms.toLocaleString()} ms total · {answer.timing.retrieval_ms.toLocaleString()} ms search · {answer.timing.generation_ms.toLocaleString()} ms answer</span>}
               </div>
             </div>
           </details>

@@ -2,6 +2,18 @@
 
 A browser-first workspace with a source-linked Tolerance Assistant and a workbook-grounded Ask assistant.
 
+## Gemini Lab test branch
+
+The `codex/gemini-excel-tools` branch adds a separate **Gemini Lab** tab while leaving Ask on GPT-5.6. Both tabs use the same deterministic Excel utilities and master-catalog retrieval path, including exact identifiers, numeric filters, D1 lexical search, relationship lookup, and semantic retrieval when configured. This keeps latency and answer-quality comparisons grounded in the same source data. Gemini Lab uses `gemini-3.8-flash` with low thinking by default and shows search, generation, and total request time in each answer's details.
+
+Set the Gemini key only on the server. For local testing, copy `.env.example` to `.env.local` and fill in `GEMINI_API_KEY`. For a deployed Worker, store it as a secret:
+
+```sh
+npx wrangler secret put GEMINI_API_KEY --config wrangler.deploy.jsonc
+```
+
+`GEMINI_MODEL` and `GEMINI_THINKING_LEVEL` are optional; their defaults are `gemini-3.8-flash` and `low`. The existing team access code protects both model-backed tabs.
+
 ## Workbook-grounded Ask assistant
 
 Ask is grounded in `MMMDF_EN_US_20260605_AI_Organized 2.xlsx`, the master product workbook. The current generated version contains 6,407 materials across 46 named parent families and 45,167 bounded retrieval chunks. `Product_Catalog_AI` is imported as the source sheet; the duplicate `Raw_Data` sheet is intentionally not indexed a second time.

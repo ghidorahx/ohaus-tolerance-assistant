@@ -11,6 +11,12 @@ import {
   MAX_VERIFIED_CONTEXT_TURNS,
 } from "@/lib/sales-agent.mjs";
 import {
+  answerSalesQuestionWithGemini,
+  DEFAULT_GEMINI_MODEL,
+  DEFAULT_GEMINI_THINKING_LEVEL,
+  GEMINI_MAX_OUTPUT_TOKENS,
+} from "@/lib/gemini-sales-agent.mjs";
+import {
   buildGroundingBundle,
   getSalesCatalogStatus,
   MAX_RETRIEVAL_DOCUMENTS,
@@ -341,6 +347,7 @@ function masterRetrievalOptions(question: string) {
 }
 
 export async function GET(request: Request) {
+  const provider = new URL(request.url).searchParams.get("provider") === "gemini" ? "gemini" : "openai";
   const bindings = await cloudflareBindings();
   const accessPolicy = accessCodePolicy(request);
   const masterStatus = await getMasterCatalogStatus({
@@ -358,17 +365,18 @@ export async function GET(request: Request) {
     };
   return json({
     status: accessPolicy.available ? "ready" : "configuration_required",
-    model: process.env.OPENAI_MODEL ?? DEFAULT_MODEL,
-    fallback_model: process.env.OPENAI_FALLBACK_MODEL ?? DEFAULT_FALLBACK_MODEL,
-    reasoning_effort: DEFAULT_REASONING_EFFORT,
-    reasoning_mode: process.env.OPENAI_REASONING_MODE ?? DEFAULT_REASONING_MODE,
-    service_tier: DEFAULT_SERVICE_TIER,
+    provider,
+    model: provider === "gemini" ? process.env.GEMINI_MODEL ?? DEFAULT_GEMINI_MODEL : process.env.OPENAI_MODEL ?? DEFAULT_MODEL,
+    fallback_model: provider === "gemini" ? "none" : process.env.OPENAI_FALLBACK_MODEL ?? DEFAULT_FALLBACK_MODEL,
+    reasoning_effort: provider === "gemini" ? process.env.GEMINI_THINKING_LEVEL ?? DEFAULT_GEMINI_THINKING_LEVEL : DEFAULT_REASONING_EFFORT,
+    reasoning_mode: provider === "gemini" ? "gemini" : process.env.OPENAI_REASONING_MODE ?? DEFAULT_REASONING_MODE,
+    service_tier: provider === "gemini" ? "standard" : DEFAULT_SERVICE_TIER,
     answer_routing: {
       deterministic_fast_lane: true,
       phrase_normalization: true,
       ai_fallback: true,
     },
-    api_configured: Boolean(process.env.OPENAI_API_KEY),
+    api_configured: provider === "gemini" ? Boolean(process.env.GEMINI_API_KEY) : Boolean(process.env.OPENAI_API_KEY),
     access_code_required: accessPolicy.required,
     access_code_configured: accessPolicy.configured,
     vectorize: vectorizeStatus,
@@ -378,7 +386,7 @@ export async function GET(request: Request) {
       max_retrieval_documents: Math.max(MAX_RETRIEVAL_DOCUMENTS, MASTER_MAX_RETRIEVAL_CHUNKS),
       max_total_request_tokens: MAX_TOTAL_REQUEST_TOKENS,
       max_input_tokens: MAX_INPUT_TOKENS,
-      max_output_tokens: MAX_OUTPUT_TOKENS,
+      max_output_tokens: provider === "gemini" ? GEMINI_MAX_OUTPUT_TOKENS : MAX_OUTPUT_TOKENS,
     },
     catalog: masterCatalog ?? getSalesCatalogStatus(),
   });
@@ -403,7 +411,7 @@ export async function POST(request: Request) {
     return json({ error: "Enter the team access code to continue.", code: "access_code_required" }, 401);
   }
 
-  let body: { question?: unknown; context?: unknown };
+  let body: { question?: unknown; context?: unknown; provider?: unknown };
   try {
     body = await readBoundedJson(request, MAX_CHAT_BODY_BYTES);
   } catch (error) {
@@ -414,6 +422,9 @@ export async function POST(request: Request) {
   }
 
   const question = typeof body.question === "string" ? body.question.trim() : "";
+  const provider = body.provider === "gemini" || new URL(request.url).searchParams.get("provider") === "gemini"
+    ? "gemini"
+    : "openai";
   if (question.length < 2 || question.length > 1_600) {
     return json({ error: "Ask a product question between 2 and 1,600 characters." }, 400);
   }
@@ -422,7 +433,9 @@ export async function POST(request: Request) {
     const context = boundedContext(body.context);
     const bindings = await cloudflareBindings();
     const contextMaterials = [...new Set(context.flatMap((turn) => turn.materials.map(String)))];
-    const primaryModel = process.env.OPENAI_MODEL ?? DEFAULT_MODEL;
+    const primaryModel = provider === "gemini"
+      ? process.env.GEMINI_MODEL ?? DEFAULT_GEMINI_MODEL
+      : process.env.OPENAI_MODEL ?? DEFAULT_MODEL;
     const interpretation = interpretCatalogQuestion(question);
     const latestContextMaterials = [...context]
       .reverse()
@@ -538,8 +551,11 @@ export async function POST(request: Request) {
       }
     }
 
-    if (!process.env.OPENAI_API_KEY) {
-      return json({ error: "The OpenAI connection is not configured for this question.", code: "ai_not_configured" }, 503);
+    if (provider === "gemini" ? !process.env.GEMINI_API_KEY : !process.env.OPENAI_API_KEY) {
+      return json({
+        error: `The ${provider === "gemini" ? "Gemini" : "OpenAI"} connection is not configured for this question.`,
+        code: "ai_not_configured",
+      }, 503);
     }
 
     let semanticRetrieval = { status: "not_configured", matches: [] };
@@ -570,18 +586,28 @@ export async function POST(request: Request) {
     }
 
     const generationStarted = performance.now();
-    const answer = await answerSalesQuestionWithAI({
-      question,
-      sessionContext: context,
-      apiKey: process.env.OPENAI_API_KEY,
-      model: primaryModel,
-      fallbackModel: process.env.OPENAI_FALLBACK_MODEL ?? DEFAULT_FALLBACK_MODEL,
-      reasoningEffort: DEFAULT_REASONING_EFFORT,
-      reasoningMode: process.env.OPENAI_REASONING_MODE ?? DEFAULT_REASONING_MODE,
-      semanticRetrieval,
-      groundingBundle,
-      evidenceHydrator: usingMasterGrounding ? hydrateMasterEvidenceItems : undefined,
-    });
+    const answer = provider === "gemini"
+      ? await answerSalesQuestionWithGemini({
+        question,
+        sessionContext: context,
+        apiKey: process.env.GEMINI_API_KEY!,
+        model: process.env.GEMINI_MODEL ?? DEFAULT_GEMINI_MODEL,
+        thinkingLevel: process.env.GEMINI_THINKING_LEVEL ?? DEFAULT_GEMINI_THINKING_LEVEL,
+        groundingBundle,
+        evidenceHydrator: usingMasterGrounding ? hydrateMasterEvidenceItems : undefined,
+      })
+      : await answerSalesQuestionWithAI({
+        question,
+        sessionContext: context,
+        apiKey: process.env.OPENAI_API_KEY!,
+        model: primaryModel,
+        fallbackModel: process.env.OPENAI_FALLBACK_MODEL ?? DEFAULT_FALLBACK_MODEL,
+        reasoningEffort: DEFAULT_REASONING_EFFORT,
+        reasoningMode: process.env.OPENAI_REASONING_MODE ?? DEFAULT_REASONING_MODE,
+        semanticRetrieval,
+        groundingBundle,
+        evidenceHydrator: usingMasterGrounding ? hydrateMasterEvidenceItems : undefined,
+      });
     const generationMilliseconds = performance.now() - generationStarted;
     const masterCatalog = masterCatalogHealthForVersion(masterRetrieval?.version ?? null);
     return json({
@@ -598,12 +624,15 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error(JSON.stringify({
-      message: "Ask assistant request failed",
+      message: "Product assistant request failed",
       error: error instanceof Error ? error.message : String(error),
     }));
     const upstream = error as { status?: number; code?: string | null; message?: string; retryAfterSeconds?: number | null };
     if (upstream.status === 429 && (upstream.code === "insufficient_quota" || /credits|quota/i.test(upstream.message ?? ""))) {
-      return json({ error: "The OpenAI API project needs billing credits before the assistant can answer.", code: "ai_billing_required" }, 503);
+      return json({
+        error: `The ${provider === "gemini" ? "Gemini" : "OpenAI"} API project needs available quota before the assistant can answer.`,
+        code: "ai_billing_required",
+      }, 503);
     }
     if (upstream.status === 429) {
       const retryAfterSeconds = Math.max(1, Math.min(600, Math.ceil(upstream.retryAfterSeconds ?? 30)));

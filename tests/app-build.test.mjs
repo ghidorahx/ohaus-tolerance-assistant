@@ -93,6 +93,24 @@ test("packages the workbook-grounded Ask endpoint and focused context policy", a
   assert.ok(payload.vectorize.vector_records > payload.vectorize.source_documents);
 });
 
+test("packages an isolated Gemini Lab configuration on the same Excel retrieval pipeline", async () => {
+  const response = await fetchBuiltWorker("/api/sales?provider=gemini");
+  assert.equal(response.status, 200);
+  const payload = await response.json();
+  assert.equal(payload.provider, "gemini");
+  assert.equal(payload.model, "gemini-3.8-flash");
+  assert.equal(payload.fallback_model, "none");
+  assert.equal(payload.reasoning_effort, "low");
+  assert.equal(payload.reasoning_mode, "gemini");
+  assert.equal(payload.context.max_output_tokens, 8_000);
+  assert.equal(payload.catalog.portable_products, 80);
+  assert.deepEqual(payload.answer_routing, {
+    deterministic_fast_lane: true,
+    phrase_normalization: true,
+    ai_fallback: true,
+  });
+});
+
 test("answers a high-confidence Excel lookup directly without an OpenAI call", async () => {
   const response = await postBuiltWorker("/api/sales", {
     question: "How much can CR221 weigh, and what is the smallest weight it can show?",
@@ -158,6 +176,62 @@ test("keeps Medium plus Fast for AI fallback and hydrates legacy evidence with t
     globalThis.fetch = previousFetch;
     if (previousApiKey === undefined) delete process.env.OPENAI_API_KEY;
     else process.env.OPENAI_API_KEY = previousApiKey;
+  }
+});
+
+test("routes Gemini Lab AI fallback through Gemini with the same hydrated Excel evidence", async () => {
+  const previousApiKey = process.env.GEMINI_API_KEY;
+  const previousFetch = globalThis.fetch;
+  const requests = [];
+  process.env.GEMINI_API_KEY = "test-gemini-key";
+  globalThis.fetch = async (url, init) => {
+    if (!String(url).includes("generativelanguage.googleapis.com")) return previousFetch(url, init);
+    requests.push(JSON.parse(init.body));
+    return Response.json({
+      id: "interaction-built-worker",
+      model: "gemini-3.8-flash",
+      status: "completed",
+      steps: [{
+        type: "model_output",
+        content: [{
+          type: "text",
+          text: JSON.stringify({
+            answer: "CR221 has a maximum capacity of 220 g.",
+            answer_items: [{ identifier: "30428204", label: "CR221", description: "Maximum capacity: 220 g" }],
+            status: "answered",
+            confidence: "high",
+            intent: "lookup",
+            materials: ["30428204"],
+            evidence: [{ material_number: "30428204", field: "specifications.maximum_capacity" }],
+            unresolved_items: [],
+            follow_up_suggestions: [],
+            context_summary: "The user asked about CR221.",
+            escalation_reason: null,
+          }),
+        }],
+      }],
+    });
+  };
+
+  try {
+    const response = await postBuiltWorker("/api/sales?provider=gemini", {
+      provider: "gemini",
+      question: "Explain CR221 capacity",
+      context: [],
+    });
+    assert.equal(response.status, 200);
+    const payload = await response.json();
+    assert.equal(requests.length, 1);
+    assert.equal(requests[0].model, "gemini-3.8-flash");
+    assert.equal(requests[0].generation_config.thinking_level, "low");
+    assert.equal(payload.answer.model, "gemini-3.8-flash");
+    assert.equal(payload.answer.reasoning_mode, "gemini");
+    assert.deepEqual(payload.answer.evidence.map((item) => [item.material_number, item.value]), [["30428204", "220 g"]]);
+    assert.ok(payload.answer.timing.total_ms >= payload.answer.timing.generation_ms);
+  } finally {
+    globalThis.fetch = previousFetch;
+    if (previousApiKey === undefined) delete process.env.GEMINI_API_KEY;
+    else process.env.GEMINI_API_KEY = previousApiKey;
   }
 });
 

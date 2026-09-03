@@ -36,7 +36,7 @@ test("uses the requested neutral glass presentation", () => {
 
 test("provides a workbook-grounded Ask assistant with focused verified context", () => {
   assert.match(page, /<SalesAssistant/);
-  assert.match(salesAssistant, /new URL\("api\/sales"/);
+  assert.match(salesAssistant, /const apiPath = isGemini \? "api\/sales\?provider=gemini" : "api\/sales"/);
   assert.match(salesAssistant, /buildContext/);
   assert.match(salesAssistant, /verified turns/);
   assert.match(salesAssistant, /Verified catalog evidence/);
@@ -61,7 +61,7 @@ test("keeps the Sales surface concise and supports answer-specific follow-ups", 
 });
 
 test("keeps Ask on medium reasoning and Fast fallback without a customer-facing slider", () => {
-  assert.match(salesAssistant, /Direct lookup first · GPT‑5\.6 Sol \{titleCase\(health\?\.reasoning_effort, "medium"\)\}/);
+  assert.match(salesAssistant, /GPT‑5\.6 Sol \$\{titleCase\(health\?\.reasoning_effort, "medium"\)\}/);
   assert.match(salesAssistant, /Phrase-aware Excel lookup · OpenAI Fast mode for AI fallback/);
   assert.doesNotMatch(salesAssistant, /type="range"/);
   assert.doesNotMatch(salesAssistant, /reasoning_profile/);
@@ -130,7 +130,7 @@ test("keeps evidence and diagnostics inside one collapsed reference panel", () =
 test("makes the Sales product-knowledge rail collapsible and accessible", () => {
   assert.match(salesAssistant, /productKnowledgeCollapsed/);
   assert.match(salesAssistant, /aria-expanded=\{!productKnowledgeCollapsed\}/);
-  assert.match(salesAssistant, /aria-controls="sales-product-knowledge-details"/);
+  assert.match(salesAssistant, /aria-controls=\{railDetailsId\}/);
   assert.match(salesAssistant, /sales-product-knowledge-collapsed/);
   assert.match(styles, /\.sales-workspace\.sales-rail-collapsed/);
   assert.match(styles, /\.sales-rail-body\[hidden\]/);
@@ -139,6 +139,7 @@ test("makes the Sales product-knowledge rail collapsible and accessible", () => 
 test("keeps the Tolerance and Ask workspaces mounted while switching tabs", () => {
   assert.match(page, /className="mode-surface tolerance-mode-surface" hidden=\{mode !== "tolerance"\}/);
   assert.match(page, /className="mode-surface sales-mode-surface" hidden=\{!isSalesMode\}/);
+  assert.match(page, /className="mode-surface sales-mode-surface" hidden=\{!isGeminiMode\}/);
   assert.doesNotMatch(page, /compatibility-mode-surface/);
   assert.doesNotMatch(page, />3D Web</);
   assert.doesNotMatch(page, /\{isSalesMode && <SalesAssistant/);
@@ -146,4 +147,13 @@ test("keeps the Tolerance and Ask workspaces mounted while switching tabs", () =
 
   const switchMode = page.match(/function switchMode[\s\S]*?\n {2}\}/)?.[0] ?? "";
   assert.doesNotMatch(switchMode, /setInput\(""\)/);
+});
+
+test("adds a separate Gemini Lab backed by the same product interface", () => {
+  assert.match(page, /type AssistantMode = "tolerance" \| "sales" \| "gemini"/);
+  assert.match(page, /Gemini Lab/);
+  assert.match(page, /<SalesAssistant provider="gemini"/);
+  assert.match(salesAssistant, /provider\?: "openai" \| "gemini"/);
+  assert.match(salesAssistant, /Gemini 3\.8 Flash/);
+  assert.match(salesAssistant, /timing\.total_ms\.toLocaleString\(\)/);
 });

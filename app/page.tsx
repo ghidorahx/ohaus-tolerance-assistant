@@ -84,7 +84,7 @@ type Exchange = {
   assistant: Message;
 };
 
-type AssistantMode = "tolerance" | "sales";
+type AssistantMode = "tolerance" | "sales" | "gemini";
 
 const starterMessage: Message = {
   id: "welcome",
@@ -215,6 +215,8 @@ export default function Home() {
   );
 
   const isSalesMode = mode === "sales";
+  const isGeminiMode = mode === "gemini";
+  const isProductMode = isSalesMode || isGeminiMode;
 
   const exchanges = useMemo(() => {
     const conversation = messages.filter((message) => message.id !== "welcome");
@@ -260,13 +262,13 @@ export default function Home() {
   }
 
   return (
-    <main className={`app-shell ${isSalesMode ? "sales-mode" : "tolerance-mode"}`}>
+    <main className={`app-shell ${isProductMode ? "sales-mode" : "tolerance-mode"}`}>
       <header className="topbar">
         <div className="brand">
           <div className="brand-mark" aria-hidden="true">O</div>
           <div>
-            <p className="eyebrow">{isSalesMode ? "Product intelligence" : "Service reference"}</p>
-            <h1>{isSalesMode ? "Ask" : "Tolerance Assistant"}</h1>
+            <p className="eyebrow">{isProductMode ? "Product intelligence" : "Service reference"}</p>
+            <h1>{isGeminiMode ? "Gemini Lab" : isSalesMode ? "Ask" : "Tolerance Assistant"}</h1>
           </div>
         </div>
 
@@ -287,19 +289,30 @@ export default function Home() {
             <span className="mode-icon" aria-hidden="true">?</span>
             Ask
           </button>
+          <button
+            className={isGeminiMode ? "active" : ""}
+            onClick={() => switchMode("gemini")}
+            aria-pressed={isGeminiMode}
+          >
+            <span className="mode-icon" aria-hidden="true">G</span>
+            Gemini Lab
+          </button>
         </nav>
 
         <div className="header-actions">
           {mode === "tolerance" && <button className="clear-button" onClick={clearConversation}>Clear chat</button>}
           <div className="header-status">
             <span className="status-dot" aria-hidden="true" />
-            {isSalesMode ? "Workbook grounded" : "Verified local data"}
+            {isProductMode ? "Workbook grounded" : "Verified local data"}
           </div>
         </div>
       </header>
 
       <div className="mode-surface sales-mode-surface" hidden={!isSalesMode}>
         <SalesAssistant />
+      </div>
+      <div className="mode-surface sales-mode-surface" hidden={!isGeminiMode}>
+        <SalesAssistant provider="gemini" />
       </div>
       <div className="mode-surface tolerance-mode-surface" hidden={mode !== "tolerance"}>
         <section className="workspace">
