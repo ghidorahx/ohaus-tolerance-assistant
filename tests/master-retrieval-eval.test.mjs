@@ -475,26 +475,25 @@ test("requires semantic discovery anchors to arrive through the semantic channel
   assert.deepEqual(summary.failures[0].missing_semantic_materials, ["83041308"]);
 });
 
-test("requires exact filtered listings and accepts a proven empty range", async () => {
-  const fixtureRaw = fixtureRawForCases([{
-    id: "empty-range",
-    category: "no_results",
-    query: "empty range",
-    expected: {
-      answerability: "no_results",
-      material_numbers: [],
-      result_assertions: {
-        catalog_listing_kind: "materials_by_category",
-        category_level: "family",
-        category_name: "Compass™ CR",
-        exact_listing_material_numbers: [],
-        numeric_constraints: [
-          { field: "capacity", comparator: "at_least", value: 700, unit: "g" },
-          { field: "capacity", comparator: "at_most", value: 800, unit: "g" },
-        ],
-      },
+test("requires exact filtered listings and rejects stray materials from a proven empty range", async () => {
+  const expected = {
+    answerability: "no_results",
+    material_numbers: [],
+    result_assertions: {
+      catalog_listing_kind: "materials_by_category",
+      category_level: "family",
+      category_name: "Compass™ CR",
+      exact_listing_material_numbers: [],
+      numeric_constraints: [
+        { field: "capacity", comparator: "at_least", value: 700, unit: "g" },
+        { field: "capacity", comparator: "at_most", value: 800, unit: "g" },
+      ],
     },
-  }]);
+  };
+  const fixtureRaw = fixtureRawForCases([
+    { id: "empty-range", category: "no_results", query: "empty range", expected },
+    { id: "empty-range-stray", category: "no_results", query: "empty range with stray", expected },
+  ]);
   const calls = [];
   const { summary } = await evaluateMasterRetrieval({
     url: "https://example.invalid/api/sales",
@@ -528,6 +527,7 @@ test("requires exact filtered listings and accepts a proven empty range", async 
                 truncated: false,
                 items: [],
               },
+              chunks: body.question.includes("stray") ? [{ material_number: "80000003" }] : [],
             },
           };
         },
@@ -536,8 +536,10 @@ test("requires exact filtered listings and accepts a proven empty range", async 
     log() {},
   });
 
-  assert.equal(summary.status, "passed");
+  assert.equal(summary.status, "failed");
   assert.equal(summary.passed, 1);
+  assert.equal(summary.failed, 1);
+  assert.deepEqual(summary.failures[0].unexpected_materials, ["80000003"]);
 });
 
 test("requires technical source headers while ignoring identity-only source fields", async () => {

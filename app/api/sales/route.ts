@@ -331,7 +331,7 @@ function publicMasterAdminStatus(masterStatus: Awaited<ReturnType<typeof getMast
 
 function masterRetrievalOptions(question: string) {
   const expansive = /\b(?:all|every|complete|compare|comparison|list|which products?|which models?)\b/i.test(question);
-  const relationshipList = /\b(?:compatible|compatibility|fit|fits|accessories|spare parts?|replacement parts?|related items?|relationships?)\b|\bworks?\s+with\b/i.test(question);
+  const relationshipList = /\b(?:compatible|compatibility|fit|fits|accessories|spare[ -]?parts?|replacement(?:[ -]?parts?)?|services?|cross[ -]?sell(?:ing)?|upsell(?:ing)?s?|related items?|relationships?)\b|\bworks?\s+with\b/i.test(question);
   return {
     topK: expansive ? 48 : 30,
     chunkLimit: expansive ? MASTER_MAX_RETRIEVAL_CHUNKS : MASTER_DEFAULT_CHUNK_LIMIT,
@@ -443,6 +443,7 @@ export async function POST(request: Request) {
         const retrievalStarted = performance.now();
         masterRetrieval = await retrieveMasterCatalog({
           question: retrievalQuestion,
+          rawQuestion: question,
           contextMaterials: interpretation.fast_lane_candidate ? directRetrievalContext : contextMaterials,
           db: bindings.CATALOG_DB,
           // High-confidence direct lookups deliberately skip embeddings. The
@@ -514,6 +515,7 @@ export async function POST(request: Request) {
           const semanticRetrievalStarted = performance.now();
           const semanticMasterRetrieval = await retrieveMasterCatalog({
             question: retrievalQuestion,
+            rawQuestion: question,
             contextMaterials,
             db: bindings.CATALOG_DB,
             ai: bindings.AI,

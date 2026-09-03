@@ -84,6 +84,14 @@ test("authenticated retrieval diagnostics derive semantic materials from selecte
   assert.match(adminPut, /retrievalProfileSha256:\s*body\.retrieval_profile_sha256/);
 });
 
+test("public retrieval preserves the raw customer question on both retrieval passes", () => {
+  const publicPost = salesRoute.slice(
+    salesRoute.indexOf("export async function POST"),
+    salesRoute.indexOf("export async function PUT"),
+  );
+  assert.equal(publicPost.match(/rawQuestion:\s*question/g)?.length, 2);
+});
+
 test("catalog administration rejects cross-origin requests before authorization", { concurrency: false }, async () => {
   await withEnvironment({ CATALOG_ADMIN_TOKEN: "valid-admin-token" }, async () => {
     const response = await request("https://support.example/api/sales", {

@@ -9,19 +9,19 @@
   "raw_fixture_case_count": 115,
   "unsupported_case_count": 6,
   "retrieval_build": {
-    "retrieval_code_sha256": "bb066c221f7a9644d5b611465578a905cfea48c7a35b7eee0b5d9c148b11a622",
+    "retrieval_code_sha256": "d2a3c57c793f05b4307e2d8083917b438848911f57d2225f0609e3aed459df99",
     "code_files": [
       {
         "path": "lib/master-catalog-rag.mjs",
-        "sha256": "2d1a24da93050d2f9d51bcd61508ae3a8321622d7eb619b6afc017c87258edf5"
+        "sha256": "813ae0c8c3a2dbaf604231172ead481ef209ed3adafefc040f96d3a66c46ac64"
       },
       {
         "path": "app/api/sales/route.ts",
-        "sha256": "c8daf66bbda20f3e65907d8d9765742958829b70188c5adb379b186987ad1b6a"
+        "sha256": "fd32c2616d5bbd8864bc9a6ae84ed485f4a3095ffdcdf880d760aa1020df0a47"
       },
       {
         "path": "scripts/evaluate-master-retrieval.mjs",
-        "sha256": "dc163a7bd4df9dfb7ca3a3021ae5f11ab340e7e47ff7349dbc29ae94c86a94a7"
+        "sha256": "28ea730df6731edb7e2b43647f897554be7f379901c05ee22773cb85cec4602b"
       },
       {
         "path": "scripts/verify-master-retrieval-profile.mjs",
@@ -48,5 +48,5 @@
       "metric": "cosine"
     }
   },
-  "retrieval_profile_sha256": "9fccac9e41210c7a7d2f770299a2591ea0c68dfb3431791954c593bebc4f66e8"
+  "retrieval_profile_sha256": "aca5253994ff75ea4017a370c99ea5a894a6d69137f4ded0b9d05f03c04fbe9e"
 }

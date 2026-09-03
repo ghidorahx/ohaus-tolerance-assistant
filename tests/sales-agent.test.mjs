@@ -209,6 +209,8 @@ test("uses intent-sized output budgets", () => {
   assert.equal(outputTokenLimitForQuestion("Which models are compatible with this accessory?"), 8_000);
   assert.equal(outputTokenLimitForQuestion("Which models fit this part?"), 8_000);
   assert.equal(outputTokenLimitForQuestion("What models work with this part?"), 8_000);
+  assert.equal(outputTokenLimitForQuestion("List every service linked to this product"), 8_000);
+  assert.equal(outputTokenLimitForQuestion("Show the upsell items for this product"), 8_000);
   assert.equal(outputTokenLimitForQuestion("Give me every detail in the complete record"), 12_000);
 });
 
