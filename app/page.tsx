@@ -84,7 +84,7 @@ type Exchange = {
   assistant: Message;
 };
 
-type AssistantMode = "tolerance" | "sales" | "gemini";
+type AssistantMode = "tolerance" | "sales";
 
 const starterMessage: Message = {
   id: "welcome",
@@ -215,8 +215,7 @@ export default function Home() {
   );
 
   const isSalesMode = mode === "sales";
-  const isGeminiMode = mode === "gemini";
-  const isProductMode = isSalesMode || isGeminiMode;
+  const isProductMode = isSalesMode;
 
   const exchanges = useMemo(() => {
     const conversation = messages.filter((message) => message.id !== "welcome");
@@ -268,7 +267,7 @@ export default function Home() {
           <div className="brand-mark" aria-hidden="true">O</div>
           <div>
             <p className="eyebrow">{isProductMode ? "Product intelligence" : "Service reference"}</p>
-            <h1>{isGeminiMode ? "Gemini Lab" : isSalesMode ? "Ask" : "Tolerance Assistant"}</h1>
+            <h1>{isSalesMode ? "Ask" : "Tolerance Assistant"}</h1>
           </div>
         </div>
 
@@ -289,14 +288,6 @@ export default function Home() {
             <span className="mode-icon" aria-hidden="true">?</span>
             Ask
           </button>
-          <button
-            className={isGeminiMode ? "active" : ""}
-            onClick={() => switchMode("gemini")}
-            aria-pressed={isGeminiMode}
-          >
-            <span className="mode-icon" aria-hidden="true">G</span>
-            Gemini Lab
-          </button>
         </nav>
 
         <div className="header-actions">
@@ -310,9 +301,6 @@ export default function Home() {
 
       <div className="mode-surface sales-mode-surface" hidden={!isSalesMode}>
         <SalesAssistant />
-      </div>
-      <div className="mode-surface sales-mode-surface" hidden={!isGeminiMode}>
-        <SalesAssistant provider="gemini" />
       </div>
       <div className="mode-surface tolerance-mode-surface" hidden={mode !== "tolerance"}>
         <section className="workspace">

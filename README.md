@@ -2,9 +2,9 @@
 
 A browser-first workspace with a source-linked Tolerance Assistant and a workbook-grounded Ask assistant.
 
-## Gemini Lab test branch
+## Gemini-powered Ask assistant
 
-The `codex/gemini-excel-tools` branch adds a separate **Gemini Lab** tab while leaving Ask on GPT-5.6. Both tabs use the same deterministic Excel utilities and master-catalog retrieval path, including exact identifiers, numeric filters, D1 lexical search, relationship lookup, and semantic retrieval when configured. This keeps latency and answer-quality comparisons grounded in the same source data. Gemini Lab uses `gemini-3.8-flash` with low thinking by default and shows search, generation, and total request time in each answer's details.
+Ask uses Gemini with the deterministic Excel utilities and master-catalog retrieval path, including exact identifiers, numeric filters, D1 lexical search, relationship lookup, and semantic retrieval when configured. Gemini uses low thinking by default, while the interface reports search, generation, and total request time in each answer's details.
 
 Set the Gemini key only on the server. For local testing, copy `.env.example` to `.env.local` and fill in `GEMINI_API_KEY`. For a deployed Worker, store it as a secret:
 
@@ -12,26 +12,26 @@ Set the Gemini key only on the server. For local testing, copy `.env.example` to
 npx wrangler secret put GEMINI_API_KEY --config wrangler.deploy.jsonc
 ```
 
-`GEMINI_MODEL` and `GEMINI_THINKING_LEVEL` are optional; their defaults are `gemini-3.8-flash` and `low`. The existing team access code protects both model-backed tabs.
+`GEMINI_MODEL` and `GEMINI_THINKING_LEVEL` are optional; their defaults are `gemini-3.7-flash` and `low`. The existing team access code protects the model-backed Ask tab.
 
 ## Workbook-grounded Ask assistant
 
 Ask is grounded in `MMMDF_EN_US_20260605_AI_Organized 2.xlsx`, the master product workbook. The current generated version contains 6,407 materials across 46 named parent families and 45,167 bounded retrieval chunks. `Product_Catalog_AI` is imported as the source sheet; the duplicate `Raw_Data` sheet is intentionally not indexed a second time.
 
-The assistant uses a hybrid retrieval pipeline instead of sending the workbook, or a 450K-token catalog dump, to OpenAI for every question:
+The assistant uses a hybrid retrieval pipeline instead of sending the workbook, or a 450K-token catalog dump, to Gemini for every question:
 
 1. Normalize the customer wording and resolve exact material numbers, trade names, model aliases, and alternate model spellings.
 2. Parse deterministic numeric requirements and compare canonical units for fields such as capacity, readability, dimensions, mass, volume, time, and temperature.
 3. Search D1 with exact indexed lookups and SQLite FTS5 for lexical matches.
 4. Search the active catalog namespace in Cloudflare Vectorize for semantic matches generated with Workers AI (`@cf/baai/bge-small-en-v1.5`, 384 dimensions, in `ohaus-master-catalog-fast-v1`).
 5. Merge and rank the candidates, then hydrate only the relevant source fields, relationships, document links, and material records from D1.
-6. Send that compact, source-traceable grounding bundle to the OpenAI Responses API for the final answer.
+6. Send that compact, source-traceable grounding bundle to Gemini for the final answer.
 
 Exact identifiers, numeric filtering, FTS, aliases, and semantic retrieval complement one another; Vectorize is not treated as the authority for specifications. Model memory and earlier chat answers are never accepted as product evidence. If semantic retrieval is unavailable, the deterministic master-catalog paths can still answer. If the master D1 catalog is unavailable or has no active version, Ask falls back to the older verified 80-product portable-balance catalog so the interface remains usable; that fallback has much narrower coverage.
 
-The generation fallback is `gpt-5.6-sol` with fixed `medium` reasoning in Standard mode and request-level OpenAI Fast mode (`service_tier: "fast"`). High-confidence model/material lookups use a phrase-aware deterministic Excel fast lane first, without an embedding or generative-model call. Ambiguous, interpretive, and open-ended requests continue through semantic retrieval and GPT. `gpt-5.6-terra` is used only as the same-generation fallback for a transient Sol rate limit and keeps the same Fast service tier. Official [GPT-5.6 model guidance](https://developers.openai.com/api/docs/guides/latest-model) describes medium as the balanced starting point, while the [Fast mode guide](https://developers.openai.com/api/docs/guides/fast-mode) documents the latency and pricing tradeoff. The reusable instruction prefix stays stable for [prompt caching](https://developers.openai.com/api/reference/resources/responses/methods/create), while the changing question and compact retrieved evidence are appended per request.
+The generation fallback is Gemini with fixed `low` thinking. High-confidence model/material lookups use a phrase-aware deterministic Excel fast lane first, without an embedding or generative-model call. Ambiguous, interpretive, and open-ended requests continue through semantic retrieval and Gemini. The changing question and compact retrieved evidence are appended per request.
 
-Each request retains at most 12 verified conversation turns and has a 66K-token safety ceiling: up to 54K input tokens and up to 12K output tokens. Normal answers remain capped lower, while compatibility and relationship lists receive an 8K allowance. These are ceilings rather than targets; routine questions should retrieve a small set of relevant chunks and fields. Exact relationship lookups bypass generative AI and can return up to 80 separately listed catalog items, with explicit truncation when a source list is larger. Every new question revalidates product claims against the active catalog, the OpenAI response is not stored by the app, and the API key and catalog remain server-side.
+Each request retains at most 12 verified conversation turns and has a 66K-token safety ceiling: up to 54K input tokens and up to 8K output tokens. These are ceilings rather than targets; routine questions should retrieve a small set of relevant chunks and fields. Exact relationship lookups bypass generative AI and can return up to 80 separately listed catalog items, with explicit truncation when a source list is larger. Every new question revalidates product claims against the active catalog, the Gemini response is not stored by the app, and the API key and catalog remain server-side.
 
 ### Catalog source pipeline
 
@@ -145,7 +145,7 @@ The workbook contains product fields and document URLs, but the referenced PDF b
 
 At the time of this import, the remote D1 database is 424,308,736 bytes (about 424 MB). Cloudflare's current [D1 limits](https://developers.cloudflare.com/d1/platform/limits/) allow 500 MB per database on Workers Free and 10 GB on Workers Paid. Consequently, a second full catalog version should not be staged in the same database on the Free plan. The 45,167-vector seed is resumable, but its progress updates can approach the Free plan's daily row-write allowance, and the 22,426,666-character embedding corpus may slightly exceed one day's [Workers AI free allocation](https://developers.cloudflare.com/workers-ai/platform/pricing/) depending on actual tokenization. Cloudflare's [Free D1 limits reset at 00:00 UTC](https://developers.cloudflare.com/changelog/post/2026-09-01-d1-free-tier-limit-enforcement/); a quota-stopped run should be resumed after reset, not restarted. Before the next master update, confirm the account plan and current database size. Workers Paid provides more headroom. A fresh-D1 rollout additionally requires a temporary non-production Worker/config bound to that database for seeding and evaluation before the production binding is switched. Do not point the production admin URL at an unvalidated replacement, and do not delete the active version merely to create space without a verified backup and rollback path.
 
-To reduce avoidable API throttling, generated answers are capped to the size expected by this interface, Sol enters a short circuit-breaker period after a rate limit, and the browser honors the API retry interval with a visible countdown. Repeatedly submitting during a limit window should be avoided because rejected requests also count toward OpenAI rate limits.
+To reduce avoidable API throttling, generated answers are capped to the size expected by this interface, and the browser honors the API retry interval with a visible countdown.
 
 ## Local browser test
 
@@ -158,9 +158,9 @@ npm run prepare:sales-data
 npm run dev
 ```
 
-Open `http://localhost:3000` in a browser. The Tolerance Assistant remains local-only. Ask questions are processed through the server-side OpenAI connection and are grounded in the server-side catalog.
+Open `http://localhost:3000` in a browser. The Tolerance Assistant remains local-only. Ask questions are processed through the server-side Gemini connection and are grounded in the server-side catalog.
 
-The current local configuration intentionally uses the remote Cloudflare D1 and Vectorize bindings. Local Ask tests can therefore read production catalog resources and consume OpenAI/Workers AI usage; use a valid local `OPENAI_API_KEY` and do not run catalog administration commands casually.
+The current local configuration intentionally uses the remote Cloudflare D1 and Vectorize bindings. Local Ask tests can therefore read production catalog resources and consume Gemini/Workers AI usage; use a valid local `GEMINI_API_KEY` and do not run catalog administration commands casually.
 
 ## Electron test on this laptop
 

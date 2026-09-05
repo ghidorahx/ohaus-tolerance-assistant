@@ -67,7 +67,7 @@ test("Gemini uses low thinking, structured output, and hydrated Excel evidence",
   assert.equal(requests.length, 1);
   assert.match(requests[0].url, /generativelanguage\.googleapis\.com\/v1beta\/interactions$/);
   assert.equal(requests[0].headers["x-goog-api-key"], "test-key");
-  assert.equal(requests[0].body.model, "gemini-3.8-flash");
+  assert.equal(requests[0].body.model, "gemini-3.7-flash");
   assert.equal(requests[0].body.generation_config.thinking_level, "low");
   assert.equal(requests[0].body.response_format.mime_type, "application/json");
   assert.equal(requests[0].body.response_format.schema.additionalProperties, false);

@@ -1,12 +1,5 @@
 import {
-  answerSalesQuestionWithAI,
-  DEFAULT_FALLBACK_MODEL,
-  DEFAULT_MODEL,
-  DEFAULT_REASONING_EFFORT,
-  DEFAULT_REASONING_MODE,
-  DEFAULT_SERVICE_TIER,
   MAX_INPUT_TOKENS,
-  MAX_OUTPUT_TOKENS,
   MAX_TOTAL_REQUEST_TOKENS,
   MAX_VERIFIED_CONTEXT_TURNS,
 } from "@/lib/sales-agent.mjs";
@@ -49,6 +42,7 @@ import {
 } from "@/lib/master-catalog-grounding.mjs";
 import masterCatalogManifest from "@/data/master-catalog-manifest.json";
 import masterRetrievalEvalProfile from "@/data/master-retrieval-eval-profile.json";
+import { salesStreamResponse } from "@/lib/sales-stream.mjs";
 
 export const runtime = "edge";
 
@@ -347,7 +341,6 @@ function masterRetrievalOptions(question: string) {
 }
 
 export async function GET(request: Request) {
-  const provider = new URL(request.url).searchParams.get("provider") === "gemini" ? "gemini" : "openai";
   const bindings = await cloudflareBindings();
   const accessPolicy = accessCodePolicy(request);
   const masterStatus = await getMasterCatalogStatus({
@@ -365,18 +358,18 @@ export async function GET(request: Request) {
     };
   return json({
     status: accessPolicy.available ? "ready" : "configuration_required",
-    provider,
-    model: provider === "gemini" ? process.env.GEMINI_MODEL ?? DEFAULT_GEMINI_MODEL : process.env.OPENAI_MODEL ?? DEFAULT_MODEL,
-    fallback_model: provider === "gemini" ? "none" : process.env.OPENAI_FALLBACK_MODEL ?? DEFAULT_FALLBACK_MODEL,
-    reasoning_effort: provider === "gemini" ? process.env.GEMINI_THINKING_LEVEL ?? DEFAULT_GEMINI_THINKING_LEVEL : DEFAULT_REASONING_EFFORT,
-    reasoning_mode: provider === "gemini" ? "gemini" : process.env.OPENAI_REASONING_MODE ?? DEFAULT_REASONING_MODE,
-    service_tier: provider === "gemini" ? "standard" : DEFAULT_SERVICE_TIER,
+    provider: "gemini",
+    model: process.env.GEMINI_MODEL ?? DEFAULT_GEMINI_MODEL,
+    fallback_model: "none",
+    reasoning_effort: process.env.GEMINI_THINKING_LEVEL ?? DEFAULT_GEMINI_THINKING_LEVEL,
+    reasoning_mode: "gemini",
+    service_tier: "standard",
     answer_routing: {
       deterministic_fast_lane: true,
       phrase_normalization: true,
       ai_fallback: true,
     },
-    api_configured: provider === "gemini" ? Boolean(process.env.GEMINI_API_KEY) : Boolean(process.env.OPENAI_API_KEY),
+    api_configured: Boolean(process.env.GEMINI_API_KEY),
     access_code_required: accessPolicy.required,
     access_code_configured: accessPolicy.configured,
     vectorize: vectorizeStatus,
@@ -386,7 +379,7 @@ export async function GET(request: Request) {
       max_retrieval_documents: Math.max(MAX_RETRIEVAL_DOCUMENTS, MASTER_MAX_RETRIEVAL_CHUNKS),
       max_total_request_tokens: MAX_TOTAL_REQUEST_TOKENS,
       max_input_tokens: MAX_INPUT_TOKENS,
-      max_output_tokens: provider === "gemini" ? GEMINI_MAX_OUTPUT_TOKENS : MAX_OUTPUT_TOKENS,
+      max_output_tokens: GEMINI_MAX_OUTPUT_TOKENS,
     },
     catalog: masterCatalog ?? getSalesCatalogStatus(),
   });
@@ -411,7 +404,7 @@ export async function POST(request: Request) {
     return json({ error: "Enter the team access code to continue.", code: "access_code_required" }, 401);
   }
 
-  let body: { question?: unknown; context?: unknown; provider?: unknown };
+  let body: { question?: unknown; context?: unknown };
   try {
     body = await readBoundedJson(request, MAX_CHAT_BODY_BYTES);
   } catch (error) {
@@ -422,20 +415,22 @@ export async function POST(request: Request) {
   }
 
   const question = typeof body.question === "string" ? body.question.trim() : "";
-  const provider = body.provider === "gemini" || new URL(request.url).searchParams.get("provider") === "gemini"
-    ? "gemini"
-    : "openai";
   if (question.length < 2 || question.length > 1_600) {
     return json({ error: "Ask a product question between 2 and 1,600 characters." }, 400);
   }
+  if (request.headers.get("accept")?.includes("text/event-stream")) {
+    return salesStreamResponse((onDraft, signal) => answerQuestion(question, body.context, signal, onDraft), request.signal);
+  }
+  return answerQuestion(question, body.context, request.signal);
+}
+
+async function answerQuestion(question: string, contextValue: unknown, signal: AbortSignal, onDraft?: (text: string) => void) {
   try {
     const requestStarted = performance.now();
-    const context = boundedContext(body.context);
+    const context = boundedContext(contextValue);
     const bindings = await cloudflareBindings();
     const contextMaterials = [...new Set(context.flatMap((turn) => turn.materials.map(String)))];
-    const primaryModel = provider === "gemini"
-      ? process.env.GEMINI_MODEL ?? DEFAULT_GEMINI_MODEL
-      : process.env.OPENAI_MODEL ?? DEFAULT_MODEL;
+    const primaryModel = process.env.GEMINI_MODEL ?? DEFAULT_GEMINI_MODEL;
     const interpretation = interpretCatalogQuestion(question);
     const latestContextMaterials = [...context]
       .reverse()
@@ -520,8 +515,8 @@ export async function POST(request: Request) {
 
       // A direct candidate can still decline—for example, when the wording
       // looks structured but no unique record or safe field was found. Re-run
-      // master retrieval with the semantic channel before asking GPT so the
-      // fallback keeps the same retrieval quality as any other AI question.
+      // master retrieval with the semantic channel before asking Gemini so the
+      // fallback keeps the same retrieval quality as any other Gemini question.
       if (masterRetrieval?.version && bindings.AI && bindings.CATALOG_VECTORIZE) {
         try {
           const semanticRetrievalStarted = performance.now();
@@ -551,9 +546,9 @@ export async function POST(request: Request) {
       }
     }
 
-    if (provider === "gemini" ? !process.env.GEMINI_API_KEY : !process.env.OPENAI_API_KEY) {
+    if (!process.env.GEMINI_API_KEY) {
       return json({
-        error: `The ${provider === "gemini" ? "Gemini" : "OpenAI"} connection is not configured for this question.`,
+        error: "The Gemini connection is not configured for this question.",
         code: "ai_not_configured",
       }, 503);
     }
@@ -586,28 +581,18 @@ export async function POST(request: Request) {
     }
 
     const generationStarted = performance.now();
-    const answer = provider === "gemini"
-      ? await answerSalesQuestionWithGemini({
-        question,
-        sessionContext: context,
-        apiKey: process.env.GEMINI_API_KEY!,
-        model: process.env.GEMINI_MODEL ?? DEFAULT_GEMINI_MODEL,
-        thinkingLevel: process.env.GEMINI_THINKING_LEVEL ?? DEFAULT_GEMINI_THINKING_LEVEL,
-        groundingBundle,
-        evidenceHydrator: usingMasterGrounding ? hydrateMasterEvidenceItems : undefined,
-      })
-      : await answerSalesQuestionWithAI({
-        question,
-        sessionContext: context,
-        apiKey: process.env.OPENAI_API_KEY!,
-        model: primaryModel,
-        fallbackModel: process.env.OPENAI_FALLBACK_MODEL ?? DEFAULT_FALLBACK_MODEL,
-        reasoningEffort: DEFAULT_REASONING_EFFORT,
-        reasoningMode: process.env.OPENAI_REASONING_MODE ?? DEFAULT_REASONING_MODE,
-        semanticRetrieval,
-        groundingBundle,
-        evidenceHydrator: usingMasterGrounding ? hydrateMasterEvidenceItems : undefined,
-      });
+    signal.throwIfAborted();
+    const answer = await answerSalesQuestionWithGemini({
+      onDraft,
+      signal,
+      question,
+      sessionContext: context,
+      apiKey: process.env.GEMINI_API_KEY!,
+      model: process.env.GEMINI_MODEL ?? DEFAULT_GEMINI_MODEL,
+      thinkingLevel: process.env.GEMINI_THINKING_LEVEL ?? DEFAULT_GEMINI_THINKING_LEVEL,
+      groundingBundle,
+      evidenceHydrator: usingMasterGrounding ? hydrateMasterEvidenceItems : undefined,
+    });
     const generationMilliseconds = performance.now() - generationStarted;
     const masterCatalog = masterCatalogHealthForVersion(masterRetrieval?.version ?? null);
     return json({
@@ -630,7 +615,7 @@ export async function POST(request: Request) {
     const upstream = error as { status?: number; code?: string | null; message?: string; retryAfterSeconds?: number | null };
     if (upstream.status === 429 && (upstream.code === "insufficient_quota" || /credits|quota/i.test(upstream.message ?? ""))) {
       return json({
-        error: `The ${provider === "gemini" ? "Gemini" : "OpenAI"} API project needs available quota before the assistant can answer.`,
+        error: "The Gemini API project needs available quota before the assistant can answer.",
         code: "ai_billing_required",
       }, 503);
     }

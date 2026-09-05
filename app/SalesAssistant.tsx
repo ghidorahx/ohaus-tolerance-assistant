@@ -2,6 +2,7 @@
 
 import { FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { readEvents } from "@/lib/sales-stream.mjs";
 
 type Evidence = {
   material_number: string;
@@ -65,7 +66,7 @@ type Exchange = {
 };
 
 type Health = {
-  provider?: "openai" | "gemini";
+  provider?: "gemini";
   api_configured: boolean;
   access_code_required: boolean;
   access_code_configured?: boolean;
@@ -110,10 +111,6 @@ type Health = {
     retrieval_status: string;
     source_file: string;
   };
-};
-
-type SalesAssistantProps = {
-  provider?: "openai" | "gemini";
 };
 
 type AskApiResponse = {
@@ -288,16 +285,18 @@ function SalesAnswerItems({ items, partNumbers }: { items: AnswerItem[]; partNum
   );
 }
 
-export default function SalesAssistant({ provider = "openai" }: SalesAssistantProps) {
-  const isGemini = provider === "gemini";
-  const apiPath = isGemini ? "api/sales?provider=gemini" : "api/sales";
-  const railDetailsId = isGemini ? "gemini-product-knowledge-details" : "sales-product-knowledge-details";
-  const questionId = isGemini ? "gemini-sales-question" : "sales-question";
-  const collapsePreferenceKey = isGemini ? "gemini-product-knowledge-collapsed" : "sales-product-knowledge-collapsed";
+export default function SalesAssistant() {
+  const apiPath = "api/sales";
+  const railDetailsId = "sales-product-knowledge-details";
+  const questionId = "sales-question";
+  const collapsePreferenceKey = "sales-product-knowledge-collapsed";
   const [health, setHealth] = useState<Health | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
+  const [draft, setDraft] = useState("");
+  const activeRequest = useRef<AbortController | null>(null);
+  useEffect(() => () => activeRequest.current?.abort(), []);
   const [error, setError] = useState<string | null>(null);
   const [accessCode, setAccessCode] = useState("");
   const [needsCode, setNeedsCode] = useState(false);
@@ -361,6 +360,9 @@ export default function SalesAssistant({ provider = "openai" }: SalesAssistantPr
     setInput("");
     setError(null);
     setThinking(true);
+    setDraft("");
+    const abort = new AbortController();
+    activeRequest.current = abort;
 
     try {
       const url = new URL(apiPath, document.baseURI);
@@ -368,16 +370,32 @@ export default function SalesAssistant({ provider = "openai" }: SalesAssistantPr
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Accept: "text/event-stream",
           ...(accessCode.trim() ? { "X-Pilot-Access-Code": accessCode.trim() } : {}),
         },
-        body: JSON.stringify({ question: trimmed, context, provider }),
+        body: JSON.stringify({ question: trimmed, context }),
+        signal: abort.signal,
       });
-      const payload = await response.json().catch(() => ({})) as AskApiResponse;
+      let payload: AskApiResponse = {};
+      let responseStatus = response.status;
+      if (response.ok && response.headers.get("content-type")?.includes("text/event-stream")) {
+        let complete = false;
+        for await (const event of readEvents(response.body)) {
+          if (event.type === "draft" && typeof event.text === "string") setDraft((current) => current + event.text);
+          if (event.type === "complete" || event.type === "error") {
+            payload = event;
+            responseStatus = event.status;
+            complete = true;
+            break;
+          }
+        }
+        if (!complete) throw new Error("The answer stream was interrupted. Please try again.");
+      } else payload = await response.json().catch(() => ({})) as AskApiResponse;
       if (response.status === 401 && payload.code === "access_code_required") {
         setNeedsCode(true);
         throw new Error("Enter the team access code, then ask the question again.");
       }
-      if (response.status === 429) {
+      if (responseStatus === 429) {
         const retryHeader = Number(response.headers.get("Retry-After"));
         const retryAfter = Number(payload.retry_after_seconds);
         const cooldown = Number.isFinite(retryAfter) && retryAfter > 0
@@ -388,7 +406,7 @@ export default function SalesAssistant({ provider = "openai" }: SalesAssistantPr
         setRateLimitSeconds(Math.min(600, Math.max(1, Math.ceil(cooldown))));
         throw new Error(payload.error ?? `The assistant is rate limited. Try again in about ${Math.ceil(cooldown)} seconds.`);
       }
-      if (!response.ok || !payload.answer) throw new Error(payload.error ?? "The assistant could not answer this question.");
+      if (responseStatus >= 400 || !payload.answer) throw new Error(payload.error ?? "The assistant could not answer this question.");
 
       const answer = payload.answer as SalesAnswer;
       const assistantMessage: Message = {
@@ -405,6 +423,8 @@ export default function SalesAssistant({ provider = "openai" }: SalesAssistantPr
       setMessages((current) => current.filter((message) => message.id !== userMessage.id));
       setError(caught instanceof Error ? caught.message : "The assistant could not answer this question.");
     } finally {
+      activeRequest.current = null;
+      setDraft("");
       setThinking(false);
       requestAnimationFrame(() => inputRef.current?.focus());
     }
@@ -443,10 +463,10 @@ export default function SalesAssistant({ provider = "openai" }: SalesAssistantPr
   const coolingDown = rateLimitSeconds > 0;
   const totalRequestTokens = Math.round((health?.context.max_total_request_tokens ?? 66_000) / 1_000);
   const inputTokens = Math.round((health?.context.max_input_tokens ?? 54_000) / 1_000);
-  const outputTokens = Math.round((health?.context.max_output_tokens ?? 12_000) / 1_000);
+  const outputTokens = Math.round((health?.context.max_output_tokens ?? 8_000) / 1_000);
 
   return (
-    <section className={`sales-workspace ${productKnowledgeCollapsed ? "sales-rail-collapsed" : ""}`} aria-label={isGemini ? "Gemini Lab assistant" : "Ask assistant"}>
+    <section className={`sales-workspace ${productKnowledgeCollapsed ? "sales-rail-collapsed" : ""}`} aria-label="Ask assistant">
       <aside className="sales-rail">
         <div className="sales-rail-header">
           <div className="sales-agent-badge" aria-hidden="true">AI</div>
@@ -479,12 +499,8 @@ export default function SalesAssistant({ provider = "openai" }: SalesAssistantPr
 
           <div className="sales-coverage-card">
             <span>Reasoning configuration</span>
-            <strong>{isGemini
-              ? `Direct lookup first · Gemini 3.8 Flash ${titleCase(health?.reasoning_effort, "low")}`
-              : `Direct lookup first · GPT‑5.6 Sol ${titleCase(health?.reasoning_effort, "medium")}`}</strong>
-            <small>{isGemini
-              ? `Phrase-aware Excel utilities · Gemini low thinking · ${health?.catalog.chunks ?? health?.catalog.retrieval_documents ?? 45_167} focused knowledge chunks`
-              : `Phrase-aware Excel lookup · OpenAI Fast mode for AI fallback · Terra fallback · ${health?.catalog.chunks ?? health?.catalog.retrieval_documents ?? 45_167} focused knowledge chunks`}</small>
+            <strong>{`Direct lookup first · ${health?.model ?? "gemini-3.7-flash"} ${titleCase(health?.reasoning_effort, "low")}`}</strong>
+            <small>{`Phrase-aware Excel utilities · Gemini low thinking · ${health?.catalog.chunks ?? health?.catalog.retrieval_documents ?? 45_167} focused knowledge chunks`}</small>
           </div>
 
           <div className="sales-memory-card">
@@ -495,7 +511,7 @@ export default function SalesAssistant({ provider = "openai" }: SalesAssistantPr
             </small>
           </div>
 
-          <footer>{health?.vectorize?.configured ? "Direct + semantic + lexical retrieval" : "Direct + lexical catalog retrieval"} · {isGemini ? "Gemini experiment" : "Ask pilot owner · T. Delacruz"}</footer>
+          <footer>{health?.vectorize?.configured ? "Direct + semantic + lexical retrieval" : "Direct + lexical catalog retrieval"} · Gemini powered</footer>
         </div>
       </aside>
 
@@ -504,7 +520,7 @@ export default function SalesAssistant({ provider = "openai" }: SalesAssistantPr
           <div className="sales-composer-heading">
             <label htmlFor={questionId}>Product question</label>
             <div className="sales-heading-actions">
-            {messages.length > 0 && <button type="button" onClick={clearConversation}>Clear conversation</button>}
+            {messages.length > 0 && <button type="button" disabled={thinking} onClick={clearConversation}>Clear conversation</button>}
             <span className={`sales-ready ${!ready || coolingDown ? "waiting" : ""}`}>
               <i aria-hidden="true" />
               {coolingDown
@@ -559,16 +575,23 @@ export default function SalesAssistant({ provider = "openai" }: SalesAssistantPr
           {thinking && (
             <div className="sales-thinking" role="status">
               <span aria-hidden="true" />
-              Searching the relevant workbook records and verifying the answer with {isGemini ? "Gemini" : "Ask"}…
+              {draft ? "Draft answer · finalizing catalog sources…" : "Searching the relevant workbook records and verifying the answer with Gemini…"}
             </div>
           )}
 
-          {exchanges.length === 0 ? (
+          {thinking && draft && (
+            <article className="sales-assistant-message" aria-busy="true" aria-label="Draft answer">
+              <span className="sales-message-avatar" aria-hidden="true">AI</span>
+              <SalesAnswerContent value={draft} partNumbers={[]} />
+            </article>
+          )}
+
+          {exchanges.length === 0 ? (!thinking && (
             <div className="sales-welcome-state">
               <div className="sales-welcome">
                 <span className="sales-message-avatar" aria-hidden="true">AI</span>
                 <div>
-                  <strong>{isGemini ? "Gemini product assistant" : "Product assistant"}</strong>
+                  <strong>Gemini product assistant</strong>
                   <p>I’ll identify the relevant records, verify the requested fields, and show exactly which catalog data supports the answer.</p>
                 </div>
               </div>
@@ -580,7 +603,7 @@ export default function SalesAssistant({ provider = "openai" }: SalesAssistantPr
                 ))}
               </div>
             </div>
-          ) : (
+          )) : (
             <>
               <section className="sales-latest" aria-label="Latest product answer">
                 <div className="sales-section-label"><span>Latest answer</span></div>
@@ -707,7 +730,7 @@ function SalesExchange({
               <div className="sales-answer-foot">
                 <span>{answer.ai_used === false
                   ? "Direct Excel lookup · no generative AI"
-                  : `${answer.model}${answer.fallback_used ? " fallback" : ""} · ${answer.reasoning_effort} reasoning · ${answer.reasoning_mode} mode${answer.service_tier ? ` · ${answer.service_tier === "priority" ? "fast" : answer.service_tier} service` : ""}`}</span>
+                  : `${answer.model} · ${answer.reasoning_effort} thinking · Gemini${answer.service_tier ? ` · ${answer.service_tier} service` : ""}`}</span>
                 <span>{answer.retrieval_strategy.includes("hybrid") ? "Semantic + exact catalog" : "Catalog retrieval"} · {answer.retrieval_documents_sent ?? 0} source chunk{answer.retrieval_documents_sent === 1 ? "" : "s"}</span>
                 <span>{answer.catalog_checks} catalog check{answer.catalog_checks === 1 ? "" : "s"}</span>
                 {answer.timing && <span>{answer.timing.total_ms.toLocaleString()} ms total · {answer.timing.retrieval_ms.toLocaleString()} ms search · {answer.timing.generation_ms.toLocaleString()} ms answer</span>}

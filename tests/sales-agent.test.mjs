@@ -10,7 +10,7 @@ import {
   outputTokenLimitForQuestion,
 } from "../lib/sales-agent.mjs";
 
-test("uses one medium-reasoning GPT-5.6 Fast mode Responses call with comprehensive workbook grounding", async () => {
+test("uses one low-reasoning GPT-5.6 Fast mode Responses call with comprehensive workbook grounding", async () => {
   const requests = [];
   const fetchImpl = async (_url, init) => {
     const body = JSON.parse(init.body);
@@ -47,12 +47,12 @@ test("uses one medium-reasoning GPT-5.6 Fast mode Responses call with comprehens
 
   assert.equal(DEFAULT_MODEL, "gpt-5.6-sol");
   assert.equal(DEFAULT_FALLBACK_MODEL, "gpt-5.6-terra");
-  assert.equal(DEFAULT_REASONING_EFFORT, "medium");
+  assert.equal(DEFAULT_REASONING_EFFORT, "low");
   assert.equal(DEFAULT_REASONING_MODE, "standard");
   assert.equal(DEFAULT_SERVICE_TIER, "fast");
   assert.equal(requests.length, 1);
   assert.equal(requests[0].model, "gpt-5.6-sol");
-  assert.deepEqual(requests[0].reasoning, { effort: "medium", mode: "standard", context: "current_turn" });
+  assert.deepEqual(requests[0].reasoning, { effort: "low", mode: "standard", context: "current_turn" });
   assert.equal(requests[0].service_tier, "fast");
   assert.equal(requests[0].max_output_tokens, 2_400);
   assert.equal(requests[0].store, false);
