@@ -522,7 +522,7 @@ test("keeps an exact alias on the deterministic path despite extra inferred cand
     if (version !== undefined) return version;
     if (sql.includes("m.material_number = ?")) return [];
     if (sql.includes("FROM master_aliases AS a")) return parameters.includes("ta 100783") ? [record] : [];
-    if (sql.includes("FROM master_attributes AS a") && sql.includes("alternative model")) return [];
+    if (sql.includes("FROM master_attributes AS a") && sql.includes("alternative_model")) return [];
     if (sql.includes("FROM master_chunks_fts")) {
       lexicalQueries += 1;
       return [];
@@ -558,7 +558,7 @@ test("falls back to broad retrieval when a model-like identifier is unresolved",
     if (version !== undefined) return version;
     if (sql.includes("m.material_number = ?")) return [];
     if (sql.includes("FROM master_aliases AS a")) return [];
-    if (sql.includes("FROM master_attributes AS a") && sql.includes("alternative model")) return [];
+    if (sql.includes("FROM master_attributes AS a") && sql.includes("alternative_model")) return [];
     if (sql.includes("FROM master_chunks_fts")) {
       lexicalQueries += 1;
       return [];
@@ -1094,7 +1094,7 @@ test("resolves short numeric alternative models only when the question labels th
     if (version !== undefined) return version;
     if (sql.includes("m.material_number = ?")) return [];
     if (sql.includes("FROM master_aliases AS a")) return [];
-    if (sql.includes("FROM master_attributes AS a") && sql.includes("alternative model")) {
+    if (sql.includes("FROM master_attributes AS a") && sql.includes("alternative_model")) {
       assert.equal(parameters[1], "9123");
       return alternatives;
     }
@@ -1106,6 +1106,10 @@ test("resolves short numeric alternative models only when the question labels th
   assert.equal(result.exact_matches.length, 1);
   assert.equal(result.exact_matches[0].status, "ambiguous");
   assert.deepEqual(result.exact_matches[0].candidates.map((item) => item.material_number), alternatives.map((item) => item.material_number));
+  const fallbackCall = db.calls.find((call) => call.sql?.includes("FROM master_attributes AS a") && call.sql.includes("alternative_model"));
+  assert.match(fallbackCall.sql, /a\.field_key >= 'alternative_model'/);
+  assert.match(fallbackCall.sql, /a\.field_key < 'alternative_model/);
+  assert.doesNotMatch(fallbackCall.sql, /lower\(a\.source_header\)/);
 });
 
 test("does not mistake a six-digit measured capacity for a material number", async () => {
@@ -1119,7 +1123,7 @@ test("does not mistake a six-digit measured capacity for a material number", asy
   await retrieveMasterCatalog({ question: "Find a balance with capacity at least 120000 g.", db });
   assert.equal(db.calls.some((call) => call.sql?.includes("m.material_number = ?")), false);
   assert.equal(db.calls.some((call) => call.sql?.includes("FROM master_aliases AS a")), false);
-  assert.equal(db.calls.some((call) => call.sql?.includes("alternative model")), false);
+  assert.equal(db.calls.some((call) => call.sql?.includes("alternative_model")), false);
 });
 
 test("does not mistake spaced domain specifications for model aliases and preserves prior-item context", async () => {
@@ -1358,7 +1362,7 @@ test("resolves full relationship subjects and supports hyphenated spare-part wor
       const match = parameters.map(String).find((value) => aliases.has(value));
       return match ? [aliases.get(match)] : [];
     }
-    if (sql.includes("FROM master_attributes AS a") && sql.includes("alternative model")) return [];
+    if (sql.includes("FROM master_attributes AS a") && sql.includes("alternative_model")) return [];
     if (sql.includes("FROM master_chunks_fts")) return [];
     if (sql.includes("WITH material_chunks AS")) return [];
     if (sql.includes("FROM master_materials AS m") && sql.includes("material_number IN")) {
