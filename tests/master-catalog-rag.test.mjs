@@ -441,6 +441,145 @@ test("runs exact, lexical, numeric, and semantic retrieval concurrently with com
   assert.ok(numericCalls.every((call) => call.parameters.every((parameter) => !String(parameter).startsWith("%"))));
 });
 
+test("uses resolved identifiers without spending broad retrieval quota", async () => {
+  const record = {
+    material_number: "30428204",
+    trade_name: "CR221",
+    product_name: "Portable Balance CR221",
+    parent_family: "Balances & Scales",
+    family: "Compass CR",
+    source_row: 122,
+    source_file: activeVersion.source_file,
+    source_sheet: activeVersion.source_sheet,
+    record_json: JSON.stringify({
+      material_number: "30428204",
+      trade_name: "CR221",
+      product_name: "Portable Balance CR221",
+      source: { file: activeVersion.source_file, sheet: activeVersion.source_sheet, row: 122 },
+      fields: { maximum_capacity_metric: "220 g" },
+    }),
+  };
+  const chunk = {
+    chunk_id: "mc_cr221_identity",
+    material_number: "30428204",
+    chunk_kind: "identity",
+    chunk_ordinal: 1,
+    parent_family: record.parent_family,
+    family: record.family,
+    title: "CR221 — Identity",
+    content: "Material Number: 30428204; Trade Name: CR221",
+    field_keys_json: JSON.stringify(["material_number", "trade_name"]),
+    metadata_json: JSON.stringify({ source_file: activeVersion.source_file, source_sheet: activeVersion.source_sheet, source_row: 122 }),
+  };
+  let lexicalQueries = 0;
+  let embeddingCalls = 0;
+  let vectorQueries = 0;
+  const db = createDb((sql, parameters, method) => {
+    const version = versionHandler(sql, parameters, method);
+    if (version !== undefined) return version;
+    if (sql.includes("m.material_number = ?")) return parameters[1] === record.material_number ? [record] : [];
+    if (sql.includes("FROM master_chunks_fts")) {
+      lexicalQueries += 1;
+      return [];
+    }
+    if (sql.includes("WITH material_chunks AS")) return [chunk];
+    if (sql.includes("FROM master_materials AS m") && sql.includes("material_number IN")) return [record];
+    return [];
+  });
+  const result = await retrieveMasterCatalog({
+    question: "What catalog item is OHAUS material number 30428204?",
+    db,
+    ai: { async run() { embeddingCalls += 1; return { data: [vector()] }; } },
+    index: { async query() { vectorQueries += 1; return { matches: [] }; } },
+  });
+
+  assert.equal(result.status, "ready");
+  assert.equal(result.retrieval.strategy, "exact");
+  assert.equal(result.retrieval.lexical.status, "skipped");
+  assert.equal(result.retrieval.semantic.status, "skipped");
+  assert.equal(result.materials[0].material_number, record.material_number);
+  assert.equal(result.chunks[0].chunk_id, chunk.chunk_id);
+  assert.equal(lexicalQueries, 0);
+  assert.equal(embeddingCalls, 0);
+  assert.equal(vectorQueries, 0);
+});
+
+test("keeps an exact alias on the deterministic path despite extra inferred candidates", async () => {
+  const record = {
+    material_number: "61038661",
+    trade_name: "TA100783",
+    product_name: "Assembly Pjb",
+    parent_family: "Spare Parts",
+    family: "Miscellaneous",
+    source_file: activeVersion.source_file,
+    source_sheet: activeVersion.source_sheet,
+    record_json: JSON.stringify({ material_number: "61038661", trade_name: "TA100783", fields: {} }),
+  };
+  let lexicalQueries = 0;
+  let embeddingCalls = 0;
+  const db = createDb((sql, parameters, method) => {
+    const version = versionHandler(sql, parameters, method);
+    if (version !== undefined) return version;
+    if (sql.includes("m.material_number = ?")) return [];
+    if (sql.includes("FROM master_aliases AS a")) return parameters.includes("ta 100783") ? [record] : [];
+    if (sql.includes("FROM master_attributes AS a") && sql.includes("alternative model")) return [];
+    if (sql.includes("FROM master_chunks_fts")) {
+      lexicalQueries += 1;
+      return [];
+    }
+    if (sql.includes("WITH material_chunks AS")) return [];
+    if (sql.includes("FROM master_materials AS m") && sql.includes("material_number IN")) return [record];
+    return [];
+  });
+  const result = await retrieveMasterCatalog({
+    question: "Which OHAUS material corresponds to the model alias ta 100783?",
+    db,
+    ai: { async run() { embeddingCalls += 1; return { data: [vector()] }; } },
+    index: { async query() { return { matches: [] }; } },
+  });
+
+  assert.equal(result.status, "ready");
+  assert.equal(result.retrieval.strategy, "exact");
+  assert.equal(result.retrieval.lexical.status, "skipped");
+  assert.equal(result.retrieval.semantic.status, "skipped");
+  assert.equal(result.exact_matches.some((match) => match.status === "found"), true);
+  assert.equal(result.exact_matches.some((match) => match.status === "not_found"), true);
+  assert.equal(result.materials[0].material_number, record.material_number);
+  assert.equal(lexicalQueries, 0);
+  assert.equal(embeddingCalls, 0);
+});
+
+test("falls back to broad retrieval when a model-like identifier is unresolved", async () => {
+  let lexicalQueries = 0;
+  let embeddingCalls = 0;
+  let vectorQueries = 0;
+  const db = createDb((sql, parameters, method) => {
+    const version = versionHandler(sql, parameters, method);
+    if (version !== undefined) return version;
+    if (sql.includes("m.material_number = ?")) return [];
+    if (sql.includes("FROM master_aliases AS a")) return [];
+    if (sql.includes("FROM master_attributes AS a") && sql.includes("alternative model")) return [];
+    if (sql.includes("FROM master_chunks_fts")) {
+      lexicalQueries += 1;
+      return [];
+    }
+    return [];
+  });
+  const result = await retrieveMasterCatalog({
+    question: "Tell me about ZXQ999",
+    db,
+    ai: { async run() { embeddingCalls += 1; return { data: [vector()] }; } },
+    index: { async query() { vectorQueries += 1; return { matches: [] }; } },
+  });
+
+  assert.equal(result.status, "no_results");
+  assert.equal(result.retrieval.lexical.status, "ready");
+  assert.equal(result.retrieval.semantic.status, "ready");
+  assert.equal(lexicalQueries, 1);
+  assert.equal(embeddingCalls, 1);
+  assert.equal(vectorQueries, 1);
+});
+
 test("intersects complete numeric material sets before ranking and avoids duplicate chunk joins", async () => {
   const materialNumber = "39999999";
   const material = {
