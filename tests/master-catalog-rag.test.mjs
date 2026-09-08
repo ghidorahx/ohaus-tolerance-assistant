@@ -1627,6 +1627,62 @@ test("keeps sibling technical fields when a catalog fields map contains a displa
   assert.equal(evidence.some((item) => item.field === "fields"), false);
 });
 
+test("keeps paraphrased capacity and stabilization evidence inside a compact limit", () => {
+  const material = {
+    material_number: "30035439",
+    model: "V22XWE1501T",
+    fields: {
+      material_number: "30035439",
+      trade_name: "V22XWE1501T",
+      gross_weight: "4.8 KG",
+      net_weight: "4.2 kg",
+      test_weight: "1.5 kg",
+      maximum_capacity_metric: "1.5 kg",
+      stabilization_time: "0.5 s",
+      battery_life: "50 Hours",
+      power: "AC Adapter",
+      readability_metric: "0.2 g",
+    },
+  };
+  const chunks = [{
+    material_number: material.material_number,
+    source_fields: [
+      "material_number",
+      "trade_name",
+      "gross_weight",
+      "net_weight",
+      "test_weight",
+      "maximum_capacity_metric",
+      "stabilization_time",
+      "battery_life",
+      "power",
+      "readability_metric",
+    ],
+  }];
+  const attributes = [
+    { material_number: material.material_number, field_key: "maximum_capacity_metric", source_header: "Maximum Capacity {metric}", source_column: "GL" },
+    { material_number: material.material_number, field_key: "stabilization_time", source_header: "Stabilization Time", source_column: "JT" },
+  ];
+
+  const capacity = selectCompactEvidence({
+    question: "How much can V22XWE1501T weigh at most?",
+    materials: [material],
+    chunks,
+    attributes,
+    limit: 4,
+  });
+  assert.equal(capacity.find((item) => item.field === "fields.maximum_capacity_metric")?.source_header, "Maximum Capacity {metric}");
+
+  const stabilization = selectCompactEvidence({
+    question: "How quickly does V22XWE1501T stabilize?",
+    materials: [material],
+    chunks,
+    attributes,
+    limit: 4,
+  });
+  assert.equal(stabilization.find((item) => item.field === "fields.stabilization_time")?.source_header, "Stabilization Time");
+});
+
 test("compacts only the standard embedding prefix while preserving every value", () => {
   const text = boundedEmbeddingText([
     "Category: Balances & Scales",
