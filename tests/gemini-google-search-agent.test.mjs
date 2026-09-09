@@ -114,6 +114,10 @@ test("automatic fallback allows only verified public catalog gaps", () => {
       searchFacets: ["company_history"],
     },
   );
+  assert.equal(googleSearchFallbackDecision("Who founded OHAUS?", [], {
+    ...publicGap,
+    intent: "lookup",
+  }, activeCatalogHealth).useGoogleSearch, true);
 
   const exactProductGap = {
     answer: "The requested specification is not available in the loaded catalog.",
