@@ -118,6 +118,10 @@ test("automatic fallback allows only verified public catalog gaps", () => {
     ...publicGap,
     intent: "lookup",
   }, activeCatalogHealth).useGoogleSearch, true);
+  assert.equal(googleSearchFallbackDecision("Who founded OHAUS?", [], {
+    ...publicGap,
+    intent: "catalog_scope",
+  }, activeCatalogHealth).useGoogleSearch, true);
   assert.equal(googleSearchFallbackDecision("What is the warranty for Adventurer?", [], {
     ...publicGap,
     intent: "lookup",
