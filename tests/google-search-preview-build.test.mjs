@@ -114,6 +114,7 @@ test("preview uses Gemini 3.8 Search only after a verified catalog pass", async 
   delete process.env.SALES_PILOT_ACCESS_CODE;
   const requests = [];
   const encoder = new TextEncoder();
+  const finalText = "Current public recall information is summarized from the cited source.";
   globalThis.fetch = async (_, init) => {
     const body = JSON.parse(init.body);
     requests.push(body);
@@ -124,17 +125,19 @@ test("preview uses Gemini 3.8 Search only after a verified catalog pass", async 
         model: "gemini-3.8-flash",
         steps: [{
           type: "model_output",
-          content: [{ type: "text", text: JSON.stringify(structuredAnswer("Not available in the loaded catalog.", {
+          content: [{ type: "text", text: JSON.stringify(structuredAnswer("CR221 is verified in the loaded catalog; current public recall information is not a catalog field.", {
             status: "not_in_source",
-            confidence: "low",
+            confidence: "high",
+            materials: ["30428204"],
+            answer_items: [{ identifier: "30428204", label: "CR221", description: "Verified catalog model" }],
+            unresolved_items: ["public recall information"],
           })) }],
         }],
       });
     }
 
-    const finalText = "NIST published current public guidance.";
     const events = [
-      { event_type: "step.start", index: 0, step: { type: "google_search_call", id: "search-1", arguments: { queries: ["latest NIST guidance"] } } },
+      { event_type: "step.start", index: 0, step: { type: "google_search_call", id: "search-1", arguments: { queries: ["CR221 recall"] } } },
       { event_type: "step.start", index: 1, step: { type: "google_search_result", call_id: "search-1", is_error: false, result: [{ search_suggestions: searchSuggestion }] } },
       { event_type: "step.start", index: 2, step: { type: "model_output" } },
       { event_type: "step.delta", index: 2, delta: { type: "text", text: finalText } },
@@ -145,8 +148,8 @@ test("preview uses Gemini 3.8 Search only after a verified catalog pass", async 
           type: "text_annotation_delta",
           annotations: [{
             type: "url_citation",
-            url: "https://www.nist.gov/current-guidance",
-            title: "NIST current guidance",
+            url: "https://www.cpsc.gov/Recalls",
+            title: "CPSC recalls",
             start_index: 0,
             end_index: 24,
           }],
@@ -163,7 +166,7 @@ test("preview uses Gemini 3.8 Search only after a verified catalog pass", async 
   };
 
   try {
-    const response = await requestPreview("Search Google for the latest NIST guidance on balance calibration.");
+    const response = await requestPreview("Search Google for the latest public recall information affecting CR221.");
     const events = await Array.fromAsync(readEvents(response.body));
     const final = events.at(-1);
     assert.equal(final.type, "complete");
@@ -172,9 +175,13 @@ test("preview uses Gemini 3.8 Search only after a verified catalog pass", async 
     assert.equal(requests[1].model, "gemini-3.8-flash");
     assert.deepEqual(requests[1].tools, [{ type: "google_search" }]);
     assert.equal(final.answer.web_search_used, true);
+    assert.equal(final.experiment.routing, "catalog_plus_web");
+    assert.equal(final.answer.answer, "CR221 is verified in the loaded catalog; current public recall information is not a catalog field.");
+    assert.equal(final.answer.web_answer, finalText);
+    assert.deepEqual(final.answer.materials, ["30428204"]);
     assert.deepEqual(final.answer.web_sources, [{
-      title: "NIST current guidance",
-      url: "https://www.nist.gov/current-guidance",
+      title: "CPSC recalls",
+      url: "https://www.cpsc.gov/Recalls",
     }]);
     assert.deepEqual(final.answer.search_suggestions, [searchSuggestion]);
   } finally {

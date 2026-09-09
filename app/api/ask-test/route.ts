@@ -180,12 +180,8 @@ async function webAnswer(
   if (routingDecision.route === "catalog_plus_web") {
     const catalogStatus = String(catalogPayload.answer.status ?? "");
     const materials = Array.isArray(catalogPayload.answer.materials) ? catalogPayload.answer.materials : [];
-    const unresolved = Array.isArray(catalogPayload.answer.unresolved_items)
-      ? catalogPayload.answer.unresolved_items
-      : [];
     if (["needs_clarification", "escalate"].includes(catalogStatus)
-      || materials.length === 0
-      || unresolved.length > 0) {
+      || materials.length === 0) {
       return safeJson({
         ...catalogPayload,
         experiment: {
