@@ -106,6 +106,13 @@ test("extracts only unique HTTPS API citations and preserves Google's Search Sug
     title: "NIST café guidance",
     url: "https://www.nist.gov/example",
   }]);
+  assert.equal(extractGoogleSearchSources({
+    annotations: Array.from({ length: 14 }, (_, index) => ({
+      type: "url_citation",
+      url: `https://example.com/source-${index}`,
+      title: `Source ${index}`,
+    })),
+  }).length, 14);
   assert.deepEqual(extractGoogleSearchSuggestions(interaction), [searchSuggestion]);
   assert.deepEqual(extractGoogleSearchSuggestions({
     steps: [{
@@ -299,6 +306,48 @@ test("streaming retrieves the stored interaction when citation deltas are absent
   assert.equal(result.answer, "Stored citation answer.");
   assert.deepEqual(result.web_sources, [{ title: "Stored source", url: "https://www.nist.gov/stored" }]);
   assert.deepEqual(result.search_suggestions, [searchSuggestion]);
+});
+
+test("streaming recovers final text from the stored interaction when text deltas are absent", async () => {
+  const events = [
+    { event_type: "step.start", index: 0, step: { type: "google_search_call", id: "search-1" } },
+    { event_type: "step.start", index: 1, step: { type: "google_search_result", call_id: "search-1", is_error: false } },
+    { event_type: "step.start", index: 2, step: { type: "model_output" } },
+    { event_type: "interaction.completed", interaction: { id: "interaction-stored-text", status: "completed", model: GOOGLE_SEARCH_MODEL } },
+  ];
+  const drafts = [];
+  const result = await answerWithGoogleSearch({
+    question: "Search Google for current guidance.",
+    apiKey: "test-key",
+    groundingBundle,
+    catalogAnswer,
+    routingDecision: { route: "public_web" },
+    onDraft: (text) => drafts.push(text),
+    fetchImpl: async (url, init) => {
+      if (init?.method === "POST") {
+        return new Response(events.map((event) => `data: ${JSON.stringify(event)}\n\n`).join(""));
+      }
+      return Response.json({
+        id: "interaction-stored-text",
+        status: "completed",
+        model: GOOGLE_SEARCH_MODEL,
+        steps: [
+          { type: "google_search_call", id: "search-1" },
+          { type: "google_search_result", call_id: "search-1", is_error: false, result: [{ search_suggestions: searchSuggestion }] },
+          {
+            type: "model_output",
+            content: [{
+              type: "text",
+              text: "Recovered stored answer.",
+              annotations: [{ type: "url_citation", url: "https://www.nist.gov/recovered", title: "Recovered source" }],
+            }],
+          },
+        ],
+      });
+    },
+  });
+  assert.equal(result.answer, "Recovered stored answer.");
+  assert.deepEqual(drafts, ["Recovered stored answer."]);
 });
 
 test("streaming never reveals a web draft before grounding validation succeeds", async () => {
