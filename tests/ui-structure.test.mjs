@@ -36,7 +36,7 @@ test("uses the requested neutral glass presentation", () => {
 
 test("provides a Gemini-powered workbook-grounded Ask assistant with focused verified context", () => {
   assert.match(page, /<SalesAssistant/);
-  assert.match(salesAssistant, /const apiPath = "api\/sales"/);
+  assert.match(salesAssistant, /const apiPath = "api\/ask-test"/);
   assert.match(salesAssistant, /buildContext/);
   assert.match(salesAssistant, /verified turns/);
   assert.match(salesAssistant, /Verified catalog evidence/);
@@ -120,11 +120,31 @@ test("keeps evidence and diagnostics inside one collapsed reference panel", () =
   const answerStart = salesAssistant.indexOf('<SalesAnswerContent value={answer.answer}');
   const detailsStart = salesAssistant.indexOf('<details className={`sales-reference-panel', answerStart);
   const evidenceStart = salesAssistant.indexOf('<div className="sales-evidence">', answerStart);
+  const webSourcesStart = salesAssistant.indexOf('<div className="sales-web-sources">', answerStart);
   const footerStart = salesAssistant.indexOf('<div className="sales-answer-foot">', answerStart);
   const detailsEnd = salesAssistant.indexOf('</details>', detailsStart);
   assert.ok(answerStart >= 0 && detailsStart > answerStart);
   assert.ok(evidenceStart > detailsStart && evidenceStart < detailsEnd);
+  assert.ok(webSourcesStart > detailsStart && webSourcesStart < detailsEnd);
   assert.ok(footerStart > detailsStart && footerStart < detailsEnd);
+});
+
+test("keeps Google citations in the collapsed reference panel with safe links", () => {
+  assert.match(salesAssistant, /Current web sources/);
+  assert.match(salesAssistant, /Google Search/);
+  assert.match(salesAssistant, /target="_blank" rel="noreferrer"/);
+  assert.match(styles, /\.sales-web-sources\s*\{/);
+  assert.match(salesAssistant, /className="sales-web-answer"/);
+  assert.match(salesAssistant, /value=\{answer\.web_answer\}/);
+  assert.match(styles, /\.sales-web-answer\s*\{/);
+  assert.match(salesAssistant, /className="sales-google-search-suggestions"/);
+  assert.match(salesAssistant, /dangerouslySetInnerHTML=\{\{ __html: html \}\}/);
+  assert.match(styles, /\.sales-google-search-suggestions\s*\{/);
+
+  const webAnswerStart = salesAssistant.indexOf('<section className="sales-web-answer"');
+  const suggestionStart = salesAssistant.indexOf('<GoogleSearchSuggestions items={searchSuggestions}', webAnswerStart);
+  const detailsStart = salesAssistant.indexOf('<details className={`sales-reference-panel', webAnswerStart);
+  assert.ok(webAnswerStart >= 0 && suggestionStart > webAnswerStart && suggestionStart < detailsStart);
 });
 
 test("makes the Sales product-knowledge rail collapsible and accessible", () => {

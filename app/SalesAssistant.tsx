@@ -18,8 +18,14 @@ type AnswerItem = {
   description: string;
 };
 
+type WebSource = {
+  title: string;
+  url: string;
+};
+
 type SalesAnswer = {
   answer: string;
+  web_answer?: string;
   answer_items: AnswerItem[];
   status: "answered" | "needs_clarification" | "not_in_source" | "escalate";
   confidence: "high" | "medium" | "low";
@@ -45,6 +51,13 @@ type SalesAnswer = {
   retrieval_strategy: string;
   vectorize_status: string;
   retrieval_documents_sent: number;
+  google_search_requested?: boolean;
+  web_search_used?: boolean;
+  web_search_succeeded?: boolean;
+  web_citations_available?: boolean;
+  web_sources?: WebSource[];
+  search_suggestions?: string[];
+  grounding_mode?: "catalog_only" | "catalog_and_google_search";
   timing?: {
     retrieval_ms: number;
     generation_ms: number;
@@ -79,6 +92,8 @@ type Health = {
     deterministic_fast_lane: boolean;
     phrase_normalization: boolean;
     ai_fallback: boolean;
+    google_search_current_external?: boolean;
+    catalog_authority?: string;
   };
   vectorize: {
     configured: boolean;
@@ -286,7 +301,7 @@ function SalesAnswerItems({ items, partNumbers }: { items: AnswerItem[]; partNum
 }
 
 export default function SalesAssistant() {
-  const apiPath = "api/sales";
+  const apiPath = "api/ask-test";
   const railDetailsId = "sales-product-knowledge-details";
   const questionId = "sales-question";
   const collapsePreferenceKey = "sales-product-knowledge-collapsed";
@@ -391,7 +406,7 @@ export default function SalesAssistant() {
         }
         if (!complete) throw new Error("The answer stream was interrupted. Please try again.");
       } else payload = await response.json().catch(() => ({})) as AskApiResponse;
-      if (response.status === 401 && payload.code === "access_code_required") {
+      if ((response.status === 401 || responseStatus === 401) && payload.code === "access_code_required") {
         setNeedsCode(true);
         throw new Error("Enter the team access code, then ask the question again.");
       }
@@ -646,6 +661,11 @@ function SalesExchange({
   const answer = exchange.assistant.answer;
   if (!answer) return null;
   const answerItems = Array.isArray(answer.answer_items) ? answer.answer_items : [];
+  const webSources = Array.isArray(answer.web_sources) ? answer.web_sources : [];
+  const searchSuggestions = Array.isArray(answer.search_suggestions)
+    ? answer.search_suggestions.filter((value) => typeof value === "string").slice(0, 5)
+    : [];
+  const referenceCount = answer.evidence.length + webSources.length;
 
   function submitFollowUp(event: FormEvent) {
     event.preventDefault();
@@ -666,11 +686,18 @@ function SalesExchange({
         <div>
           <SalesAnswerContent value={answer.answer} partNumbers={answer.materials} />
           <SalesAnswerItems items={answerItems} partNumbers={answer.materials} />
+          {answer.web_answer ? (
+            <section className="sales-web-answer" aria-label="Current public information">
+              <span>Current public information</span>
+              <SalesAnswerContent value={answer.web_answer} partNumbers={[]} />
+              <GoogleSearchSuggestions items={searchSuggestions} />
+            </section>
+          ) : <GoogleSearchSuggestions items={searchSuggestions} />}
 
           <details className={`sales-reference-panel ${answer.status}`}>
             <summary>
               <span>Sources &amp; details</span>
-              <small>{answer.evidence.length > 0 ? `${answer.evidence.length} verified field${answer.evidence.length === 1 ? "" : "s"}` : statusLabel(answer.status)}</small>
+              <small>{referenceCount > 0 ? `${referenceCount} source${referenceCount === 1 ? "" : "s"}` : statusLabel(answer.status)}</small>
               <b aria-hidden="true">+</b>
             </summary>
             <div className="sales-reference-content">
@@ -705,6 +732,22 @@ function SalesExchange({
                 </div>
               )}
 
+              {webSources.length > 0 && (
+                <div className="sales-web-sources">
+                  <div className="sales-evidence-heading">
+                    <span>Current web sources</span>
+                    <small>Google Search · {webSources.length} citation{webSources.length === 1 ? "" : "s"}</small>
+                  </div>
+                  <ol>
+                    {webSources.map((source) => (
+                      <li key={source.url}>
+                        <a href={source.url} target="_blank" rel="noreferrer">{source.title}</a>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+
               {answer.unresolved_items.length > 0 && (
                 <div className="sales-review-note">
                   <strong>Needs source review</strong>
@@ -732,6 +775,7 @@ function SalesExchange({
                   ? "Direct Excel lookup · no generative AI"
                   : `${answer.model} · ${answer.reasoning_effort} thinking · Gemini${answer.service_tier ? ` · ${answer.service_tier} service` : ""}`}</span>
                 <span>{answer.retrieval_strategy.includes("hybrid") ? "Semantic + exact catalog" : "Catalog retrieval"} · {answer.retrieval_documents_sent ?? 0} source chunk{answer.retrieval_documents_sent === 1 ? "" : "s"}</span>
+                {answer.web_search_used && <span>Current public information · Google Search grounded</span>}
                 <span>{answer.catalog_checks} catalog check{answer.catalog_checks === 1 ? "" : "s"}</span>
                 {answer.timing && <span>{answer.timing.total_ms.toLocaleString()} ms total · {answer.timing.retrieval_ms.toLocaleString()} ms search · {answer.timing.generation_ms.toLocaleString()} ms answer</span>}
               </div>
@@ -757,6 +801,19 @@ function SalesExchange({
 
         </div>
       </article>
+    </div>
+  );
+}
+
+function GoogleSearchSuggestions({ items }: { items: string[] }) {
+  if (items.length === 0) return null;
+  return (
+    <div className="sales-google-search-suggestions" aria-label="Google Search suggestions">
+      {items.map((html, index) => (
+        // This trusted snippet is supplied by Google's grounding API and must
+        // be displayed unmodified with the associated grounded result.
+        <div key={index} dangerouslySetInnerHTML={{ __html: html }} />
+      ))}
     </div>
   );
 }

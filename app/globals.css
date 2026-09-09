@@ -295,6 +295,14 @@ button { cursor: pointer; }
 .sales-reference-content { padding: 13px; border-top: 1px solid rgba(196,18,48,.1); background: rgba(255,255,255,.34); }
 .sales-reference-content .sales-materials { margin-top: 10px; }
 .sales-reference-content .sales-evidence { margin-top: 11px; }
+.sales-web-sources { margin-top: 11px; padding: 12px; border: 1px solid rgba(196,18,48,.1); border-radius: 9px; background: rgba(255,255,255,.52); }
+.sales-web-sources ol { margin: 9px 0 0; padding-left: 20px; display: grid; gap: 7px; }
+.sales-web-sources li { color: #78636a; font-size: 10px; }
+.sales-web-sources a { color: #9f1239; font-weight: 800; text-decoration-thickness: 1px; text-underline-offset: 2px; overflow-wrap: anywhere; }
+.sales-web-sources a:hover { color: #720b27; }
+.sales-web-answer { margin-top: 12px; padding-top: 11px; border-top: 1px solid rgba(196,18,48,.12); }
+.sales-web-answer > span { display: block; margin-bottom: 6px; color: #8e0e25; font-size: 9px; font-weight: 900; letter-spacing: .07em; text-transform: uppercase; }
+.sales-google-search-suggestions { margin-top: 10px; }
 .sales-materials { margin-top: 13px; padding: 10px 12px; display: grid; gap: 3px; color: #6d1428; background: #fcecf0; border-radius: 9px; }
 .sales-materials span { font-size: 8px; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; }
 .sales-materials strong { font-family: var(--font-geist-mono), monospace; font-size: 11px; }

@@ -1,0 +1,42 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "support-google-search-test",
+  "account_id": "184954aa769a7b5fbc3776178662c8cf",
+  "main": "./dist/server/index.js",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": true,
+  "assets": {
+    "directory": "./dist/client",
+    "binding": "ASSETS"
+  },
+  "ai": {
+    "binding": "AI"
+  },
+  "vectorize": [
+    {
+      "binding": "SALES_VECTORIZE",
+      "index_name": "ohaus-sales-catalog-v1"
+    },
+    {
+      "binding": "CATALOG_VECTORIZE",
+      "index_name": "ohaus-master-catalog-fast-v1"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "CATALOG_DB",
+      "database_name": "ohaus-master-catalog-v1",
+      "database_id": "70bd6c91-01ec-4ce8-81ff-07956b5737c6"
+    }
+  ],
+  "vars": {
+    "GEMINI_MODEL": "gemini-3.8-flash",
+    "GEMINI_THINKING_LEVEL": "low",
+    "GOOGLE_SEARCH_GROUNDING_ENABLED": "true"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

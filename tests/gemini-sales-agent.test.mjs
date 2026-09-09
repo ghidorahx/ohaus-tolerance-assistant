@@ -71,6 +71,7 @@ test("Gemini uses low thinking, structured output, and hydrated Excel evidence",
   assert.equal(requests[0].body.generation_config.thinking_level, "low");
   assert.equal(requests[0].body.response_format.mime_type, "application/json");
   assert.equal(requests[0].body.response_format.schema.additionalProperties, false);
+  assert.equal("tools" in requests[0].body, false);
   assert.match(requests[0].body.input, /CURRENT AUTHORITATIVE CATALOG GROUNDING BUNDLE/);
   assert.deepEqual(result.materials, ["30428204"]);
   assert.deepEqual(result.evidence.map((item) => item.value), ["220 g"]);
