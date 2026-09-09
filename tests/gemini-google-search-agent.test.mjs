@@ -118,6 +118,18 @@ test("automatic fallback allows only verified public catalog gaps", () => {
     ...publicGap,
     intent: "lookup",
   }, activeCatalogHealth).useGoogleSearch, true);
+  assert.equal(googleSearchFallbackDecision("What is the warranty for Adventurer?", [], {
+    ...publicGap,
+    intent: "lookup",
+  }, activeCatalogHealth).useGoogleSearch, false);
+  assert.equal(googleSearchFallbackDecision("What is the battery life of Ranger?", [], {
+    ...publicGap,
+    intent: "lookup",
+  }, activeCatalogHealth).useGoogleSearch, false);
+  assert.equal(googleSearchFallbackDecision("Who founded OHAUS and what is its warranty?", [], {
+    ...publicGap,
+    intent: "lookup",
+  }, activeCatalogHealth).useGoogleSearch, false);
 
   const exactProductGap = {
     answer: "The requested specification is not available in the loaded catalog.",
