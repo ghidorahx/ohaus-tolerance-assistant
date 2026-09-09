@@ -2,7 +2,10 @@ import {
   answerWithGoogleSearch,
   GOOGLE_SEARCH_MODEL,
 } from "@/lib/gemini-google-search-agent.mjs";
-import { googleSearchGroundingDecision } from "@/lib/google-search-routing.mjs";
+import {
+  googleSearchFallbackDecision,
+  googleSearchGroundingDecision,
+} from "@/lib/google-search-routing.mjs";
 import { salesStreamResponse } from "@/lib/sales-stream.mjs";
 import { GET as getCatalogAssistant, POST as postCatalogAssistant } from "../sales/route";
 
@@ -27,6 +30,23 @@ function webExperimentEnabled() {
   return process.env.GOOGLE_SEARCH_GROUNDING_ENABLED?.trim().toLowerCase() === "true";
 }
 
+function automaticWebFallbackEnabled() {
+  return process.env.GOOGLE_SEARCH_AUTO_FALLBACK_ENABLED?.trim().toLowerCase() === "true";
+}
+
+function isLocalPreviewRequest(request: Request) {
+  try {
+    const hostname = new URL(request.url).hostname.toLowerCase();
+    const loopback = hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]";
+    // The legacy exception exists only for unauthenticated local build tests.
+    // Any configured access code exercises the same master-request gate as the
+    // remote preview Worker, even on a loopback URL.
+    return loopback && !process.env.SALES_PILOT_ACCESS_CODE?.trim();
+  } catch {
+    return false;
+  }
+}
+
 type CatalogAnswer = {
   answer?: string;
   answer_items?: Array<{ identifier?: string; label?: string; description?: string }>;
@@ -45,6 +65,7 @@ type CatalogAnswer = {
   unresolved_items?: string[];
   follow_up_suggestions?: string[];
   escalation_reason?: string | null;
+  answer_engine?: string;
   retrieval_strategy?: string;
   vectorize_status?: string;
   retrieval_documents_sent?: number;
@@ -57,6 +78,14 @@ type CatalogResponse = {
   catalog?: Record<string, unknown>;
   context_used?: number;
   error?: string;
+};
+
+type GoogleSearchRoutingDecision = {
+  route: string;
+  useGoogleSearch: boolean;
+  reason: string;
+  automatic?: boolean;
+  searchQuestion?: string;
 };
 
 async function readBoundedBody(request: Request) {
@@ -100,25 +129,34 @@ function catalogRequest(request: Request, rawBody: string, accept: string, signa
   });
 }
 
-function webGroundingBundle(answer: CatalogAnswer, catalog: Record<string, unknown> | undefined) {
+function webGroundingBundle(
+  answer: CatalogAnswer,
+  catalog: Record<string, unknown> | undefined,
+  automatic = false,
+) {
   const evidence = Array.isArray(answer.evidence) ? answer.evidence : [];
   const materials = Array.isArray(answer.materials) ? answer.materials.map(String) : [];
   return {
     catalog_scope: {
       materials: Number(catalog?.materials) || materials.length,
-      source_file: typeof catalog?.source_file === "string" ? catalog.source_file : "Loaded catalog",
+      // Automatic fallback never transmits an internal catalog filename.
+      source_file: automatic
+        ? "Verified OHAUS catalog"
+        : typeof catalog?.source_file === "string" ? catalog.source_file : "Loaded catalog",
     },
-    allowed_material_numbers: materials,
-    evidence_fields: evidence,
-    verified_catalog_answer: {
-      answer: String(answer.answer ?? ""),
-      answer_items: Array.isArray(answer.answer_items) ? answer.answer_items : [],
-      context_summary: String(answer.context_summary ?? ""),
-    },
+    allowed_material_numbers: automatic ? materials.slice(0, 1) : materials,
+    evidence_fields: automatic ? [] : evidence,
+    ...(!automatic ? {
+      verified_catalog_answer: {
+        answer: String(answer.answer ?? ""),
+        answer_items: Array.isArray(answer.answer_items) ? answer.answer_items : [],
+        context_summary: String(answer.context_summary ?? ""),
+      },
+    } : {}),
     retrieval: {
-      strategy: answer.retrieval_strategy ?? "verified_catalog_answer",
-      vectorize_status: answer.vectorize_status ?? "not_needed",
-      result_count: Number(answer.retrieval_documents_sent) || evidence.length,
+      strategy: automatic ? "catalog_checked_first" : answer.retrieval_strategy ?? "verified_catalog_answer",
+      vectorize_status: automatic ? "withheld" : answer.vectorize_status ?? "not_needed",
+      result_count: automatic ? 0 : Number(answer.retrieval_documents_sent) || evidence.length,
     },
   };
 }
@@ -162,26 +200,23 @@ function webFailureResponse(error: unknown) {
   }, { status: 502 });
 }
 
-async function webAnswer(
-  request: Request,
-  rawBody: string,
-  body: { question?: unknown; context?: unknown },
-  routingDecision: ReturnType<typeof googleSearchGroundingDecision>,
+async function groundedAnswerFromCatalog(
+  body: { question?: unknown },
+  catalogPayload: CatalogResponse,
+  routingDecision: GoogleSearchRoutingDecision,
+  catalogMilliseconds: number,
   onDraft?: (text: string) => void,
-  signal: AbortSignal = request.signal,
+  onStatus?: (message: string) => void,
+  signal?: AbortSignal,
 ) {
-  const started = performance.now();
-  const catalogResponse = await postCatalogAssistant(catalogRequest(request, rawBody, "application/json", signal));
-  if (!catalogResponse.ok) return catalogResponse;
-  const catalogPayload = await catalogResponse.json() as CatalogResponse;
-  if (!catalogPayload.answer) {
+  const catalogAnswer = catalogPayload.answer;
+  if (!catalogAnswer) {
     return safeJson({ error: "The verified catalog answer was unavailable." }, { status: 502 });
   }
-  if (routingDecision.route === "catalog_plus_web") {
-    const catalogStatus = String(catalogPayload.answer.status ?? "");
-    const materials = Array.isArray(catalogPayload.answer.materials) ? catalogPayload.answer.materials : [];
-    if (["needs_clarification", "escalate"].includes(catalogStatus)
-      || materials.length === 0) {
+  if (routingDecision.route === "catalog_plus_web" && routingDecision.automatic !== true) {
+    const catalogStatus = String(catalogAnswer.status ?? "");
+    const materials = Array.isArray(catalogAnswer.materials) ? catalogAnswer.materials : [];
+    if (["needs_clarification", "escalate"].includes(catalogStatus) || materials.length === 0) {
       return safeJson({
         ...catalogPayload,
         experiment: {
@@ -192,20 +227,40 @@ async function webAnswer(
       });
     }
   }
-  const groundingBundle = webGroundingBundle(catalogPayload.answer, catalogPayload.catalog);
-  const catalogMilliseconds = performance.now() - started;
+
+  const automatic = routingDecision.automatic === true;
+  const googleQuestion = automatic
+    ? String(routingDecision.searchQuestion ?? "").trim()
+    : String(body.question ?? "").trim();
+  if (!googleQuestion) {
+    return safeJson({
+      ...catalogPayload,
+      experiment: {
+        google_search: false,
+        fallback_attempted: false,
+        fallback_used: false,
+        catalog_authority: "excel_only",
+        routing: "safe_web_query_unavailable",
+      },
+    });
+  }
+  const groundingBundle = webGroundingBundle(catalogAnswer, catalogPayload.catalog, automatic);
+  onStatus?.(automatic
+    ? "The catalog didn’t have this answer — searching Google for a cited result…"
+    : "Searching Google for current, cited information…");
+  const webStarted = performance.now();
   let answer;
   try {
     answer = await answerWithGoogleSearch({
-      question: String(body.question ?? "").trim(),
-      // The verified catalog answer resolves safe follow-up context. Raw prior
-      // turns are deliberately withheld from the web-search interaction.
+      question: googleQuestion,
+      // Raw prior turns are deliberately withheld from every Google Search
+      // interaction. Automatic fallback also receives no generated catalog text.
       sessionContext: [],
       apiKey: process.env.GEMINI_API_KEY ?? "",
       model: GOOGLE_SEARCH_MODEL,
       thinkingLevel: process.env.GEMINI_THINKING_LEVEL ?? "low",
       groundingBundle,
-      catalogAnswer: catalogPayload.answer,
+      catalogAnswer,
       routingDecision,
       onDraft,
       signal,
@@ -213,25 +268,103 @@ async function webAnswer(
   } catch (error) {
     console.error(JSON.stringify({
       message: "Google Search grounding experiment failed",
-      error: error instanceof Error ? error.message : String(error),
+      automatic,
+      code: (error as { code?: unknown })?.code ?? "unknown",
     }));
+    if (automatic) {
+      // A failed automatic search must never replace a valid catalog abstention
+      // or reveal an incomplete/uncited web draft.
+      return safeJson({
+        ...catalogPayload,
+        experiment: {
+          google_search: false,
+          fallback_attempted: true,
+          fallback_used: false,
+          catalog_authority: "excel_only",
+          routing: "catalog_fallback_unavailable",
+        },
+      });
+    }
     return webFailureResponse(error);
   }
-  const totalMilliseconds = performance.now() - started;
+  const webMilliseconds = performance.now() - webStarted;
   return safeJson({
     ...catalogPayload,
     answer: {
       ...answer,
       timing: {
         retrieval_ms: Math.round(catalogMilliseconds),
-        generation_ms: Math.round(totalMilliseconds - catalogMilliseconds),
-        total_ms: Math.round(totalMilliseconds),
+        generation_ms: Math.round(webMilliseconds),
+        total_ms: Math.round(catalogMilliseconds + webMilliseconds),
       },
     },
     experiment: {
       google_search: true,
+      fallback_attempted: automatic,
+      fallback_used: automatic,
       catalog_authority: "excel_only",
-      routing: routingDecision.route,
+      routing: automatic ? "catalog_miss_auto_search" : routingDecision.route,
+    },
+  });
+}
+
+async function routedAnswer(
+  request: Request,
+  rawBody: string,
+  body: { question?: unknown; context?: unknown },
+  initialDecision: ReturnType<typeof googleSearchGroundingDecision>,
+  onDraft?: (text: string) => void,
+  onStatus?: (message: string) => void,
+  signal: AbortSignal = request.signal,
+) {
+  const started = performance.now();
+  const catalogResponse = await postCatalogAssistant(catalogRequest(request, rawBody, "application/json", signal));
+  if (!catalogResponse.ok) return catalogResponse;
+  const catalogPayload = await catalogResponse.json() as CatalogResponse;
+  if (!catalogPayload.answer) {
+    return safeJson({ error: "The verified catalog answer was unavailable." }, { status: 502 });
+  }
+  const catalogMilliseconds = performance.now() - started;
+
+  if (initialDecision.useGoogleSearch) {
+    return groundedAnswerFromCatalog(
+      body,
+      catalogPayload,
+      initialDecision,
+      catalogMilliseconds,
+      onDraft,
+      onStatus,
+      signal,
+    );
+  }
+
+  const fallbackDecision = googleSearchFallbackDecision(
+    typeof body.question === "string" ? body.question : "",
+    Array.isArray(body.context) ? body.context as Array<Record<string, unknown>> : [],
+    catalogPayload.answer,
+    catalogPayload.catalog,
+    { allowLegacyCatalog: isLocalPreviewRequest(request) },
+  );
+  if (automaticWebFallbackEnabled() && fallbackDecision.useGoogleSearch) {
+    return groundedAnswerFromCatalog(
+      body,
+      catalogPayload,
+      fallbackDecision,
+      catalogMilliseconds,
+      onDraft,
+      onStatus,
+      signal,
+    );
+  }
+
+  return safeJson({
+    ...catalogPayload,
+    experiment: {
+      google_search: false,
+      fallback_attempted: false,
+      fallback_used: false,
+      catalog_authority: "excel_only",
+      routing: automaticWebFallbackEnabled() ? fallbackDecision.reason : "catalog_only",
     },
   });
 }
@@ -247,6 +380,7 @@ export async function GET(request: Request) {
     answer_routing: {
       ...payload.answer_routing,
       google_search_current_external: webExperimentEnabled(),
+      google_search_catalog_fallback: webExperimentEnabled() && automaticWebFallbackEnabled(),
       catalog_authority: "excel_only",
     },
     experiment: "google-search-grounding-test",
@@ -270,17 +404,28 @@ export async function POST(request: Request) {
     typeof body.question === "string" ? body.question : "",
     Array.isArray(body.context) ? body.context as Array<Record<string, unknown>> : [],
   );
-  if (!webExperimentEnabled() || !decision.useGoogleSearch) {
+  const shouldInspectCatalogResult = webExperimentEnabled()
+    && decision.route !== "private_live_unavailable"
+    && (decision.useGoogleSearch || automaticWebFallbackEnabled());
+  if (!shouldInspectCatalogResult) {
     return postCatalogAssistant(catalogRequest(request, rawBody, request.headers.get("Accept") ?? "application/json"));
   }
 
   if (request.headers.get("Accept")?.includes("text/event-stream")) {
     return salesStreamResponse(
-      (onDraft, signal) => webAnswer(request, rawBody, body, decision, onDraft, signal),
+      (onDraft, signal, onStatus) => routedAnswer(
+        request,
+        rawBody,
+        body,
+        decision,
+        onDraft,
+        onStatus,
+        signal,
+      ),
       // The standard route already handles authorization and rate limiting
-      // during the verified catalog pass inside webAnswer.
+      // during the single verified catalog pass inside routedAnswer.
       request.signal,
     );
   }
-  return webAnswer(request, rawBody, body, decision);
+  return routedAnswer(request, rawBody, body, decision);
 }

@@ -147,6 +147,21 @@ test("keeps Google citations in the collapsed reference panel with safe links", 
   assert.ok(webAnswerStart >= 0 && suggestionStart > webAnswerStart && suggestionStart < detailsStart);
 });
 
+test("shows automatic Google fallback as one labeled answer with live queue status", () => {
+  assert.match(salesAssistant, /"google_search_fallback"/);
+  assert.match(salesAssistant, /Google-grounded answer/);
+  assert.match(salesAssistant, /event\.type === "status"/);
+  assert.match(salesAssistant, /setActivity\(event\.message\)/);
+  assert.match(salesAssistant, /activity \|\|/);
+  assert.match(salesAssistant, /Google-grounded response/);
+  assert.match(styles, /\.sales-web-answer\.sales-web-fallback/);
+
+  const fallbackStart = salesAssistant.indexOf('aria-label="Google-grounded answer"');
+  const fallbackSuggestion = salesAssistant.indexOf('<GoogleSearchSuggestions items={searchSuggestions}', fallbackStart);
+  const detailsStart = salesAssistant.indexOf('<details className={`sales-reference-panel', fallbackStart);
+  assert.ok(fallbackStart >= 0 && fallbackSuggestion > fallbackStart && fallbackSuggestion < detailsStart);
+});
+
 test("makes the Sales product-knowledge rail collapsible and accessible", () => {
   assert.match(salesAssistant, /productKnowledgeCollapsed/);
   assert.match(salesAssistant, /aria-expanded=\{!productKnowledgeCollapsed\}/);

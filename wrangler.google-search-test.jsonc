@@ -34,7 +34,8 @@
   "vars": {
     "GEMINI_MODEL": "gemini-3.8-flash",
     "GEMINI_THINKING_LEVEL": "low",
-    "GOOGLE_SEARCH_GROUNDING_ENABLED": "true"
+    "GOOGLE_SEARCH_GROUNDING_ENABLED": "true",
+    "GOOGLE_SEARCH_AUTO_FALLBACK_ENABLED": "true"
   },
   "observability": {
     "enabled": true

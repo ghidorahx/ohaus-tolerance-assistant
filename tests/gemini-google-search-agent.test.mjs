@@ -7,7 +7,10 @@ import {
   extractGoogleSearchSuggestions,
   GOOGLE_SEARCH_MODEL,
 } from "../lib/gemini-google-search-agent.mjs";
-import { googleSearchGroundingDecision } from "../lib/google-search-routing.mjs";
+import {
+  googleSearchFallbackDecision,
+  googleSearchGroundingDecision,
+} from "../lib/google-search-routing.mjs";
 
 const searchSuggestion = '<div class="google-search-suggestion"><a href="https://www.google.com/search?q=nist">Search on Google</a></div>';
 
@@ -37,6 +40,12 @@ const catalogAnswer = {
   retrieval_strategy: "exact_lexical",
   vectorize_status: "not_needed",
   retrieval_documents_sent: 1,
+};
+
+const activeCatalogHealth = {
+  retrieval_status: "ready",
+  version_id: "mcv_test",
+  materials: 6_407,
 };
 
 test("Google Search routing defaults to catalog and blocks private commercial data", () => {
@@ -78,6 +87,248 @@ test("Google Search routing defaults to catalog and blocks private commercial da
     googleSearchGroundingDecision("Search Google for current NIST calibration guidance.", olderPrivateContext),
     { route: "public_web", useGoogleSearch: true, reason: "explicit_web_search" },
   );
+});
+
+test("automatic fallback allows only verified public catalog gaps", () => {
+  const publicGap = {
+    answer: "That information is not available in the loaded catalog.",
+    status: "not_in_source",
+    confidence: "low",
+    intent: "unsupported",
+    materials: [],
+    evidence: [],
+    answer_items: [],
+    unresolved_items: [],
+    answer_engine: "ai",
+    retrieval_strategy: "none",
+    vectorize_status: "ready",
+  };
+  assert.deepEqual(
+    googleSearchFallbackDecision("Who founded OHAUS?", [], publicGap, activeCatalogHealth),
+    {
+      route: "public_web",
+      useGoogleSearch: true,
+      automatic: true,
+      reason: "catalog_public_topic_absent",
+      searchQuestion: "Find official public information for OHAUS about: company founding and history. Address every listed topic and say when official public sources do not establish one. Use primary official sources.",
+      searchFacets: ["company_history"],
+    },
+  );
+
+  const exactProductGap = {
+    answer: "The requested specification is not available in the loaded catalog.",
+    status: "not_in_source",
+    confidence: "medium",
+    intent: "lookup",
+    materials: ["30428204"],
+    evidence: [],
+    answer_items: [{ identifier: "30428204", label: "CR221" }],
+    unresolved_items: ["CR221: warranty"],
+    answer_engine: "catalog_fast_lane",
+    retrieval_strategy: "exact",
+    vectorize_status: "skipped",
+  };
+  assert.deepEqual(
+    googleSearchFallbackDecision("What is the warranty for CR221?", [], exactProductGap, activeCatalogHealth),
+    {
+      route: "catalog_plus_web",
+      useGoogleSearch: true,
+      automatic: true,
+      reason: "catalog_product_field_absent",
+      searchQuestion: "Find official public information for OHAUS material 30428204 about: public warranty policy and terms. Address every listed topic and say when official public sources do not establish one. Use primary official sources.",
+      searchFacets: ["warranty"],
+    },
+  );
+  assert.equal(googleSearchFallbackDecision("What is the warranty for CR221?", [], {
+    ...exactProductGap,
+    answer_engine: "ai",
+  }, activeCatalogHealth).useGoogleSearch, true);
+  assert.equal(googleSearchFallbackDecision("What is its warranty?", [], {
+    ...exactProductGap,
+    answer_engine: "ai",
+  }, activeCatalogHealth).useGoogleSearch, false);
+  assert.equal(googleSearchFallbackDecision("What is the warranty for CR221?", [], {
+    ...exactProductGap,
+    answer_engine: "ai",
+    confidence: "low",
+  }, activeCatalogHealth).useGoogleSearch, false);
+
+  for (const status of ["answered", "needs_clarification", "escalate"]) {
+    assert.equal(googleSearchFallbackDecision("Who founded OHAUS?", [], {
+      ...publicGap,
+      status,
+    }, activeCatalogHealth).useGoogleSearch, false);
+  }
+  assert.equal(googleSearchFallbackDecision("What is the warranty for UNKNOWN123?", [], {
+    ...publicGap,
+    intent: "lookup",
+    unresolved_items: ["UNKNOWN123"],
+    answer_engine: "catalog_fast_lane",
+  }, activeCatalogHealth).useGoogleSearch, false);
+  assert.equal(googleSearchFallbackDecision("Compare OHAUS balance warranties.", [], {
+    ...exactProductGap,
+    materials: ["30428204", "30012345"],
+    answer_items: [{ identifier: "30428204" }, { identifier: "30012345" }],
+  }, activeCatalogHealth).useGoogleSearch, false);
+  assert.equal(googleSearchFallbackDecision("Who won the Super Bowl?", [], publicGap, activeCatalogHealth).useGoogleSearch, false);
+  assert.equal(googleSearchFallbackDecision("Who founded OHAUS?", [], publicGap, {
+    retrieval_status: "ready",
+    materials: 80,
+  }).useGoogleSearch, false);
+  assert.equal(googleSearchFallbackDecision("Who founded OHAUS?", [], {
+    ...publicGap,
+    answer: "Maybe it was founded in 1907.",
+  }, activeCatalogHealth).useGoogleSearch, false);
+  assert.equal(googleSearchFallbackDecision("Who founded OHAUS?", [], publicGap, {
+    retrieval_status: "stale",
+    version_id: "mcv_test",
+    materials: 6_407,
+  }).useGoogleSearch, false);
+  assert.deepEqual(googleSearchFallbackDecision("Who founded OHAUS?", [], {
+    ...publicGap,
+    retrieval_strategy: "local_fallback",
+    vectorize_status: "not_configured",
+  }, activeCatalogHealth), {
+    route: "catalog_only",
+    useGoogleSearch: false,
+    automatic: true,
+    reason: "catalog_request_unverified",
+  });
+  assert.equal(googleSearchFallbackDecision("Who founded OHAUS?", [], {
+    ...publicGap,
+    vectorize_status: "fallback",
+  }, activeCatalogHealth).useGoogleSearch, false);
+});
+
+test("automatic fallback preserves every allowlisted public facet without copying raw text", () => {
+  const productGap = {
+    answer: "The requested specification is not available in the loaded catalog.",
+    status: "not_in_source",
+    confidence: "medium",
+    intent: "lookup",
+    materials: ["30428204"],
+    evidence: [],
+    answer_items: [{ identifier: "30428204", label: "ORION7Q" }],
+    unresolved_items: ["PRIVATE-UNRESOLVED-SENTINEL"],
+    answer_engine: "ai",
+    retrieval_strategy: "hybrid_rrf",
+    vectorize_status: "ready",
+  };
+  const multiFacet = googleSearchFallbackDecision(
+    "PRIVATE-RAW-SENTINEL: What are the battery life, dimentions, warranty, and recall details for ORION7Q?",
+    [],
+    productGap,
+    activeCatalogHealth,
+  );
+  assert.equal(multiFacet.useGoogleSearch, true);
+  assert.deepEqual(multiFacet.searchFacets, ["warranty", "recall", "battery_runtime", "dimensions"]);
+  assert.match(multiFacet.searchQuestion, /OHAUS material 30428204/);
+  assert.match(multiFacet.searchQuestion, /battery runtime and expected operating time/);
+  assert.match(multiFacet.searchQuestion, /overall physical dimensions/);
+  assert.match(multiFacet.searchQuestion, /public warranty policy and terms/);
+  assert.match(multiFacet.searchQuestion, /current recalls and safety notices/);
+  assert.doesNotMatch(multiFacet.searchQuestion, /PRIVATE|ORION7Q|dimentions/i);
+
+  const companyGap = {
+    ...productGap,
+    confidence: "low",
+    intent: "unsupported",
+    materials: [],
+    answer_items: [],
+    unresolved_items: [],
+    retrieval_strategy: "none",
+  };
+  const company = googleSearchFallbackDecision(
+    "When was OHAUS founded and where is it headquartered?",
+    [],
+    companyGap,
+    activeCatalogHealth,
+  );
+  assert.deepEqual(company.searchFacets, ["company_history", "company_profile"]);
+  assert.match(company.searchQuestion, /company founding and history; company profile, ownership, and headquarters/);
+
+  const precedence = googleSearchFallbackDecision(
+    "What are the battery capacity, pan dimensions, and shipping weight for ORION7Q?",
+    [],
+    productGap,
+    activeCatalogHealth,
+  );
+  assert.deepEqual(precedence.searchFacets, ["pan_size", "shipping_weight"]);
+  assert.doesNotMatch(precedence.searchQuestion, /weighing capacity|overall physical dimensions|net product weight/);
+
+  assert.equal(googleSearchFallbackDecision("What is the warranty for ORION7Q?", [], {
+    ...productGap,
+    materials: ["30428204;DROP"],
+    answer_items: [{ identifier: "30428204;DROP", label: "ORION7Q" }],
+  }, activeCatalogHealth).useGoogleSearch, false);
+
+  const availableUnits = googleSearchFallbackDecision(
+    "What measurement units are available for ORION7Q?",
+    [],
+    productGap,
+    activeCatalogHealth,
+  );
+  assert.equal(availableUnits.useGoogleSearch, true);
+  assert.deepEqual(availableUnits.searchFacets, ["units"]);
+});
+
+test("automatic fallback blocks sensitive prompts and dependent private context", () => {
+  const publicGap = {
+    answer: "That information is not available in the loaded catalog.",
+    status: "not_in_source",
+    intent: "unsupported",
+    materials: [],
+    evidence: [],
+    answer_items: [],
+    unresolved_items: [],
+    answer_engine: "ai",
+    retrieval_strategy: "none",
+    vectorize_status: "ready",
+  };
+  const blockedQuestions = [
+    "What is the current price of an OHAUS CR221?",
+    "How much is OHAUS CR221?",
+    "Is OHAUS CR221 in stock today?",
+    "Is OHAUS CR221 available?",
+    "Can I order OHAUS CR221?",
+    "Where can I buy OHAUS CR221?",
+    "When can I get OHAUS CR221?",
+    "What is the lead time for this OHAUS balance?",
+    "What are our negotiated terms for OHAUS?",
+    "What is our special deal for OHAUS?",
+    "Find customer account 123 for this OHAUS order.",
+    "What is our internal OHAUS warranty note?",
+    "What is the team access code?",
+    "What is the team-code?",
+    "What is the access-code?",
+    "What is the pass-word?",
+    "Use API key abc123 to search for OHAUS manuals.",
+    "Use client-secret abc123 to search for OHAUS manuals.",
+    "Send the result by email for this OHAUS warranty.",
+    "Call by phone about this OHAUS warranty.",
+    "Use the mailing address for this OHAUS warranty.",
+    "Email the OHAUS result to person@example.com.",
+    "OHAUS warranty for person@example.com.",
+    "Call 212-555-0199 about this OHAUS balance.",
+  ];
+  for (const question of blockedQuestions) {
+    assert.equal(googleSearchFallbackDecision(question, [], publicGap, activeCatalogHealth).useGoogleSearch, false, question);
+    assert.equal(googleSearchGroundingDecision(`Search Google: ${question}`).useGoogleSearch, false, question);
+  }
+
+  const namedPublicQuestion = googleSearchFallbackDecision(
+    "What is the OHAUS warranty for Jane Doe at Acme Labs?",
+    [],
+    publicGap,
+    activeCatalogHealth,
+  );
+  assert.equal(namedPublicQuestion.useGoogleSearch, true);
+  assert.doesNotMatch(namedPublicQuestion.searchQuestion, /Jane|Doe|Acme|Labs/i);
+
+  assert.equal(googleSearchFallbackDecision("What about its OHAUS warranty?", [{
+    question: "What is the customer-specific quote for CR221?",
+    answer: "Not in the catalog.",
+  }], publicGap, activeCatalogHealth).useGoogleSearch, false);
 });
 
 test("extracts only unique HTTPS API citations and preserves Google's Search Suggestion HTML", () => {
@@ -177,6 +428,71 @@ test("Gemini 3.8 uses native Google Search text and preserves verified catalog e
   assert.equal(result.web_search_used, true);
   assert.deepEqual(result.web_sources, [{ title: "CPSC recalls", url: "https://www.cpsc.gov/Recalls" }]);
   assert.deepEqual(result.search_suggestions, [searchSuggestion]);
+});
+
+test("automatic fallback returns one grounded answer without sending history or generated catalog text", async () => {
+  const requests = [];
+  const fallbackText = "OHAUS publishes a public warranty policy for this product category.";
+  const privateSentinel = "PRIVATE-CONTEXT-SENTINEL";
+  const result = await answerWithGoogleSearch({
+    question: "What is the public warranty for CR221?",
+    sessionContext: [{ question: privateSentinel, answer: privateSentinel }],
+    apiKey: "test-key",
+    model: GOOGLE_SEARCH_MODEL,
+    groundingBundle,
+    catalogAnswer: {
+      ...catalogAnswer,
+      answer: "GENERATED-CATALOG-ABSTENTION",
+      context_summary: "GENERATED-CONTEXT-SUMMARY",
+      status: "not_in_source",
+      confidence: "medium",
+      intent: "lookup",
+      unresolved_items: ["warranty"],
+    },
+    routingDecision: {
+      route: "catalog_plus_web",
+      useGoogleSearch: true,
+      automatic: true,
+      reason: "catalog_product_field_absent",
+    },
+    fetchImpl: async (url, init) => {
+      requests.push({ url, body: JSON.parse(init.body) });
+      return Response.json({
+        id: "interaction-auto-fallback",
+        model: GOOGLE_SEARCH_MODEL,
+        status: "completed",
+        steps: [
+          { type: "google_search_call", id: "search-1", arguments: { queries: ["CR221 warranty"] } },
+          { type: "google_search_result", call_id: "search-1", is_error: false, result: [{ search_suggestions: searchSuggestion }] },
+          {
+            type: "model_output",
+            content: [{
+              type: "text",
+              text: fallbackText,
+              annotations: [{ type: "url_citation", url: "https://us.ohaus.com/warranty", title: "OHAUS warranty" }],
+            }],
+          },
+        ],
+      });
+    },
+  });
+
+  assert.equal(requests.length, 1);
+  assert.match(requests[0].body.system_instruction, /public-web fallback/i);
+  assert.match(requests[0].body.input, /30428204/);
+  assert.doesNotMatch(requests[0].body.input, /PRIVATE-CONTEXT-SENTINEL/);
+  assert.doesNotMatch(requests[0].body.input, /GENERATED-CATALOG-ABSTENTION/);
+  assert.doesNotMatch(requests[0].body.input, /GENERATED-CONTEXT-SUMMARY/);
+  assert.doesNotMatch(requests[0].body.input, /catalog\.xlsx/);
+  assert.equal(result.answer, fallbackText);
+  assert.equal(result.web_answer, undefined);
+  assert.deepEqual(result.answer_items, []);
+  assert.deepEqual(result.materials, ["30428204"]);
+  assert.equal(result.status, "answered");
+  assert.equal(result.fallback_used, true);
+  assert.equal(result.grounding_mode, "google_search_fallback");
+  assert.equal(result.web_fallback_reason, "catalog_product_field_absent");
+  assert.equal(result.grounding_products, 1);
 });
 
 test("Google Search answers fail closed when search is skipped, errors, lacks citations, or lacks Search Suggestions", async () => {

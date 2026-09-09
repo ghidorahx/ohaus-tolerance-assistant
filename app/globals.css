@@ -302,6 +302,7 @@ button { cursor: pointer; }
 .sales-web-sources a:hover { color: #720b27; }
 .sales-web-answer { margin-top: 12px; padding-top: 11px; border-top: 1px solid rgba(196,18,48,.12); }
 .sales-web-answer > span { display: block; margin-bottom: 6px; color: #8e0e25; font-size: 9px; font-weight: 900; letter-spacing: .07em; text-transform: uppercase; }
+.sales-web-answer.sales-web-fallback { margin-top: 0; padding-top: 0; border-top: 0; }
 .sales-google-search-suggestions { margin-top: 10px; }
 .sales-materials { margin-top: 13px; padding: 10px 12px; display: grid; gap: 3px; color: #6d1428; background: #fcecf0; border-radius: 9px; }
 .sales-materials span { font-size: 8px; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; }

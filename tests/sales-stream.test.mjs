@@ -34,6 +34,19 @@ test("draft arrives before completion, final response and status survive", async
   await events.return();
 });
 
+test("stream runners can report a bounded second-stage status", async () => {
+  const response = salesStreamResponse(async (_, __, status) => {
+    status("Searching Google for a cited result…");
+    status(` ${"x".repeat(240)} `);
+    return Response.json({ answer: { answer: "Grounded", evidence: [] } });
+  }, new AbortController().signal);
+  const events = await Array.fromAsync(readEvents(response.body));
+  assert.equal(events[0].message, "Searching catalog");
+  assert.equal(events[1].message, "Searching Google for a cited result…");
+  assert.equal(events[2].message.length, 180);
+  assert.equal(events.at(-1).type, "complete");
+});
+
 test("stream preserves rate-limit errors and cancellation", async () => {
   const response = salesStreamResponse(async () => Response.json({ error: "Wait", retry_after_seconds: 3 }, { status: 429 }), new AbortController().signal);
   const events = await Array.fromAsync(readEvents(response.body));

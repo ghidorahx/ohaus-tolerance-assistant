@@ -57,7 +57,7 @@ type SalesAnswer = {
   web_citations_available?: boolean;
   web_sources?: WebSource[];
   search_suggestions?: string[];
-  grounding_mode?: "catalog_only" | "catalog_and_google_search";
+  grounding_mode?: "catalog_only" | "catalog_and_google_search" | "google_search_fallback";
   timing?: {
     retrieval_ms: number;
     generation_ms: number;
@@ -93,6 +93,7 @@ type Health = {
     phrase_normalization: boolean;
     ai_fallback: boolean;
     google_search_current_external?: boolean;
+    google_search_catalog_fallback?: boolean;
     catalog_authority?: string;
   };
   vectorize: {
@@ -310,6 +311,7 @@ export default function SalesAssistant() {
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
   const [draft, setDraft] = useState("");
+  const [activity, setActivity] = useState("");
   const activeRequest = useRef<AbortController | null>(null);
   useEffect(() => () => activeRequest.current?.abort(), []);
   const [error, setError] = useState<string | null>(null);
@@ -376,6 +378,7 @@ export default function SalesAssistant() {
     setError(null);
     setThinking(true);
     setDraft("");
+    setActivity("Searching the catalog…");
     const abort = new AbortController();
     activeRequest.current = abort;
 
@@ -396,6 +399,7 @@ export default function SalesAssistant() {
       if (response.ok && response.headers.get("content-type")?.includes("text/event-stream")) {
         let complete = false;
         for await (const event of readEvents(response.body)) {
+          if (event.type === "status" && typeof event.message === "string") setActivity(event.message);
           if (event.type === "draft" && typeof event.text === "string") setDraft((current) => current + event.text);
           if (event.type === "complete" || event.type === "error") {
             payload = event;
@@ -440,6 +444,7 @@ export default function SalesAssistant() {
     } finally {
       activeRequest.current = null;
       setDraft("");
+      setActivity("");
       setThinking(false);
       requestAnimationFrame(() => inputRef.current?.focus());
     }
@@ -502,7 +507,7 @@ export default function SalesAssistant() {
           <div>
             <p className="eyebrow">Workbook-grounded</p>
             <h2>Product knowledge</h2>
-            <p>Answers are generated only after the relevant Excel-derived records are retrieved.</p>
+            <p>Answers check the Excel-derived catalog first, then eligible public gaps can use cited Google results.</p>
           </div>
 
           <div className="sales-stat-grid">
@@ -590,7 +595,7 @@ export default function SalesAssistant() {
           {thinking && (
             <div className="sales-thinking" role="status">
               <span aria-hidden="true" />
-              {draft ? "Draft answer · finalizing catalog sources…" : "Searching the relevant workbook records and verifying the answer with Gemini…"}
+              {activity || (draft ? "Finalizing the cited answer…" : "Searching the relevant workbook records…")}
             </div>
           )}
 
@@ -607,7 +612,7 @@ export default function SalesAssistant() {
                 <span className="sales-message-avatar" aria-hidden="true">AI</span>
                 <div>
                   <strong>Gemini product assistant</strong>
-                  <p>I’ll identify the relevant records, verify the requested fields, and show exactly which catalog data supports the answer.</p>
+                  <p>I’ll check the catalog first. If it cannot answer an eligible public question, I’ll search Google and return a cited result.</p>
                 </div>
               </div>
               <div className="sales-suggestions">
@@ -630,7 +635,7 @@ export default function SalesAssistant() {
                   {exchanges.slice(1).map((exchange) => (
                     <details key={exchange.id}>
                       <summary>
-                        <span><strong>{exchange.user.text}</strong><small>{exchange.assistant.answer?.materials.join(" · ") || "Catalog response"}</small></span>
+                        <span><strong>{exchange.user.text}</strong><small>{exchange.assistant.answer?.grounding_mode === "google_search_fallback" ? "Google-grounded response" : exchange.assistant.answer?.materials.join(" · ") || "Catalog response"}</small></span>
                         <b aria-hidden="true">+</b>
                       </summary>
                       <SalesExchange exchange={exchange} onFollowUp={askQuestion} disabled={thinking || coolingDown} />
@@ -665,6 +670,7 @@ function SalesExchange({
   const searchSuggestions = Array.isArray(answer.search_suggestions)
     ? answer.search_suggestions.filter((value) => typeof value === "string").slice(0, 5)
     : [];
+  const isGoogleFallback = answer.grounding_mode === "google_search_fallback";
   const referenceCount = answer.evidence.length + webSources.length;
 
   function submitFollowUp(event: FormEvent) {
@@ -684,15 +690,25 @@ function SalesExchange({
       <article className="sales-assistant-message">
         <span className="sales-message-avatar" aria-hidden="true">AI</span>
         <div>
-          <SalesAnswerContent value={answer.answer} partNumbers={answer.materials} />
-          <SalesAnswerItems items={answerItems} partNumbers={answer.materials} />
-          {answer.web_answer ? (
+          {isGoogleFallback ? (
+            <section className="sales-web-answer sales-web-fallback" aria-label="Google-grounded answer">
+              <span>Google-grounded answer</span>
+              <SalesAnswerContent value={answer.answer} partNumbers={answer.materials} />
+              <GoogleSearchSuggestions items={searchSuggestions} />
+            </section>
+          ) : (
+            <>
+              <SalesAnswerContent value={answer.answer} partNumbers={answer.materials} />
+              <SalesAnswerItems items={answerItems} partNumbers={answer.materials} />
+            </>
+          )}
+          {!isGoogleFallback && answer.web_answer ? (
             <section className="sales-web-answer" aria-label="Current public information">
               <span>Current public information</span>
               <SalesAnswerContent value={answer.web_answer} partNumbers={[]} />
               <GoogleSearchSuggestions items={searchSuggestions} />
             </section>
-          ) : <GoogleSearchSuggestions items={searchSuggestions} />}
+          ) : !isGoogleFallback ? <GoogleSearchSuggestions items={searchSuggestions} /> : null}
 
           <details className={`sales-reference-panel ${answer.status}`}>
             <summary>
