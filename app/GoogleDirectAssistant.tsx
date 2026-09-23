@@ -103,38 +103,25 @@ export default function GoogleDirectAssistant() {
 
   const latest = results.at(-1);
   function renderAnswer(result: Result) {
-    const visibleSources = result.sources.map((source, index) => ({ ...source, index, url: safeGoogleSourceUrl(source.url) })).filter((source) => source.url);
-    const statusText = result.status === "needs_clarification" ? "A quick clarification"
-      : result.status === "not_verified" ? "Not yet verified in public sources" : "";
     return <>
-      {statusText && <p className="sales-answer-foot">{statusText}</p>}
       <GoogleAnswerContent result={result} />
       <GoogleSearchSuggestions items={result.suggestions} />
-      <details className="sales-reference-panel answered">
-        <summary><span>{visibleSources.length ? "Sources & details" : "Response details"}</span><small>{visibleSources.length ? `${visibleSources.length} ${visibleSources.length === 1 ? "source" : "sources"} · ` : ""}{(result.elapsed_ms / 1000).toFixed(1)}s</small></summary>
-        <div className="sales-reference-content">
-          {visibleSources.length > 0 && <div className="sales-web-sources"><ol>{visibleSources.map((source) => <li key={source.index} value={source.index + 1}><a href={source.url!} target="_blank" rel="noopener noreferrer">{source.title}</a></li>)}</ol></div>}
-          <div className="sales-answer-foot">{result.model} · {result.thinking || "low"} thinking · Google Search · no catalog lookup{result.attempts > 1 ? " · search refined once" : ""}</div>
-        </div>
-      </details>
     </>;
   }
 
-  return <section className="sales-chat-panel" aria-label="Google AI Test">
+  return <section className="sales-chat-panel" aria-label="Testing">
     <form className="sales-composer" onSubmit={ask}>
-      <div className="sales-composer-heading"><label htmlFor="google-test-question">Google AI Test</label><button type="button" disabled={busy} onClick={() => { setResults([]); setError(""); setStopped(false); }}>Clear conversation</button></div>
-      <p>A Google-assisted experiment for public product questions, with follow-ups and cited sources. It does not use the master Excel file or Google.com’s AI Mode.</p>
+      <div className="sales-composer-heading"><span /><button type="button" disabled={busy} onClick={() => { setResults([]); setError(""); setStopped(false); }}>Clear conversation</button></div>
       {needsCode && <input className="sales-access-code" type="password" aria-label="Team access code" placeholder="Team access code" value={code} onChange={(event) => setCode(event.target.value)} autoComplete="off" />}
       <div className="sales-composer-row">
-        <textarea id="google-test-question" value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }} rows={3} maxLength={1600} disabled={busy} placeholder="Example: What is the battery life of an OHAUS CR221?" />
-        {busy ? <button type="button" onClick={stopSearch}>Stop</button> : <button type="submit" disabled={!input.trim()}>Ask Google</button>}
+        <textarea id="google-test-question" aria-label="Testing question" value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }} rows={3} maxLength={1600} disabled={busy} placeholder="Ask a question…" />
+        {busy ? <button type="button" onClick={stopSearch}>Stop</button> : <button type="submit" disabled={!input.trim()}>Testing</button>}
       </div>
-      <div className="sales-composer-foot"><small>Public questions only · Reply naturally to ask a follow-up</small></div>
-      {stopped && <p role="status">Search stopped. Your question is ready to try again.</p>}
+      {stopped && <p role="status">Stopped.</p>}
       {error && <p className="sales-error" role="alert">{error}</p>}
     </form>
     <div className="sales-conversation" aria-live="polite">
-      {busy && <div className="sales-thinking" role="status"><span aria-hidden="true" />Searching Google and checking sources. Technical questions may take a little longer…</div>}
+      {busy && <div className="sales-thinking" role="status"><span aria-hidden="true" />Thinking…</div>}
       {latest && <article className="sales-assistant-message"><span className="sales-message-avatar" aria-hidden="true">AI</span><div><p className="eyebrow">{latest.question}</p>{renderAnswer(latest)}</div></article>}
       {results.slice(0, -1).reverse().map((result, index) => <details className="sales-reference-panel" key={index}><summary>{result.question}</summary><div className="sales-reference-content">{renderAnswer(result)}</div></details>)}
     </div>

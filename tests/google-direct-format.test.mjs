@@ -1,8 +1,20 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { googleAnswerLines, safeGoogleSourceUrl } from "../lib/google-direct-format.mjs";
 
 const sources = [{ title: "OHAUS", url: "https://us.ohaus.com/manual" }];
+
+test("Testing keeps the chat simple without descriptions or a source-details panel", () => {
+  const ui = readFileSync(new URL("../app/GoogleDirectAssistant.tsx", import.meta.url), "utf8");
+  const page = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.doesNotMatch(ui, /Google AI Test|Ask Google|Sources & details|Response details|A Google-assisted experiment|sales-composer-foot/);
+  assert.doesNotMatch(page, /Google AI Test/);
+  assert.match(ui, /aria-label="Testing question"/);
+  assert.match(ui, />Testing<\/button>/);
+  assert.match(ui, /<GoogleSearchSuggestions items=\{result.suggestions\}/);
+  assert.match(ui, /Source \$\{citation.source_index \+ 1\}/);
+});
 
 test("direct answer formatting keeps UTF-16 citations aligned while stripping markdown", () => {
   const answer = "**🔎 Part 12345678** — foot.\n- [Official manual](https://example.com)";
