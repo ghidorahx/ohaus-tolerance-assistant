@@ -9,6 +9,7 @@ import {
 } from "react";
 import { answerFormatting, answerQuestion } from "@/lib/answer-engine.mjs";
 import SalesAssistant from "./SalesAssistant";
+import GoogleDirectAssistant from "./GoogleDirectAssistant";
 
 type Measure = {
   value: number | null;
@@ -84,7 +85,7 @@ type Exchange = {
   assistant: Message;
 };
 
-type AssistantMode = "tolerance" | "sales";
+type AssistantMode = "tolerance" | "sales" | "google";
 
 const starterMessage: Message = {
   id: "welcome",
@@ -215,7 +216,7 @@ export default function Home() {
   );
 
   const isSalesMode = mode === "sales";
-  const isProductMode = isSalesMode;
+  const isProductMode = isSalesMode || mode === "google";
 
   const exchanges = useMemo(() => {
     const conversation = messages.filter((message) => message.id !== "welcome");
@@ -267,7 +268,7 @@ export default function Home() {
           <div className="brand-mark" aria-hidden="true">O</div>
           <div>
             <p className="eyebrow">{isProductMode ? "Product intelligence" : "Service reference"}</p>
-            <h1>{isSalesMode ? "Ask" : "Tolerance Assistant"}</h1>
+            <h1>{mode === "google" ? "Google AI Test" : isSalesMode ? "Ask" : "Tolerance Assistant"}</h1>
           </div>
         </div>
 
@@ -288,19 +289,23 @@ export default function Home() {
             <span className="mode-icon" aria-hidden="true">?</span>
             Ask
           </button>
+          <button className={mode === "google" ? "active" : ""} onClick={() => switchMode("google")} aria-pressed={mode === "google"}>Google AI Test</button>
         </nav>
 
         <div className="header-actions">
           {mode === "tolerance" && <button className="clear-button" onClick={clearConversation}>Clear chat</button>}
           <div className="header-status">
             <span className="status-dot" aria-hidden="true" />
-            {isProductMode ? "Workbook grounded" : "Verified local data"}
+            {mode === "google" ? "Google Search" : isProductMode ? "Workbook grounded" : "Verified local data"}
           </div>
         </div>
       </header>
 
       <div className="mode-surface sales-mode-surface" hidden={!isSalesMode}>
         <SalesAssistant />
+      </div>
+      <div className="mode-surface" hidden={mode !== "google"}>
+        <GoogleDirectAssistant />
       </div>
       <div className="mode-surface tolerance-mode-surface" hidden={mode !== "tolerance"}>
         <section className="workspace">

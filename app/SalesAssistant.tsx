@@ -267,7 +267,7 @@ function renderInlineAnswer(value: string, keyPrefix: string, partNumbers: strin
   });
 }
 
-function SalesAnswerContent({ value, partNumbers }: { value: string; partNumbers: string[] }) {
+export function SalesAnswerContent({ value, partNumbers }: { value: string; partNumbers: string[] }) {
   const blocks = parseAnswerBlocks(value);
   return (
     <div className="sales-answer-copy">
@@ -821,7 +821,7 @@ function SalesExchange({
   );
 }
 
-function GoogleSearchSuggestions({ items }: { items: string[] }) {
+export function GoogleSearchSuggestions({ items }: { items: string[] }) {
   if (items.length === 0) return null;
   return (
     <div className="sales-google-search-suggestions" aria-label="Google Search suggestions">

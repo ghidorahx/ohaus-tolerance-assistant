@@ -184,6 +184,14 @@ npm run build:pages
 
 The static output is written to `pages-dist/`. It is useful for a front-end preview, but it does not include the server-side `/api/sales` route and is not a standalone Ask deployment. The production Worker build uploads its matching `dist/client` assets directly to Cloudflare, so Worker code and hashed front-end assets are published together.
 
+## Direct Google AI test tab
+
+The Google Search preview includes a separate **Google AI Test** tab. Its `/api/google-direct` endpoint uses `gemini-3.5-flash-lite` with minimal thinking and Google Search, without calling D1, Vectorize, or the catalog assistant. It sends at most four recent turns from this tab, caps output at 4,000 tokens, and requires a completed response with API citations and Search Suggestions. Sources and measured server response time appear in a collapsed panel.
+
+Enable only on the test Worker with `GOOGLE_DIRECT_TEST_ENABLED=true`; it uses the existing `GEMINI_API_KEY` and `SALES_PILOT_ACCESS_CODE` secrets. Requests require the team code, same-origin browser access, bounded input, and the existing public-information privacy policy. Google Search may add latency and usage charges. This is an API experiment, not Google's consumer AI Mode implementation.
+
+Deploy this experiment with `npm run deploy:google-search-test`.
+
 ## Validation
 
 ```bash
